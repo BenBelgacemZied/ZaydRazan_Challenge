@@ -14,7 +14,7 @@ public sealed class SplashPage : ContentPage
                 new Image
                 {
                     Source = "splash.jpg",
-                    Aspect = Aspect.AspectFit,
+                    Aspect = Aspect.AspectFill,
                     HorizontalOptions = LayoutOptions.Fill,
                     VerticalOptions = LayoutOptions.Fill
                 }
