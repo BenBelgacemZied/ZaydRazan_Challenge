@@ -91,7 +91,10 @@ public sealed class AdventurePage : ContentPage
         _sceneCard = new Border
         {
             StrokeThickness = 0,
-            StrokeShape = new RoundRectangle { CornerRadius = 28 },
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
+            {
+                CornerRadius = 28
+            },
             Padding = 20,
             Content = new VerticalStackLayout
             {
