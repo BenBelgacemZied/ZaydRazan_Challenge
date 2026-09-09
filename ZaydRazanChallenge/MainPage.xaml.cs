@@ -12,12 +12,12 @@ public partial class MainPage : ContentPage
         var total = AdventurePage.StageCount;
         AdventureProgressBar.Progress = Math.Min(1d, (double)stage / total);
         AdventureProgressLabel.Text = stage == 0
-            ? "Begin thuis en ontgrendel stap voor stap de reis naar Parijs."
+            ? "Commence à la maison et débloque chaque étape vers Paris."
             : stage >= total
-                ? "Avontuur voltooid! Je kunt opnieuw spelen."
-                : $"Etappe {stage + 1} van {total} is ontgrendeld.";
-        AdventureButton.Text = stage == 0 ? "▶  Start het avontuur"
-            : stage >= total ? "↻  Speel opnieuw" : "▶  Ga verder";
+                ? "Aventure terminée ! Tu peux recommencer."
+                : $"Étape {stage + 1} sur {total} débloquée.";
+        AdventureButton.Text = stage == 0 ? "▶  Commencer l’aventure"
+            : stage >= total ? "↻  Rejouer" : "▶  Continuer";
     }
 
     private async void OnAdventureClicked(object sender, EventArgs e) =>
