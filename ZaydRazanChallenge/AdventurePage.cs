@@ -149,6 +149,7 @@ public sealed class AdventurePage : ContentPage
 
         _missionCard = new Border
         {
+            IsVisible = false,
             Margin = new Thickness(14, -22, 14, 18),
             Stroke = Colors.White,
             StrokeThickness = 3,
@@ -175,6 +176,8 @@ public sealed class AdventurePage : ContentPage
         var hud = new Border
         {
             Margin = 10,
+            VerticalOptions = LayoutOptions.Start,
+            HorizontalOptions = LayoutOptions.Fill,
             Padding = new Thickness(14, 9),
             StrokeThickness = 0,
             BackgroundColor = Color.FromArgb("#CC17324D"),
@@ -248,8 +251,9 @@ public sealed class AdventurePage : ContentPage
             var current = i == _stageIndex;
             var marker = new Button
             {
-                Text = completed ? "✓" : unlocked ? Stages[i].Emoji : "🔒",
+                Text = (i + 1).ToString(),
                 FontSize = current ? 25 : 20,
+                FontAttributes = FontAttributes.Bold,
                 CornerRadius = 30,
                 WidthRequest = current ? 62 : 52,
                 HeightRequest = current ? 62 : 52,
@@ -265,9 +269,13 @@ public sealed class AdventurePage : ContentPage
             marker.Clicked += async (_, _) =>
             {
                 if (stageNumber == _stageIndex)
+                {
+                    _missionCard.IsVisible = true;
+                    await _missionCard.FadeTo(1, 180);
                     await _scroll.ScrollToAsync(_missionCard, ScrollToPosition.Start, true);
+                }
                 else if (stageNumber < _stageIndex)
-                    await DisplayAlert(Stages[stageNumber].Place,
+                    await DisplayAlert($"Etappe {stageNumber + 1} · {Stages[stageNumber].Place}",
                         "Deze etappe is al voltooid ✓", "Verder");
             };
 
@@ -298,6 +306,8 @@ public sealed class AdventurePage : ContentPage
     private void ShowStage()
     {
         _answered = false;
+        _missionCard.IsVisible = false;
+        _missionCard.Opacity = 0;
         var stage = Stages[_stageIndex];
         _stars.Text = $"⭐ {Preferences.Default.Get("stars", 0)}";
         _step.Text = $"MISSIE {_stageIndex + 1} / {Stages.Length}";
