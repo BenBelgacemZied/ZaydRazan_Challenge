@@ -2,6 +2,7 @@ namespace ZaydRazanChallenge;
 
 public sealed class PuzzlePage : ContentPage
 {
+    private readonly PuzzleDefinition _puzzle;
     private readonly Grid _puzzleGrid = new()
     {
         RowSpacing = 4,
@@ -24,9 +25,10 @@ public sealed class PuzzlePage : ContentPage
     private int? _selectedPosition;
     private bool _completed;
 
-    public PuzzlePage()
+    public PuzzlePage(PuzzleDefinition puzzle)
     {
-        Title = "Eiffeltoren-puzzel";
+        _puzzle = puzzle;
+        Title = puzzle.Title;
         BackgroundColor = Color.FromArgb("#FFF8E7");
 
         for (var i = 0; i < 3; i++)
@@ -44,7 +46,7 @@ public sealed class PuzzlePage : ContentPage
 
         var preview = new Image
         {
-            Source = "eiffel_puzzle.jpg",
+            Source = $"{puzzle.Key}_puzzle.jpg",
             HeightRequest = 150,
             Aspect = Aspect.AspectFit
         };
@@ -59,7 +61,7 @@ public sealed class PuzzlePage : ContentPage
                 {
                     new Label
                     {
-                        Text = "🧩 Bouw de Eiffeltoren",
+                        Text = $"🧩 Bouw {puzzle.Title}",
                         FontSize = 27,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center
@@ -87,7 +89,7 @@ public sealed class PuzzlePage : ContentPage
                         },
                         Children =
                         {
-                            new Label { Text = "Tour Eiffel · Parijs", FontSize = 17, FontAttributes = FontAttributes.Bold },
+                            new Label { Text = $"{puzzle.Emoji} {puzzle.Title} · Parijs", FontSize = 17, FontAttributes = FontAttributes.Bold },
                             _movesLabel
                         }
                     },
@@ -148,7 +150,7 @@ public sealed class PuzzlePage : ContentPage
                     : Color.FromArgb("#FFFFFF"),
                 Content = new Image
                 {
-                    Source = $"eiffel_{tileNumber}.jpg",
+                    Source = $"{_puzzle.Key}_{tileNumber}.jpg",
                     Aspect = Aspect.AspectFill,
                     InputTransparent = true
                 }
@@ -209,17 +211,38 @@ public sealed class PuzzlePage : ContentPage
         if (!IsSolved()) return;
 
         _completed = true;
-        var stars = Preferences.Default.Get("stars", 0) + 3;
+        var completionKey = $"puzzle_completed_{_puzzle.Key}";
+        var firstCompletion = !Preferences.Default.Get(completionKey, false);
+        var reward = firstCompletion ? 3 : 1;
+        Preferences.Default.Set(completionKey, true);
+        var stars = Preferences.Default.Get("stars", 0) + reward;
         Preferences.Default.Set("stars", stars);
         _messageLabel.TextColor = Color.FromArgb("#16A34A");
-        _messageLabel.Text = "Bravo! De Eiffeltoren is compleet. +3 ⭐";
+        _messageLabel.Text = $"Bravo! {_puzzle.Title} is compleet. +{reward} ⭐";
         await _puzzleGrid.ScaleTo(1.04, 180, Easing.CubicOut);
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
         await DisplayAlert("🏆 Puzzel voltooid!",
-            $"Je hebt de puzzel in {_moves} beurten opgelost en 3 sterren gewonnen.",
+            $"Je hebt de puzzel in {_moves} beurten opgelost en {reward} ster(ren) gewonnen.",
             "Super!");
     }
 
     private bool IsSolved() =>
         _tiles.Select((tile, position) => tile == position).All(correct => correct);
+}
+
+public sealed record PuzzleDefinition(string Key, string Title, string Emoji);
+
+public static class PuzzleCatalog
+{
+    public static IReadOnlyList<PuzzleDefinition> Items { get; } =
+    [
+        new("eiffel", "de Eiffeltoren", "🗼"),
+        new("louvre", "het Louvre", "🔺"),
+        new("arc", "de Arc de Triomphe", "🏛️"),
+        new("notre_dame", "Notre-Dame", "⛪"),
+        new("sacre_coeur", "Sacré-Cœur", "🤍"),
+        new("pantheon", "het Panthéon", "🏛️"),
+        new("invalides", "Les Invalides", "✨"),
+        new("opera", "Opéra Garnier", "🎭")
+    ];
 }
