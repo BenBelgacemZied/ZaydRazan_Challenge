@@ -2,8 +2,9 @@ namespace ZaydRazanChallenge;
 
 public sealed class PuzzlePage : ContentPage
 {
-    private const int MaxMoves = 10;
     private readonly PuzzleDefinition _puzzle;
+    private readonly int _gridSize;
+    private readonly int _maxMoves;
     private readonly Grid _puzzleGrid = new()
     {
         RowSpacing = 1,
@@ -32,30 +33,33 @@ public sealed class PuzzlePage : ContentPage
     public PuzzlePage(PuzzleDefinition puzzle)
     {
         _puzzle = puzzle;
-        _tiles = Enumerable.Range(0, puzzle.GridSize * puzzle.GridSize).ToList();
+        _gridSize = Random.Shared.Next(3, 7);
+        _maxMoves = Random.Shared.Next(7, 21);
+        _tiles = Enumerable.Range(0, _gridSize * _gridSize).ToList();
+
         var display = DeviceDisplay.Current.MainDisplayInfo;
         _boardSize = Math.Min(390d, Math.Max(280d, display.Width / display.Density - 44d));
 
-        Title = puzzle.Title;
+        Title = "Défi surprise";
         BackgroundColor = Color.FromArgb("#FFF8E7");
 
-        for (var i = 0; i < puzzle.GridSize; i++)
+        for (var i = 0; i < _gridSize; i++)
         {
             _puzzleGrid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
             _puzzleGrid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         }
-
         _puzzleGrid.WidthRequest = _boardSize;
         _puzzleGrid.HeightRequest = _boardSize;
 
-        var shuffleButton = new Button
+        var newChallengeButton = new Button
         {
-            Text = "🔀  Nieuwe uitdaging",
+            Text = "🎲 Autre défi aléatoire",
             BackgroundColor = Color.FromArgb("#0891B2"),
             TextColor = Colors.White,
             FontAttributes = FontAttributes.Bold
         };
-        shuffleButton.Clicked += (_, _) => Shuffle();
+        newChallengeButton.Clicked += async (_, _) =>
+            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
 
         var preview = new Image
         {
@@ -64,6 +68,8 @@ public sealed class PuzzlePage : ContentPage
             Aspect = Aspect.AspectFit
         };
 
+        var threeStarLimit = Math.Max(1, (int)Math.Floor(_maxMoves * .50));
+        var twoStarLimit = Math.Max(threeStarLimit + 1, (int)Math.Floor(_maxMoves * .75));
         var scoreRules = new Grid
         {
             ColumnSpacing = 6,
@@ -74,9 +80,9 @@ public sealed class PuzzlePage : ContentPage
                 new ColumnDefinition(GridLength.Star)
             }
         };
-        scoreRules.Add(CreateRule("⭐⭐⭐", "0–4 zetten", "#FEF3C7"), 0);
-        scoreRules.Add(CreateRule("⭐⭐", "5–7 zetten", "#E0F2FE"), 1);
-        scoreRules.Add(CreateRule("⭐", "8–10 zetten", "#DCFCE7"), 2);
+        scoreRules.Add(CreateRule("⭐⭐⭐", $"≤ {threeStarLimit}", "#FEF3C7"), 0);
+        scoreRules.Add(CreateRule("⭐⭐", $"≤ {twoStarLimit}", "#E0F2FE"), 1);
+        scoreRules.Add(CreateRule("⭐", $"≤ {_maxMoves}", "#DCFCE7"), 2);
 
         var header = new Grid
         {
@@ -88,7 +94,7 @@ public sealed class PuzzlePage : ContentPage
         };
         header.Add(new Label
         {
-            Text = $"{puzzle.Emoji} {puzzle.Title} · {puzzle.GridSize}×{puzzle.GridSize}",
+            Text = $"{puzzle.Emoji} {puzzle.Title} · {_gridSize}×{_gridSize}",
             FontSize = 17,
             FontAttributes = FontAttributes.Bold,
             VerticalTextAlignment = TextAlignment.Center
@@ -105,14 +111,14 @@ public sealed class PuzzlePage : ContentPage
                 {
                     new Label
                     {
-                        Text = $"🧩 Bouw {puzzle.Title}",
+                        Text = "🎲 Défi culturel surprise",
                         FontSize = 25,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
                     new Label
                     {
-                        Text = "Tik twee blokken aan om ze te wisselen. Voltooi de puzzel in maximaal 10 zetten!",
+                        Text = $"Image, grille et limite choisies au hasard · maximum {_maxMoves} déplacements",
                         FontSize = 15,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
@@ -139,7 +145,7 @@ public sealed class PuzzlePage : ContentPage
                         Content = _puzzleGrid
                     },
                     _messageLabel,
-                    shuffleButton
+                    newChallengeButton
                 }
             }
         };
@@ -169,6 +175,7 @@ public sealed class PuzzlePage : ContentPage
                     {
                         Text = moves,
                         FontSize = 12,
+                        FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center
                     }
                 }
@@ -177,23 +184,15 @@ public sealed class PuzzlePage : ContentPage
 
     private void Shuffle()
     {
-        for (var i = 0; i < _tiles.Count; i++)
-            _tiles[i] = i;
-
         _moves = 0;
         _completed = false;
         _selectedPosition = null;
         _messageLabel.TextColor = Color.FromArgb("#334155");
-        _messageLabel.Text = $"Nog {MaxMoves} zetten · kies twee blokken";
+        _messageLabel.Text = $"Encore {_maxMoves} déplacements";
 
-        // The challenge is produced with a reversible number of swaps, so even a
-        // 6×6 board always remains solvable within the ten-move limit.
-        var shuffleMoves = _puzzle.GridSize switch
-        {
-            4 => 4,
-            5 => 7,
-            _ => 9
-        };
+        var minimumShuffle = Math.Max(3, (int)Math.Ceiling(_maxMoves * .35));
+        var maximumShuffle = Math.Max(minimumShuffle, (int)Math.Floor(_maxMoves * .60));
+        var shuffleMoves = Random.Shared.Next(minimumShuffle, maximumShuffle + 1);
 
         do
         {
@@ -206,7 +205,6 @@ public sealed class PuzzlePage : ContentPage
                 int second;
                 do second = Random.Shared.Next(_tiles.Count);
                 while (second == first);
-
                 (_tiles[first], _tiles[second]) = (_tiles[second], _tiles[first]);
             }
         } while (IsSolved());
@@ -217,15 +215,15 @@ public sealed class PuzzlePage : ContentPage
     private void RenderPuzzle()
     {
         _puzzleGrid.Clear();
-        _movesLabel.Text = $"Zetten: {_moves}/{MaxMoves}";
-        var tileSize = _boardSize / _puzzle.GridSize;
+        _movesLabel.Text = $"{_moves}/{_maxMoves}";
+        var tileSize = _boardSize / _gridSize;
 
         for (var position = 0; position < _tiles.Count; position++)
         {
             var currentPosition = position;
             var tileNumber = _tiles[position];
-            var sourceColumn = tileNumber % _puzzle.GridSize;
-            var sourceRow = tileNumber / _puzzle.GridSize;
+            var sourceColumn = tileNumber % _gridSize;
+            var sourceRow = tileNumber / _gridSize;
 
             var image = new Image
             {
@@ -263,14 +261,10 @@ public sealed class PuzzlePage : ContentPage
                     : Colors.White,
                 Content = tileViewport
             };
-
             var tap = new TapGestureRecognizer();
             tap.Tapped += (_, _) => SelectOrSwap(currentPosition);
             tileBorder.GestureRecognizers.Add(tap);
-
-            _puzzleGrid.Add(tileBorder,
-                position % _puzzle.GridSize,
-                position / _puzzle.GridSize);
+            _puzzleGrid.Add(tileBorder, position % _gridSize, position / _gridSize);
         }
     }
 
@@ -281,7 +275,7 @@ public sealed class PuzzlePage : ContentPage
         if (_selectedPosition is null)
         {
             _selectedPosition = position;
-            _messageLabel.Text = "Kies nu het tweede blok";
+            _messageLabel.Text = "Choisis le deuxième bloc";
             RenderPuzzle();
             return;
         }
@@ -292,7 +286,7 @@ public sealed class PuzzlePage : ContentPage
             Swap(source, position);
         else
         {
-            _messageLabel.Text = $"Nog {MaxMoves - _moves} zetten · kies twee blokken";
+            _messageLabel.Text = $"Encore {_maxMoves - _moves} déplacements";
             RenderPuzzle();
         }
     }
@@ -312,33 +306,38 @@ public sealed class PuzzlePage : ContentPage
             return;
         }
 
-        var remaining = MaxMoves - _moves;
+        var remaining = _maxMoves - _moves;
         if (remaining > 0)
         {
-            _messageLabel.TextColor = remaining <= 2
+            _messageLabel.TextColor = remaining <= 3
                 ? Color.FromArgb("#DC2626")
                 : Color.FromArgb("#334155");
-            _messageLabel.Text = $"Nog {remaining} zet{(remaining == 1 ? "" : "ten")}!";
+            _messageLabel.Text = $"Encore {remaining} déplacement{(remaining == 1 ? "" : "s")}";
             return;
         }
 
         _completed = true;
         _messageLabel.TextColor = Color.FromArgb("#DC2626");
-        _messageLabel.Text = "Geen zetten meer. Probeer opnieuw!";
+        _messageLabel.Text = "Défi terminé. Essaie encore!";
         var retry = await DisplayAlert(
-            "⏱️ Uitdaging voorbij",
-            "Je hebt de limiet van 10 zetten bereikt. Wil je een nieuwe puzzel proberen?",
-            "Opnieuw",
-            "Later");
-        if (retry) Shuffle();
+            "⏱️ Limite atteinte",
+            $"Tu as utilisé les {_maxMoves} déplacements. Veux-tu remélanger cette image?",
+            "Recommencer",
+            "Autre image");
+        if (retry)
+            Shuffle();
+        else
+            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
     }
 
     private async Task CompletePuzzle()
     {
         _completed = true;
-        var reward = _moves <= 4 ? 3 : _moves <= 7 ? 2 : 1;
+        var ratio = (double)_moves / _maxMoves;
+        var reward = ratio <= .50 ? 3 : ratio <= .75 ? 2 : 1;
         var stars = Preferences.Default.Get("stars", 0) + reward;
         Preferences.Default.Set("stars", stars);
+        Preferences.Default.Set($"puzzle_completed_{_puzzle.Key}", true);
 
         var bestKey = $"puzzle_best_{_puzzle.Key}";
         var previousBest = Preferences.Default.Get(bestKey, 0);
@@ -347,33 +346,66 @@ public sealed class PuzzlePage : ContentPage
 
         var starText = new string('⭐', reward);
         _messageLabel.TextColor = Color.FromArgb("#16A34A");
-        _messageLabel.Text = $"Bravo! {_puzzle.Title} is compleet. {starText}";
+        _messageLabel.Text = $"Bravo! {_puzzle.FrenchName} {starText}";
 
         await _puzzleGrid.ScaleTo(1.04, 180, Easing.CubicOut);
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
-        await DisplayAlert(
-            "🏆 Puzzel voltooid!",
-            $"Opgelost in {_moves} zetten. Je wint {reward} ster{(reward == 1 ? "" : "ren")} {starText}",
-            "Super!");
+
+        var next = await DisplayAlert(
+            $"🎓 À découvrir · {_puzzle.FrenchName}",
+            $"Résultat: {_moves}/{_maxMoves} déplacements · {starText}\n\n{_puzzle.Description}",
+            "Nouveau défi",
+            "Retour");
+        if (next)
+            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
+        else
+            await Navigation.PopAsync();
     }
 
     private bool IsSolved() =>
         _tiles.Select((tile, position) => tile == position).All(correct => correct);
 }
 
-public sealed record PuzzleDefinition(string Key, string Title, string Emoji, int GridSize);
+public sealed record PuzzleDefinition(
+    string Key,
+    string Title,
+    string FrenchName,
+    string Emoji,
+    string Description);
 
 public static class PuzzleCatalog
 {
     public static IReadOnlyList<PuzzleDefinition> Items { get; } =
     [
-        new("eiffel", "de Eiffeltoren", "🗼", 4),
-        new("louvre", "het Louvre", "🔺", 4),
-        new("arc", "de Arc de Triomphe", "🏛️", 4),
-        new("notre_dame", "Notre-Dame", "⛪", 5),
-        new("sacre_coeur", "Sacré-Cœur", "🤍", 5),
-        new("pantheon", "het Panthéon", "🏛️", 5),
-        new("invalides", "Les Invalides", "✨", 6),
-        new("opera", "Opéra Garnier", "🎭", 6)
+        new("eiffel", "de Eiffeltoren", "La tour Eiffel", "🗼",
+            "La tour Eiffel werd gebouwd voor de Wereldtentoonstelling van 1889. In het Frans zegt men « la tour Eiffel »."),
+        new("louvre", "het Louvre", "Le Louvre", "🔺",
+            "Le Louvre is een beroemd museum in Parijs. Je vindt er duizenden kunstwerken uit de hele wereld."),
+        new("arc", "de Arc de Triomphe", "L’Arc de Triomphe", "🏛️",
+            "L’Arc de Triomphe staat aan het einde van de Champs-Élysées en eert belangrijke momenten uit de Franse geschiedenis."),
+        new("notre_dame", "Notre-Dame", "Notre-Dame de Paris", "⛪",
+            "Notre-Dame is een middeleeuwse kathedraal op het Île de la Cité, in het hart van Parijs."),
+        new("sacre_coeur", "Sacré-Cœur", "Le Sacré-Cœur", "🤍",
+            "Le Sacré-Cœur staat op de heuvel van Montmartre en biedt een prachtig uitzicht over Parijs."),
+        new("pantheon", "het Panthéon", "Le Panthéon", "🏛️",
+            "Le Panthéon is een groot monument waar beroemde Franse schrijvers, wetenschappers en helden worden geëerd."),
+        new("invalides", "Les Invalides", "Les Invalides", "✨",
+            "Les Invalides herken je aan de gouden koepel. Het gebouw vertelt veel over de militaire geschiedenis van Frankrijk."),
+        new("opera", "Opéra Garnier", "L’Opéra Garnier", "🎭",
+            "L’Opéra Garnier is een rijk versierd theater voor opera en ballet, gebouwd in de negentiende eeuw."),
+        new("joconde", "de Mona Lisa", "La Joconde", "🖼️",
+            "La Joconde werd geschilderd door Leonardo da Vinci. Het wereldberoemde portret hangt in het Louvre."),
+        new("croissant", "de croissant", "Le croissant", "🥐",
+            "Le croissant is een luchtig Frans gebak met veel dunne laagjes. Het wordt vaak bij het ontbijt gegeten."),
+        new("baguette", "het stokbrood", "La baguette", "🥖",
+            "La baguette is een lang, knapperig Frans brood. De Franse kennis en traditie rond baguettebrood zijn beroemd."),
+        new("versailles", "het paleis van Versailles", "Le château de Versailles", "👑",
+            "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen.")
     ];
+
+    public static PuzzleDefinition GetRandom(string? excludedKey = null)
+    {
+        var choices = Items.Where(x => x.Key != excludedKey).ToArray();
+        return choices[Random.Shared.Next(choices.Length)];
+    }
 }
