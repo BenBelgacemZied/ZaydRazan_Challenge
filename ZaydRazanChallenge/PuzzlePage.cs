@@ -2,16 +2,21 @@ namespace ZaydRazanChallenge;
 
 public sealed class PuzzlePage : ContentPage
 {
+    private readonly PuzzleDefinition _puzzle;
+    private readonly int _gridSize;
+    private readonly int _maxMoves;
     private readonly Grid _puzzleGrid = new()
     {
-        RowSpacing = 4,
-        ColumnSpacing = 4,
-        HorizontalOptions = LayoutOptions.Fill
+        RowSpacing = 1,
+        ColumnSpacing = 1,
+        HorizontalOptions = LayoutOptions.Center,
+        VerticalOptions = LayoutOptions.Center
     };
     private readonly Label _movesLabel = new()
     {
         FontSize = 18,
-        FontAttributes = FontAttributes.Bold
+        FontAttributes = FontAttributes.Bold,
+        HorizontalTextAlignment = TextAlignment.End
     };
     private readonly Label _messageLabel = new()
     {
@@ -19,111 +24,188 @@ public sealed class PuzzlePage : ContentPage
         FontAttributes = FontAttributes.Bold,
         HorizontalTextAlignment = TextAlignment.Center
     };
-    private readonly List<int> _tiles = Enumerable.Range(0, 9).ToList();
+    private readonly List<int> _tiles;
+    private readonly double _boardSize;
     private int _moves;
     private int? _selectedPosition;
     private bool _completed;
 
-    public PuzzlePage()
+    public PuzzlePage(PuzzleDefinition puzzle)
     {
-        Title = "Eiffeltoren-puzzel";
+        _puzzle = puzzle;
+        _gridSize = Random.Shared.Next(3, 7);
+        _maxMoves = Random.Shared.Next(7, 21);
+        _tiles = Enumerable.Range(0, _gridSize * _gridSize).ToList();
+
+        var display = DeviceDisplay.Current.MainDisplayInfo;
+        _boardSize = Math.Min(390d, Math.Max(280d, display.Width / display.Density - 44d));
+
+        Title = "Défi surprise";
         BackgroundColor = Color.FromArgb("#FFF8E7");
 
-        for (var i = 0; i < 3; i++)
+        for (var i = 0; i < _gridSize; i++)
         {
             _puzzleGrid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
             _puzzleGrid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         }
+        _puzzleGrid.WidthRequest = _boardSize;
+        _puzzleGrid.HeightRequest = _boardSize;
 
-        var shuffleButton = new Button
+        var newChallengeButton = new Button
         {
-            Text = "🔀  Opnieuw mengen",
-            BackgroundColor = Color.FromArgb("#0891B2")
+            Text = "🎲 Autre défi aléatoire",
+            BackgroundColor = Color.FromArgb("#0891B2"),
+            TextColor = Colors.White,
+            FontAttributes = FontAttributes.Bold
         };
-        shuffleButton.Clicked += (_, _) => Shuffle();
+        newChallengeButton.Clicked += async (_, _) =>
+            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
 
         var preview = new Image
         {
-            Source = "eiffel_puzzle.jpg",
-            HeightRequest = 150,
+            Source = $"{puzzle.Key}_puzzle.jpg",
+            HeightRequest = 125,
             Aspect = Aspect.AspectFit
         };
+
+        var threeStarLimit = Math.Max(1, (int)Math.Floor(_maxMoves * .50));
+        var twoStarLimit = Math.Max(threeStarLimit + 1, (int)Math.Floor(_maxMoves * .75));
+        var scoreRules = new Grid
+        {
+            ColumnSpacing = 6,
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Star)
+            }
+        };
+        scoreRules.Add(CreateRule("⭐⭐⭐", $"≤ {threeStarLimit}", "#FEF3C7"), 0);
+        scoreRules.Add(CreateRule("⭐⭐", $"≤ {twoStarLimit}", "#E0F2FE"), 1);
+        scoreRules.Add(CreateRule("⭐", $"≤ {_maxMoves}", "#DCFCE7"), 2);
+
+        var header = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            }
+        };
+        header.Add(new Label
+        {
+            Text = $"{puzzle.Emoji} {puzzle.Title} · {_gridSize}×{_gridSize}",
+            FontSize = 17,
+            FontAttributes = FontAttributes.Bold,
+            VerticalTextAlignment = TextAlignment.Center
+        }, 0);
+        header.Add(_movesLabel, 1);
 
         Content = new ScrollView
         {
             Content = new VerticalStackLayout
             {
-                Padding = 18,
-                Spacing = 15,
+                Padding = 16,
+                Spacing = 12,
                 Children =
                 {
                     new Label
                     {
-                        Text = "🧩 Bouw de Eiffeltoren",
-                        FontSize = 27,
+                        Text = "🎲 Défi culturel surprise",
+                        FontSize = 25,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
                     new Label
                     {
-                        Text = "Sleep een blok naar een ander blok. Je kunt ook twee blokken na elkaar aanraken.",
+                        Text = $"Image, grille et limite choisies au hasard · maximum {_maxMoves} déplacements",
                         FontSize = 15,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
+                    scoreRules,
                     new Border
                     {
                         BackgroundColor = Color.FromArgb("#DBEAFE"),
                         StrokeThickness = 0,
-                        StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 18 },
-                        Padding = 8,
+                        StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 16 },
+                        Padding = 6,
                         Content = preview
                     },
-                    new Grid
-                    {
-                        ColumnDefinitions =
-                        {
-                            new ColumnDefinition(GridLength.Star),
-                            new ColumnDefinition(GridLength.Auto)
-                        },
-                        Children =
-                        {
-                            new Label { Text = "Tour Eiffel · Parijs", FontSize = 17, FontAttributes = FontAttributes.Bold },
-                            _movesLabel
-                        }
-                    },
+                    header,
                     new Border
                     {
                         BackgroundColor = Colors.White,
                         Stroke = Color.FromArgb("#0891B2"),
                         StrokeThickness = 3,
                         StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 12 },
-                        Padding = 4,
-                        HeightRequest = 350,
+                        Padding = 3,
+                        WidthRequest = _boardSize + 12,
+                        HeightRequest = _boardSize + 12,
+                        HorizontalOptions = LayoutOptions.Center,
                         Content = _puzzleGrid
                     },
                     _messageLabel,
-                    shuffleButton
+                    newChallengeButton
                 }
             }
         };
 
-        Grid.SetColumn(_movesLabel, 1);
         Shuffle();
     }
+
+    private static Border CreateRule(string stars, string moves, string color) =>
+        new()
+        {
+            BackgroundColor = Color.FromArgb(color),
+            StrokeThickness = 0,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 10 },
+            Padding = new Thickness(4, 7),
+            Content = new VerticalStackLayout
+            {
+                Spacing = 1,
+                Children =
+                {
+                    new Label
+                    {
+                        Text = stars,
+                        FontSize = 15,
+                        HorizontalTextAlignment = TextAlignment.Center
+                    },
+                    new Label
+                    {
+                        Text = moves,
+                        FontSize = 12,
+                        FontAttributes = FontAttributes.Bold,
+                        HorizontalTextAlignment = TextAlignment.Center
+                    }
+                }
+            }
+        };
 
     private void Shuffle()
     {
         _moves = 0;
         _completed = false;
         _selectedPosition = null;
-        _messageLabel.Text = "";
+        _messageLabel.TextColor = Color.FromArgb("#334155");
+        _messageLabel.Text = $"Encore {_maxMoves} déplacements";
+
+        var minimumShuffle = Math.Max(3, (int)Math.Ceiling(_maxMoves * .35));
+        var maximumShuffle = Math.Max(minimumShuffle, (int)Math.Floor(_maxMoves * .60));
+        var shuffleMoves = Random.Shared.Next(minimumShuffle, maximumShuffle + 1);
 
         do
         {
-            for (var i = _tiles.Count - 1; i > 0; i--)
+            for (var i = 0; i < _tiles.Count; i++)
+                _tiles[i] = i;
+
+            for (var move = 0; move < shuffleMoves; move++)
             {
-                var j = Random.Shared.Next(i + 1);
-                (_tiles[i], _tiles[j]) = (_tiles[j], _tiles[i]);
+                var first = Random.Shared.Next(_tiles.Count);
+                int second;
+                do second = Random.Shared.Next(_tiles.Count);
+                while (second == first);
+                (_tiles[first], _tiles[second]) = (_tiles[second], _tiles[first]);
             }
         } while (IsSolved());
 
@@ -133,57 +215,67 @@ public sealed class PuzzlePage : ContentPage
     private void RenderPuzzle()
     {
         _puzzleGrid.Clear();
-        _movesLabel.Text = $"Beurten: {_moves}";
+        _movesLabel.Text = $"{_moves}/{_maxMoves}";
+        var tileSize = _boardSize / _gridSize;
 
         for (var position = 0; position < _tiles.Count; position++)
         {
             var currentPosition = position;
             var tileNumber = _tiles[position];
+            var sourceColumn = tileNumber % _gridSize;
+            var sourceRow = tileNumber / _gridSize;
+
+            var image = new Image
+            {
+                Source = $"{_puzzle.Key}_puzzle.jpg",
+                Aspect = Aspect.AspectFill,
+                WidthRequest = _boardSize,
+                HeightRequest = _boardSize,
+                MinimumWidthRequest = _boardSize,
+                MinimumHeightRequest = _boardSize,
+                HorizontalOptions = LayoutOptions.Start,
+                VerticalOptions = LayoutOptions.Start,
+                TranslationX = -sourceColumn * tileSize,
+                TranslationY = -sourceRow * tileSize,
+                InputTransparent = true
+            };
+
+            var tileViewport = new Grid
+            {
+                WidthRequest = tileSize,
+                HeightRequest = tileSize,
+                Clip = new Microsoft.Maui.Controls.Shapes.RectangleGeometry(
+                    new Rect(0, 0, tileSize, tileSize)),
+                BackgroundColor = Colors.White
+            };
+            tileViewport.Children.Add(image);
+
             var tileBorder = new Border
             {
-                Padding = 1,
+                Padding = 0,
+                WidthRequest = tileSize,
+                HeightRequest = tileSize,
                 StrokeThickness = _selectedPosition == position ? 4 : 1,
                 Stroke = _selectedPosition == position
                     ? Color.FromArgb("#F59E0B")
-                    : Color.FromArgb("#FFFFFF"),
-                Content = new Image
-                {
-                    Source = $"eiffel_{tileNumber}.jpg",
-                    Aspect = Aspect.AspectFill,
-                    InputTransparent = true
-                }
+                    : Colors.White,
+                Content = tileViewport
             };
-
-            var drag = new DragGestureRecognizer();
-            drag.DragStarting += (_, e) =>
-                e.Data.Properties["puzzle-position"] = currentPosition;
-            tileBorder.GestureRecognizers.Add(drag);
-
-            var drop = new DropGestureRecognizer { AllowDrop = true };
-            drop.Drop += (_, e) =>
-            {
-                if (e.Data.Properties.TryGetValue("puzzle-position", out var value)
-                    && value is int sourcePosition)
-                {
-                    Swap(sourcePosition, currentPosition);
-                }
-            };
-            tileBorder.GestureRecognizers.Add(drop);
-
             var tap = new TapGestureRecognizer();
             tap.Tapped += (_, _) => SelectOrSwap(currentPosition);
             tileBorder.GestureRecognizers.Add(tap);
-
-            _puzzleGrid.Add(tileBorder, position % 3, position / 3);
+            _puzzleGrid.Add(tileBorder, position % _gridSize, position / _gridSize);
         }
     }
 
     private void SelectOrSwap(int position)
     {
         if (_completed) return;
+
         if (_selectedPosition is null)
         {
             _selectedPosition = position;
+            _messageLabel.Text = "Choisis le deuxième bloc";
             RenderPuzzle();
             return;
         }
@@ -193,7 +285,10 @@ public sealed class PuzzlePage : ContentPage
         if (source != position)
             Swap(source, position);
         else
+        {
+            _messageLabel.Text = $"Encore {_maxMoves - _moves} déplacements";
             RenderPuzzle();
+        }
     }
 
     private async void Swap(int sourcePosition, int targetPosition)
@@ -202,24 +297,115 @@ public sealed class PuzzlePage : ContentPage
 
         (_tiles[sourcePosition], _tiles[targetPosition]) =
             (_tiles[targetPosition], _tiles[sourcePosition]);
-        _selectedPosition = null;
         _moves++;
         RenderPuzzle();
 
-        if (!IsSolved()) return;
+        if (IsSolved())
+        {
+            await CompletePuzzle();
+            return;
+        }
+
+        var remaining = _maxMoves - _moves;
+        if (remaining > 0)
+        {
+            _messageLabel.TextColor = remaining <= 3
+                ? Color.FromArgb("#DC2626")
+                : Color.FromArgb("#334155");
+            _messageLabel.Text = $"Encore {remaining} déplacement{(remaining == 1 ? "" : "s")}";
+            return;
+        }
 
         _completed = true;
-        var stars = Preferences.Default.Get("stars", 0) + 3;
+        _messageLabel.TextColor = Color.FromArgb("#DC2626");
+        _messageLabel.Text = "Défi terminé. Essaie encore!";
+        var retry = await DisplayAlert(
+            "⏱️ Limite atteinte",
+            $"Tu as utilisé les {_maxMoves} déplacements. Veux-tu remélanger cette image?",
+            "Recommencer",
+            "Autre image");
+        if (retry)
+            Shuffle();
+        else
+            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
+    }
+
+    private async Task CompletePuzzle()
+    {
+        _completed = true;
+        var ratio = (double)_moves / _maxMoves;
+        var reward = ratio <= .50 ? 3 : ratio <= .75 ? 2 : 1;
+        var stars = Preferences.Default.Get("stars", 0) + reward;
         Preferences.Default.Set("stars", stars);
+        Preferences.Default.Set($"puzzle_completed_{_puzzle.Key}", true);
+
+        var bestKey = $"puzzle_best_{_puzzle.Key}";
+        var previousBest = Preferences.Default.Get(bestKey, 0);
+        if (reward > previousBest)
+            Preferences.Default.Set(bestKey, reward);
+
+        var starText = new string('⭐', reward);
         _messageLabel.TextColor = Color.FromArgb("#16A34A");
-        _messageLabel.Text = "Bravo! De Eiffeltoren is compleet. +3 ⭐";
+        _messageLabel.Text = $"Bravo! {_puzzle.FrenchName} {starText}";
+
         await _puzzleGrid.ScaleTo(1.04, 180, Easing.CubicOut);
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
-        await DisplayAlert("🏆 Puzzel voltooid!",
-            $"Je hebt de puzzel in {_moves} beurten opgelost en 3 sterren gewonnen.",
-            "Super!");
+
+        var next = await DisplayAlert(
+            $"🎓 À découvrir · {_puzzle.FrenchName}",
+            $"Résultat: {_moves}/{_maxMoves} déplacements · {starText}\n\n{_puzzle.Description}",
+            "Nouveau défi",
+            "Retour");
+        if (next)
+            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
+        else
+            await Navigation.PopAsync();
     }
 
     private bool IsSolved() =>
         _tiles.Select((tile, position) => tile == position).All(correct => correct);
+}
+
+public sealed record PuzzleDefinition(
+    string Key,
+    string Title,
+    string FrenchName,
+    string Emoji,
+    string Description);
+
+public static class PuzzleCatalog
+{
+    public static IReadOnlyList<PuzzleDefinition> Items { get; } =
+    [
+        new("eiffel", "de Eiffeltoren", "La tour Eiffel", "🗼",
+            "La tour Eiffel werd gebouwd voor de Wereldtentoonstelling van 1889. In het Frans zegt men « la tour Eiffel »."),
+        new("louvre", "het Louvre", "Le Louvre", "🔺",
+            "Le Louvre is een beroemd museum in Parijs. Je vindt er duizenden kunstwerken uit de hele wereld."),
+        new("arc", "de Arc de Triomphe", "L’Arc de Triomphe", "🏛️",
+            "L’Arc de Triomphe staat aan het einde van de Champs-Élysées en eert belangrijke momenten uit de Franse geschiedenis."),
+        new("notre_dame", "Notre-Dame", "Notre-Dame de Paris", "⛪",
+            "Notre-Dame is een middeleeuwse kathedraal op het Île de la Cité, in het hart van Parijs."),
+        new("sacre_coeur", "Sacré-Cœur", "Le Sacré-Cœur", "🤍",
+            "Le Sacré-Cœur staat op de heuvel van Montmartre en biedt een prachtig uitzicht over Parijs."),
+        new("pantheon", "het Panthéon", "Le Panthéon", "🏛️",
+            "Le Panthéon is een groot monument waar beroemde Franse schrijvers, wetenschappers en helden worden geëerd."),
+        new("invalides", "Les Invalides", "Les Invalides", "✨",
+            "Les Invalides herken je aan de gouden koepel. Het gebouw vertelt veel over de militaire geschiedenis van Frankrijk."),
+        new("opera", "Opéra Garnier", "L’Opéra Garnier", "🎭",
+            "L’Opéra Garnier is een rijk versierd theater voor opera en ballet, gebouwd in de negentiende eeuw."),
+        new("joconde", "de Mona Lisa", "La Joconde", "🖼️",
+            "La Joconde werd geschilderd door Leonardo da Vinci. Het wereldberoemde portret hangt in het Louvre."),
+        new("croissant", "de croissant", "Le croissant", "🥐",
+            "Le croissant is een luchtig Frans gebak met veel dunne laagjes. Het wordt vaak bij het ontbijt gegeten."),
+        new("baguette", "het stokbrood", "La baguette", "🥖",
+            "La baguette is een lang, knapperig Frans brood. De Franse kennis en traditie rond baguettebrood zijn beroemd."),
+        new("versailles", "het paleis van Versailles", "Le château de Versailles", "👑",
+            "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen.")
+    ];
+
+    public static PuzzleDefinition GetRandom(string? excludedKey = null)
+    {
+        var choices = Items.Where(x => x.Key != excludedKey).ToArray();
+        return choices[Random.Shared.Next(choices.Length)];
+    }
 }
