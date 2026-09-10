@@ -13,6 +13,7 @@ public sealed class PuzzleGalleryPage : ContentPage
     {
         Title = "Défis de la France";
         BackgroundColor = Color.FromArgb("#FFF8E7");
+        GameUi.AddHomeButton(this);
 
         var startButton = new Button
         {
