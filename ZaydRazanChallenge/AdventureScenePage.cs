@@ -124,15 +124,17 @@ public sealed class AdventureScenePage : ContentPage
         _playfield.WidthRequest = _width;
         _playfield.HeightRequest = _height;
         _playfield.HorizontalOptions = LayoutOptions.Center;
-        _playfield.Children.Add(new Image
+        var backgroundImage = new Image
         {
             Source = _scene.Background,
             Aspect = Aspect.AspectFill,
             WidthRequest = _width,
             HeightRequest = _height,
             InputTransparent = true
-        });
-        AbsoluteLayout.SetLayoutBounds(_playfield.Children[0], new Rect(0, 0, _width, _height));
+        };
+        AbsoluteLayout.SetLayoutBounds(
+            backgroundImage, new Rect(0, 0, _width, _height));
+        _playfield.Children.Add(backgroundImage);
 
         AddCloud(.02, .03, .96, .27);
         AddCloud(.02, .30, .96, .27);
