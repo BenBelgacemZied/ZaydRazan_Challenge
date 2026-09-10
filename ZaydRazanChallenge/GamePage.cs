@@ -33,6 +33,7 @@ public sealed class GamePage : ContentPage
         _mode = mode;
         Title = mode switch { GameMode.Matching => "Woorden verbinden", GameMode.Listening => "Luisteren", _ => "Monumentenquiz" };
         BackgroundColor = Color.FromArgb("#FFF8E7");
+        GameUi.AddHomeButton(this);
         _sound.Clicked += async (_, _) => await TextToSpeech.Default.SpeakAsync(
             Words[_index % Words.Length].Fr,
             new SpeechOptions { Locale = await FindFrenchLocale() });
@@ -88,6 +89,7 @@ public sealed class GamePage : ContentPage
         foreach (var view in _answers.Children)
             if (view is Button button) button.IsEnabled = false;
         selected.BackgroundColor = correct ? Color.FromArgb("#16A34A") : Color.FromArgb("#DC2626");
+        await (correct ? GameFeedback.SuccessAsync() : GameFeedback.FailureAsync());
         _feedback.Text = correct ? "Bravo! Goed gedaan! ⭐" : "Presque ! Bijna goed.";
         if (correct)
         {
@@ -99,7 +101,7 @@ public sealed class GamePage : ContentPage
         if (_index >= (_mode == GameMode.Monuments ? Monuments.Length : Words.Length))
         {
             await DisplayAlert("Challenge terminé", $"Tu as gagné {_score} étoile(s) !", "Terug");
-            await Navigation.PopAsync();
+            await Navigation.PopToRootAsync();
             return;
         }
         ShowQuestion();
