@@ -132,6 +132,7 @@ public sealed class AdventurePage : ContentPage
     {
         Title = "Avontuur naar Parijs";
         BackgroundColor = Color.FromArgb("#E0F2FE");
+        GameUi.AddHomeButton(this);
         _stageIndex = Math.Min(Preferences.Default.Get("adventure_stage", 0), Stages.Length - 1);
 
         var display = DeviceDisplay.Current.MainDisplayInfo;
@@ -353,6 +354,7 @@ public sealed class AdventurePage : ContentPage
         selected.BackgroundColor = correct
             ? Color.FromArgb("#16A34A")
             : Color.FromArgb("#DC2626");
+        await (correct ? GameFeedback.SuccessAsync() : GameFeedback.FailureAsync());
         _feedback.TextColor = selected.BackgroundColor;
         _feedback.Text = correct
             ? "Bravo! +1 ⭐ De wolken verdwijnen..."
