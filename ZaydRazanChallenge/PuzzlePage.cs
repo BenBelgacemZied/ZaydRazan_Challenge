@@ -42,6 +42,7 @@ public sealed class PuzzlePage : ContentPage
 
         Title = "Défi surprise";
         BackgroundColor = Color.FromArgb("#FFF8E7");
+        GameUi.AddHomeButton(this);
 
         for (var i = 0; i < _gridSize; i++)
         {
@@ -317,6 +318,7 @@ public sealed class PuzzlePage : ContentPage
         }
 
         _completed = true;
+        await GameFeedback.FailureAsync();
         _messageLabel.TextColor = Color.FromArgb("#DC2626");
         _messageLabel.Text = "Défi terminé. Essaie encore!";
         var retry = await DisplayAlert(
@@ -333,6 +335,7 @@ public sealed class PuzzlePage : ContentPage
     private async Task CompletePuzzle()
     {
         _completed = true;
+        await GameFeedback.SuccessAsync();
         var ratio = (double)_moves / _maxMoves;
         var reward = ratio <= .50 ? 3 : ratio <= .75 ? 2 : 1;
         var stars = Preferences.Default.Get("stars", 0) + reward;
@@ -351,15 +354,8 @@ public sealed class PuzzlePage : ContentPage
         await _puzzleGrid.ScaleTo(1.04, 180, Easing.CubicOut);
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
 
-        var next = await DisplayAlert(
-            $"🎓 À découvrir · {_puzzle.FrenchName}",
-            $"Résultat: {_moves}/{_maxMoves} déplacements · {starText}\n\n{_puzzle.Description}",
-            "Nouveau défi",
-            "Retour");
-        if (next)
-            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
-        else
-            await Navigation.PopAsync();
+        await Navigation.PushAsync(
+            new PuzzleDiscoveryPage(_puzzle, _moves, _maxMoves, reward));
     }
 
     private bool IsSolved() =>
