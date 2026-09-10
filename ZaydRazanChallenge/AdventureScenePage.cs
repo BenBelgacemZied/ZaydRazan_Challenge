@@ -95,13 +95,12 @@ public sealed class AdventureScenePage : ContentPage
         FontAttributes = FontAttributes.Bold,
         TextColor = Colors.White
     };
-    private readonly Label _heroes = new()
+    private readonly Image _heroes = new()
     {
-        Text = "👦🏽👧🏽",
-        FontSize = 34,
-        WidthRequest = 82,
-        HeightRequest = 50,
-        HorizontalTextAlignment = TextAlignment.Center
+        Source = "zayd_razan_walk.png",
+        Aspect = Aspect.AspectFit,
+        WidthRequest = 120,
+        HeightRequest = 160
     };
     private readonly List<View> _clouds = [];
     private readonly double _width;
@@ -141,7 +140,7 @@ public sealed class AdventureScenePage : ContentPage
         AddCloud(.02, .57, .96, .27);
 
         AbsoluteLayout.SetLayoutBounds(_heroes,
-            new Rect(_width * .39, _height * .82, 82, 50));
+            new Rect(_width * .35, _height * .70, 120, 160));
         _playfield.Children.Add(_heroes);
 
         var hud = new Border
@@ -197,7 +196,7 @@ public sealed class AdventureScenePage : ContentPage
         _playfield.Children.Add(cloud);
     }
 
-    private void ShowMission()
+    private async void ShowMission()
     {
         _checking = false;
         var mission = _scene.Missions[_missionIndex];
@@ -234,6 +233,12 @@ public sealed class AdventureScenePage : ContentPage
                 50));
             _playfield.Children.Add(button);
         }
+
+        _counter.Text =
+            $"{_missionIndex + 1}/{_scene.Missions.Length}   ⚡ 10   ⭐ {Preferences.Default.Get("stars", 0)}";
+        var spokenInstruction = mission.Instruction.Split('·')[0].Trim();
+        await TextToSpeech.Default.SpeakAsync(spokenInstruction,
+            new SpeechOptions { Locale = await FindFrenchLocale() });
     }
 
     private async Task CheckChoice(int choiceIndex, Button button)
@@ -260,8 +265,8 @@ public sealed class AdventureScenePage : ContentPage
 
         var target = mission.Choices[choiceIndex];
         await WalkHeroesTo(
-            target.X * _width - (_width * .39 + 41),
-            target.Y * _height - (_height * .82 + 25));
+            target.X * _width - (_width * .35 + 60),
+            target.Y * _height - (_height * .70 + 80));
 
         var discovery = new Label
         {
@@ -287,8 +292,6 @@ public sealed class AdventureScenePage : ContentPage
             _clouds[_missionIndex].IsVisible = false;
         }
 
-        await TextToSpeech.Default.SpeakAsync(mission.FrenchPhrase,
-            new SpeechOptions { Locale = await FindFrenchLocale() });
         _missionIndex++;
 
         if (_missionIndex >= _scene.Missions.Length)
