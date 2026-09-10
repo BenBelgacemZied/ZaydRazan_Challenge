@@ -240,6 +240,19 @@ public sealed class AdventurePage : ContentPage
         ShowStage();
     }
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        var savedStage = Math.Min(
+            Preferences.Default.Get("adventure_stage", 0),
+            Stages.Length - 1);
+        if (savedStage != _stageIndex)
+        {
+            _stageIndex = savedStage;
+            ShowStage();
+        }
+    }
+
     private void RenderMap()
     {
         _mapLayer.Clear();
@@ -271,9 +284,14 @@ public sealed class AdventurePage : ContentPage
             {
                 if (stageNumber == _stageIndex)
                 {
-                    _missionCard.IsVisible = true;
-                    await _missionCard.FadeTo(1, 180);
-                    await _scroll.ScrollToAsync(_missionCard, ScrollToPosition.Start, true);
+                    if (stageNumber < 4)
+                        await Navigation.PushAsync(new AdventureScenePage(stageNumber));
+                    else
+                    {
+                        _missionCard.IsVisible = true;
+                        await _missionCard.FadeTo(1, 180);
+                        await _scroll.ScrollToAsync(_missionCard, ScrollToPosition.Start, true);
+                    }
                 }
                 else if (stageNumber < _stageIndex)
                     await DisplayAlert($"Etappe {stageNumber + 1} · {Stages[stageNumber].Place}",
