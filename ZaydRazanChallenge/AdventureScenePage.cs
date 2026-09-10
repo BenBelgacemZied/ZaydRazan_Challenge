@@ -259,11 +259,27 @@ public sealed class AdventureScenePage : ContentPage
             Preferences.Default.Get("stars", 0) + 1);
 
         var target = mission.Choices[choiceIndex];
-        await _heroes.TranslateTo(
+        await WalkHeroesTo(
             target.X * _width - (_width * .39 + 41),
-            target.Y * _height - (_height * .82 + 25),
-            650,
-            Easing.CubicInOut);
+            target.Y * _height - (_height * .82 + 25));
+
+        var discovery = new Label
+        {
+            Text = "🔎 " + mission.FrenchPhrase,
+            FontSize = 15,
+            FontAttributes = FontAttributes.Bold,
+            TextColor = Color.FromArgb("#183153"),
+            BackgroundColor = Color.FromArgb("#F2FFFFFF"),
+            Padding = new Thickness(10, 6),
+            HorizontalTextAlignment = TextAlignment.Center
+        };
+        AbsoluteLayout.SetLayoutBounds(discovery, new Rect(
+            Math.Clamp(target.X * _width - 80, 6, _width - 166),
+            Math.Clamp(target.Y * _height - 82, 70, _height - 90),
+            160, 62));
+        _playfield.Children.Add(discovery);
+        discovery.Opacity = 0;
+        await discovery.FadeTo(1, 220);
 
         if (_missionIndex < _clouds.Count)
         {
@@ -290,6 +306,25 @@ public sealed class AdventureScenePage : ContentPage
         _heroes.TranslationX = 0;
         _heroes.TranslationY = 0;
         ShowMission();
+    }
+
+    private async Task WalkHeroesTo(double destinationX, double destinationY)
+    {
+        const int steps = 7;
+        for (var step = 1; step <= steps; step++)
+        {
+            var progress = (double)step / steps;
+            _heroes.Rotation = step % 2 == 0 ? -5 : 5;
+            _heroes.Scale = step % 2 == 0 ? 1.04 : .96;
+            await _heroes.TranslateTo(
+                destinationX * progress,
+                destinationY * progress - (step % 2 == 0 ? 5 : 0),
+                90,
+                Easing.Linear);
+        }
+        _heroes.Rotation = 0;
+        _heroes.Scale = 1;
+        await _heroes.TranslateTo(destinationX, destinationY, 80);
     }
 
     private static async Task<Locale?> FindFrenchLocale() =>
