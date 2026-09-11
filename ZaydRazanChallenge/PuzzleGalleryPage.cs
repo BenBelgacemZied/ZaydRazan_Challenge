@@ -11,13 +11,13 @@ public sealed class PuzzleGalleryPage : ContentPage
 
     public PuzzleGalleryPage()
     {
-        Title = "Défis de la France";
+        Title = "Frankrijk-puzzels";
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
 
         var startButton = new Button
         {
-            Text = "🎲 Lancer un défi surprise",
+            Text = "🎲 Start een verrassingspuzzel",
             FontSize = 19,
             FontAttributes = FontAttributes.Bold,
             BackgroundColor = Color.FromArgb("#E11D48"),
@@ -44,14 +44,14 @@ public sealed class PuzzleGalleryPage : ContentPage
                     },
                     new Label
                     {
-                        Text = "Le défi surprise de la France",
+                        Text = "De verrassingspuzzel van Frankrijk",
                         FontSize = 29,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
                     new Label
                     {
-                        Text = "L’image, la grille et la limite de déplacements sont choisies au hasard. Observe, réfléchis et découvre ensuite un fait culturel!",
+                        Text = "De afbeelding, het raster en het maximale aantal zetten worden willekeurig gekozen. Kijk goed, denk na en ontdek daarna een leuk weetje!",
                         FontSize = 17,
                         LineHeight = 1.25,
                         HorizontalTextAlignment = TextAlignment.Center
@@ -69,15 +69,15 @@ public sealed class PuzzleGalleryPage : ContentPage
                             {
                                 new Label
                                 {
-                                    Text = "🎯 Règles du challenge",
+                                    Text = "🎯 Spelregels",
                                     FontSize = 20,
                                     FontAttributes = FontAttributes.Bold
                                 },
-                                new Label { Text = "• Limite aléatoire: 7 à 20 déplacements" },
-                                new Label { Text = "• Grille aléatoire: 3×3 à 6×6" },
-                                new Label { Text = "• 50% de la limite: ⭐⭐⭐" },
-                                new Label { Text = "• 75% de la limite: ⭐⭐" },
-                                new Label { Text = "• Jusqu’à la limite: ⭐" }
+                                new Label { Text = "• Willekeurige limiet: 7 tot 20 zetten" },
+                                new Label { Text = "• Willekeurig raster: 3×3 tot 6×6" },
+                                new Label { Text = "• Tot 50% van de limiet: ⭐⭐⭐" },
+                                new Label { Text = "• Tot 75% van de limiet: ⭐⭐" },
+                                new Label { Text = "• Binnen de limiet: ⭐" }
                             }
                         }
                     },
@@ -85,7 +85,7 @@ public sealed class PuzzleGalleryPage : ContentPage
                     startButton,
                     new Label
                     {
-                        Text = "La Joconde · croissant · baguette · Versailles · monuments de Paris et bien plus",
+                        Text = "La Joconde · le croissant · la baguette · Versailles · Parijse monumenten en nog veel meer",
                         FontSize = 14,
                         TextColor = Color.FromArgb("#64748B"),
                         HorizontalTextAlignment = TextAlignment.Center
@@ -101,6 +101,6 @@ public sealed class PuzzleGalleryPage : ContentPage
         var discovered = PuzzleCatalog.Items.Count(p =>
             Preferences.Default.Get($"puzzle_completed_{p.Key}", false));
         _progress.Text =
-            $"⭐ {Preferences.Default.Get("stars", 0)}   •   {discovered}/{PuzzleCatalog.Items.Count} découvertes";
+            $"⭐ {Preferences.Default.Get("stars", 0)}   •   {discovered}/{PuzzleCatalog.Items.Count} ontdekkingen";
     }
 }

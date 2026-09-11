@@ -11,15 +11,15 @@ public sealed class StationMissionHubPage : ContentPage
 
     public StationMissionHubPage()
     {
-        Title = "Chapitre · La gare";
+        Title = "Hoofdstuk · Het station";
         BackgroundColor = Color.FromArgb("#EFF6FF");
         GameUi.AddHomeButton(this);
         Content = new ScrollView { Content = new VerticalStackLayout
         {
             Padding = 18, Spacing = 13, Children =
             {
-                new Label { Text = "🚉 La gare", FontSize = 31, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D") },
-                new Label { Text = "Zayd et Razan doivent trouver seuls le chemin jusqu'au train. Chaque mission fait disparaître une partie des nuages.", FontSize = 17, LineHeight = 1.25 },
+                new Label { Text = "🚉 Het station · La gare", FontSize = 31, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D") },
+                new Label { Text = "Zayd en Razan zoeken zelf de weg naar de trein. Elke missie laat een deel van de wolken verdwijnen.", FontSize = 17, LineHeight = 1.25 },
                 _missions
             }
         }};
@@ -29,17 +29,17 @@ public sealed class StationMissionHubPage : ContentPage
     {
         base.OnAppearing();
         _missions.Clear();
-        Add(0, "🔎 Trouver le guichet", "Observe les panneaux et trouve le symbole des billets.");
-        Add(1, "🎫 Demander les billets", "Choisis la bonne phrase en français.");
-        Add(2, "💳 Payer les billets", "Sélectionne le bon moyen de paiement.");
-        Add(3, "📺 Trouver le quai", "Lis le panneau et retrouve le quai 3.");
-        Add(4, "🚄 Trouver le wagon", "Monte dans le wagon numéro 7.");
+        Add(0, "🔎 Het loket vinden", "Bekijk de borden en zoek het symbool van de tickets.");
+        Add(1, "🎫 Tickets vragen", "Kies de juiste Franse zin.");
+        Add(2, "💳 De tickets betalen", "Kies het juiste betaalmiddel.");
+        Add(3, "📺 Het perron vinden", "Lees het bord en zoek perron 3.");
+        Add(4, "🚄 De wagon vinden", "Stap in wagon 7.");
 
         if (Keys.All(k => Preferences.Default.Get(k, false)))
         {
             if (Preferences.Default.Get("adventure_stage", 0) < 3)
                 Preferences.Default.Set("adventure_stage", 3);
-            var done = new Button { Text = "☀️ Gare terminée · Retour à la carte", BackgroundColor = Color.FromArgb("#16A34A"), TextColor = Colors.White, FontAttributes = FontAttributes.Bold, HeightRequest = 58 };
+            var done = new Button { Text = "☀️ Station voltooid · Terug naar de kaart", BackgroundColor = Color.FromArgb("#16A34A"), TextColor = Colors.White, FontAttributes = FontAttributes.Bold, HeightRequest = 58 };
             done.Clicked += async (_, _) => await Navigation.PopAsync();
             _missions.Add(done);
         }
@@ -51,7 +51,7 @@ public sealed class StationMissionHubPage : ContentPage
         var unlocked = index == 0 || Preferences.Default.Get(Keys[index - 1], false);
         var button = new Button
         {
-            Text = complete ? "✓ Rejouer" : unlocked ? "Jouer" : "🔒",
+            Text = complete ? "✓ Opnieuw" : unlocked ? "Spelen" : "🔒",
             IsEnabled = unlocked, WidthRequest = 105, TextColor = Colors.White,
             BackgroundColor = complete ? Color.FromArgb("#16A34A") : unlocked ? Color.FromArgb("#2563EB") : Color.FromArgb("#94A3B8"),
             FontAttributes = FontAttributes.Bold

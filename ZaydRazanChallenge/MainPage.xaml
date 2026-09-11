@@ -23,7 +23,7 @@
                            TextColor="White"
                            FontSize="21"
                            FontAttributes="Bold" />
-                    <Label Text="Avec Zayd &amp; Razan · Paris"
+                    <Label Text="Met Zayd &amp; Razan · Parijs"
                            TextColor="#DBEAFE"
                            FontSize="13" />
                 </VerticalStackLayout>
@@ -51,12 +51,12 @@
                         StrokeThickness="3"
                         StrokeShape="RoundRectangle 24">
                     <VerticalStackLayout Spacing="9">
-                        <Label Text="🎒 Aventure principale"
+                        <Label Text="🎒 Hoofdavontuur"
                                FontSize="22"
                                FontAttributes="Bold"
                                TextColor="#183153" />
                         <Label x:Name="AdventureProgressLabel"
-                               Text="Commence le voyage et débloque les étapes."
+                               Text="Begin de reis en ontgrendel de etappes."
                                FontSize="14"
                                TextColor="#334155" />
                         <ProgressBar x:Name="AdventureProgressBar"
@@ -64,7 +64,7 @@
                                      BackgroundColor="#FDE68A"
                                      HeightRequest="8" />
                         <Button x:Name="AdventureButton"
-                                Text="▶ Jouer l’aventure"
+                                Text="▶ Speel het avontuur"
                                 FontSize="18"
                                 FontAttributes="Bold"
                                 BackgroundColor="#E11D48"

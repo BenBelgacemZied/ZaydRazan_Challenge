@@ -7,13 +7,13 @@ public sealed class PuzzleDiscoveryPage : ContentPage
     public PuzzleDiscoveryPage(PuzzleDefinition puzzle, int moves, int maxMoves, int reward)
     {
         _puzzle = puzzle;
-        Title = "Découverte";
+        Title = "Ontdekking";
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
 
         var listen = new Button
         {
-            Text = "🔊 Écouter l’information",
+            Text = "🔊 Luister naar de uitleg",
             FontSize = 18,
             FontAttributes = FontAttributes.Bold,
             BackgroundColor = Color.FromArgb("#7C3AED"),
@@ -24,7 +24,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
 
         var next = new Button
         {
-            Text = "🎲 Nouveau défi surprise",
+            Text = "🎲 Nieuwe verrassingspuzzel",
             FontSize = 17,
             FontAttributes = FontAttributes.Bold,
             BackgroundColor = Color.FromArgb("#E11D48"),
@@ -35,7 +35,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
 
         var home = new Button
         {
-            Text = "⌂ Retour à l’accueil",
+            Text = "⌂ Terug naar start",
             FontSize = 17,
             FontAttributes = FontAttributes.Bold,
             BackgroundColor = Color.FromArgb("#183153"),
@@ -53,7 +53,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
                 {
                     new Label
                     {
-                        Text = "🏆 Puzzle réussi !",
+                        Text = "🏆 Puzzel opgelost!",
                         FontSize = 30,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center,
@@ -74,7 +74,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
                     },
                     new Label
                     {
-                        Text = $"{moves}/{maxMoves} déplacements · {new string('⭐', reward)}",
+                        Text = $"{moves}/{maxMoves} zetten · {new string('⭐', reward)}",
                         FontSize = 20,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center,
@@ -94,7 +94,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
                             {
                                 new Label
                                 {
-                                    Text = "🎓 Le savais-tu ?",
+                                    Text = "🎓 Wist je dat?",
                                     FontSize = 22,
                                     FontAttributes = FontAttributes.Bold,
                                     TextColor = Color.FromArgb("#1D4ED8")

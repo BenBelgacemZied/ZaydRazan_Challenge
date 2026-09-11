@@ -25,7 +25,7 @@ public sealed class AdventurePage : ContentPage
         new("🧭", "Op weg · En route",
             "Zayd leest de kaart en Razan kiest het pad naar het station. Samen vinden ze de juiste richting.",
             "Où est la gare ?",
-            "Quel mot signifie « waar »?", "où",
+            "Welk Frans woord betekent « waar »?", "où",
             ["où", "quand", "merci"], "#FFEDD5", .63, .69),
 
         new("🚉", "Het station · La gare",
@@ -37,7 +37,7 @@ public sealed class AdventurePage : ContentPage
         new("🚄", "In de trein · Dans le train",
             "Ze stappen zelfstandig in, zoeken hun zitplaatsen en zien het landschap snel voorbijgaan.",
             "Nous voyageons en train.",
-            "Comment dit-on « wij reizen »?", "nous voyageons",
+            "Hoe zeg je « wij reizen » in het Frans?", "nous voyageons",
             ["nous voyageons", "nous mangeons", "nous dormons"], "#DBEAFE", .49, .46),
 
         new("🗺️", "Aankomst · Arrivée à Paris",
@@ -49,7 +49,7 @@ public sealed class AdventurePage : ContentPage
         new("🗼", "La tour Eiffel",
             "Ze volgen de route langs de Seine. Razan ontdekt als eerste de top van de Eiffeltoren.",
             "La tour Eiffel est très haute.",
-            "Quel mot signifie « hoog »?", "haut",
+            "Welk Frans woord betekent « hoog »?", "haut",
             ["bas", "haut", "petit"], "#FCE7F3", .36, .25),
 
         new("🖼️", "Le musée du Louvre",
@@ -61,7 +61,7 @@ public sealed class AdventurePage : ContentPage
         new("🏛️", "L’Arc de Triomphe",
             "De wolken verdwijnen: Zayd en Razan bereiken zelfstandig de laatste halte van hun Parijse avontuur!",
             "Merci et au revoir, Paris !",
-            "Que signifie « au revoir »?", "tot ziens",
+            "Wat betekent « au revoir »?", "tot ziens",
             ["dank je", "tot ziens", "goedemorgen"], "#CCFBF1", .72, .18)
     ];
 

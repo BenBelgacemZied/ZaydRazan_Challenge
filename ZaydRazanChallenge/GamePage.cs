@@ -8,7 +8,7 @@ public sealed class GamePage : ContentPage
     private readonly Label _question = new() { FontSize = 27, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center };
     private readonly Label _feedback = new() { FontSize = 18, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center };
     private readonly VerticalStackLayout _answers = new() { Spacing = 12 };
-    private readonly Button _sound = new() { Text = "🔊 Écouter le mot", BackgroundColor = Color.FromArgb("#7C3AED"), IsVisible = false };
+    private readonly Button _sound = new() { Text = "🔊 Luister naar het woord", BackgroundColor = Color.FromArgb("#7C3AED"), IsVisible = false };
     private int _index;
     private int _score;
 
@@ -21,11 +21,11 @@ public sealed class GamePage : ContentPage
 
     private static readonly (string Question, string Answer, string[] Choices)[] Monuments =
     [
-        ("Quel monument ressemble à une grande tour de fer ?", "La tour Eiffel", ["Le Louvre", "La tour Eiffel", "Notre-Dame"]),
+        ("Welk monument lijkt op een grote ijzeren toren?", "La tour Eiffel", ["Le Louvre", "La tour Eiffel", "Notre-Dame"]),
         ("Waar vind je de Mona Lisa?", "Le Louvre", ["Le Louvre", "Sacré-Cœur", "Arc de Triomphe"]),
-        ("Quel monument est une célèbre cathédrale ?", "Notre-Dame", ["Notre-Dame", "La tour Eiffel", "Le Louvre"]),
+        ("Welk monument is een beroemde kathedraal?", "Notre-Dame", ["Notre-Dame", "La tour Eiffel", "Le Louvre"]),
         ("Welk monument staat op de Champs-Élysées?", "Arc de Triomphe", ["Sacré-Cœur", "Notre-Dame", "Arc de Triomphe"]),
-        ("Quel monument blanc domine Montmartre ?", "Sacré-Cœur", ["Le Louvre", "Sacré-Cœur", "Arc de Triomphe"])
+        ("Welk wit monument staat boven op Montmartre?", "Sacré-Cœur", ["Le Louvre", "Sacré-Cœur", "Arc de Triomphe"])
     ];
 
     public GamePage(GameMode mode)
@@ -66,7 +66,7 @@ public sealed class GamePage : ContentPage
         var word = Words[_index % Words.Length];
         _sound.IsVisible = _mode == GameMode.Listening;
         _question.Text = _mode == GameMode.Matching
-            ? $"Que signifie « {word.Fr} » ?"
+            ? $"Wat betekent « {word.Fr} »?"
             : "Luister en kies het juiste Nederlandse woord";
         var choices = Words.Select(x => x.Nl).Where(x => x != word.Nl)
             .OrderBy(_ => Random.Shared.Next()).Take(2).Append(word.Nl)
@@ -90,7 +90,7 @@ public sealed class GamePage : ContentPage
             if (view is Button button) button.IsEnabled = false;
         selected.BackgroundColor = correct ? Color.FromArgb("#16A34A") : Color.FromArgb("#DC2626");
         await (correct ? GameFeedback.SuccessAsync() : GameFeedback.FailureAsync());
-        _feedback.Text = correct ? "Bravo! Goed gedaan! ⭐" : "Presque ! Bijna goed.";
+        _feedback.Text = correct ? "Goed gedaan! ⭐" : "Bijna goed. Probeer het volgende woord.";
         if (correct)
         {
             _score++;
@@ -100,7 +100,7 @@ public sealed class GamePage : ContentPage
         _index++;
         if (_index >= (_mode == GameMode.Monuments ? Monuments.Length : Words.Length))
         {
-            await DisplayAlert("Challenge terminé", $"Tu as gagné {_score} étoile(s) !", "Terug");
+            await DisplayAlert("Uitdaging voltooid", $"Je hebt {_score} ster(ren) verdiend!", "Terug");
             await Navigation.PopToRootAsync();
             return;
         }

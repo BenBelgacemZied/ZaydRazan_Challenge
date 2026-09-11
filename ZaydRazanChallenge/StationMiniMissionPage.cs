@@ -7,26 +7,26 @@ public sealed class StationMiniMissionPage : ContentPage
 
     private static readonly Mission[] Missions =
     [
-        new("station_find_counter", "Trouver le guichet",
-            "Zayd et Razan entrent dans la gare. Le hall est grand : ils cherchent où acheter leurs billets.",
-            "Cherche le panneau du guichet. Quel symbole montre les billets ?", "station_concourse.jpg",
-            "🎫 Billets", ["🎫 Billets", "☕ Café", "🧳 Bagages"], "Voilà le guichet !"),
-        new("station_ask_tickets", "Demander les billets",
-            "Razan arrive au guichet. Elle doit demander deux billets pour Paris poliment.",
-            "Que doit dire Razan ?", "station_ticket_counter.jpg",
-            "Deux billets pour Paris, s'il vous plaît.", ["Où est le café ?", "Deux billets pour Paris, s'il vous plaît.", "Au revoir Paris !"], "La dame prépare les deux billets."),
-        new("station_pay", "Payer les billets",
-            "Les billets coûtent vingt euros. Zayd regarde le terminal et les pièces posées sur le comptoir.",
-            "Comment dit-on « payer » en français ?", "station_ticket_counter.jpg",
-            "payer", ["voyager", "payer", "manger"], "Paiement accepté !"),
-        new("station_find_platform", "Trouver le quai",
-            "Le panneau annonce le train pour Paris. Le billet indique le quai numéro trois.",
-            "Choisis le bon quai.", "station_concourse.jpg",
-            "Quai 3", ["Quai 1", "Quai 3", "Quai 8"], "Le quai 3 est trouvé !"),
-        new("station_find_wagon", "Trouver le wagon",
-            "Sur le quai, Zayd tient les billets. Razan cherche le numéro inscrit sur leur wagon.",
-            "Le billet indique le wagon sept. Quel wagon choisissent-ils ?", "scene_platform.jpg",
-            "Wagon 7", ["Wagon 2", "Wagon 7", "Wagon 10"], "Ils montent dans le bon wagon !")
+        new("station_find_counter", "Het loket vinden",
+            "Zayd en Razan komen het station binnen. De hal is groot. Ze zoeken waar ze hun tickets kunnen kopen.",
+            "Zoek het bord van het loket. Welk symbool toont de tickets?", "station_concourse.jpg",
+            "🎫 Les billets", ["🎫 Les billets", "☕ Café", "🧳 Bagages"], "Daar is het loket!"),
+        new("station_ask_tickets", "Tickets vragen",
+            "Razan staat aan het loket. Ze wil beleefd twee tickets naar Parijs vragen.",
+            "Wat moet Razan zeggen?", "station_ticket_counter.jpg",
+            "Deux billets pour Paris, s'il vous plaît.", ["Où est le café ?", "Deux billets pour Paris, s'il vous plaît.", "Au revoir Paris !"], "De medewerker maakt de twee tickets klaar."),
+        new("station_pay", "De tickets betalen",
+            "De tickets kosten twintig euro. Zayd kijkt naar de betaalterminal en de munten op de balie.",
+            "Hoe zeg je « betalen » in het Frans?", "station_ticket_counter.jpg",
+            "payer", ["voyager", "payer", "manger"], "De betaling is gelukt!"),
+        new("station_find_platform", "Het perron vinden",
+            "Op het bord staat de trein naar Parijs. Op het ticket staat perron drie.",
+            "Kies het juiste perron.", "station_concourse.jpg",
+            "Quai 3", ["Quai 1", "Quai 3", "Quai 8"], "Perron 3 is gevonden!"),
+        new("station_find_wagon", "De wagon vinden",
+            "Op het perron houdt Zayd de tickets vast. Razan zoekt het nummer van hun wagon.",
+            "Op het ticket staat wagon zeven. Welke wagon kiezen ze?", "scene_platform.jpg",
+            "Wagon 7", ["Wagon 2", "Wagon 7", "Wagon 10"], "Ze stappen in de juiste wagon!")
     ];
 
     private readonly int _index;
@@ -82,7 +82,7 @@ public sealed class StationMiniMissionPage : ContentPage
         if (!correct)
         {
             selected.BackgroundColor = Color.FromArgb("#DC2626");
-            _feedback.Text = "Essaie encore : observe la scène et écoute la consigne.";
+            _feedback.Text = "Probeer opnieuw. Kijk naar de scène en luister naar de opdracht.";
             _feedback.TextColor = Color.FromArgb("#DC2626");
             await GameFeedback.FailureAsync();
             await selected.TranslateTo(-10, 0, 70); await selected.TranslateTo(10, 0, 70); await selected.TranslateTo(0, 0, 70);
@@ -98,9 +98,9 @@ public sealed class StationMiniMissionPage : ContentPage
         _feedback.Text = $"⭐ {_mission.Success}";
         _feedback.TextColor = Color.FromArgb("#16A34A");
         await GameFeedback.SuccessAsync();
-        await Speak("Bravo ! " + _mission.Success);
+        await Speak("Goed gedaan! " + _mission.Success);
         await Task.Delay(650);
-        await DisplayAlert("Mission réussie", _mission.Success + " Tu gagnes une étoile.", "Continuer");
+        await DisplayAlert("Missie voltooid", _mission.Success + " Je verdient een ster.", "Verder");
         await Navigation.PopAsync();
     }
 
@@ -109,8 +109,8 @@ public sealed class StationMiniMissionPage : ContentPage
         try
         {
             var locales = await TextToSpeech.Default.GetLocalesAsync();
-            var french = locales.FirstOrDefault(x => x.Language.StartsWith("fr", StringComparison.OrdinalIgnoreCase));
-            await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Locale = french });
+            var dutch = locales.FirstOrDefault(x => x.Language.StartsWith("nl", StringComparison.OrdinalIgnoreCase));
+            await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Locale = dutch });
         }
         catch { }
     }

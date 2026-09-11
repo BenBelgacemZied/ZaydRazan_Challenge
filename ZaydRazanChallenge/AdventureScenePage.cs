@@ -15,63 +15,63 @@ public sealed class AdventureScenePage : ContentPage
 
     private static readonly Scene[] Scenes =
     [
-        new("🏠 Préparer le voyage", "scene_home.jpg",
+        new("🏠 De reis voorbereiden", "scene_home.jpg",
         [
-            new("Trouve le sac à dos · Zoek de rugzak", "Trouve le sac à dos", 0,
+            new("Zoek de rugzak · « le sac à dos »", "Trouve le sac à dos", 0,
             [
                 new("🎒", .12, .55), new("🧳", .85, .58), new("👟", .14, .72)
             ]),
-            new("Trouve un vêtement · Zoek een kledingstuk", "Trouve le vêtement", 1,
+            new("Zoek een kledingstuk · « un vêtement »", "Trouve le vêtement", 1,
             [
                 new("🎩", .78, .43), new("👕", .48, .29), new("🎫", .82, .84)
             ]),
-            new("Trouve le billet de train · Zoek het treinkaartje", "Le billet de train", 2,
+            new("Zoek het treinkaartje · « le billet de train »", "Le billet de train", 2,
             [
                 new("👟", .13, .72), new("🧳", .86, .58), new("🎫", .82, .84)
             ])
         ]),
-        new("🎫 Acheter les billets", "scene_station.jpg",
+        new("🎫 Tickets kopen", "scene_station.jpg",
         [
-            new("Que disent Zayd et Razan au guichet ?", "Deux billets pour Paris, s'il vous plaît", 1,
+            new("Wat zeggen Zayd en Razan aan het loket?", "Deux billets pour Paris, s'il vous plaît", 1,
             [
                 new("Au revoir", .22, .70), new("Deux billets, s’il vous plaît", .50, .63),
                 new("Bonne nuit", .78, .70)
             ]),
-            new("Choisis la destination correcte", "Nous allons à Paris", 2,
+            new("Kies de juiste bestemming.", "Nous allons à Paris", 2,
             [
                 new("Londres", .22, .67), new("Rome", .50, .60), new("Paris", .78, .67)
             ]),
-            new("Comment remercier au guichet ?", "Merci beaucoup", 0,
+            new("Hoe bedank je de medewerker aan het loket?", "Merci beaucoup", 0,
             [
                 new("Merci", .22, .66), new("Bonjour", .50, .59), new("Pardon", .78, .66)
             ])
         ]),
-        new("🚉 Trouver le quai", "scene_station.jpg",
+        new("🚉 Het perron vinden", "scene_station.jpg",
         [
-            new("Le billet indique le quai 3. Trouve-le !", "Le quai numéro trois", 2,
+            new("Op het ticket staat perron 3. Zoek het!", "Le quai numéro trois", 2,
             [
                 new("1", .24, .31), new("2", .50, .25), new("3", .75, .31)
             ]),
-            new("Où regarde-t-on les départs ?", "Le tableau des départs", 0,
+            new("Waar kijk je naar de vertrektijden?", "Le tableau des départs", 0,
             [
                 new("📋", .28, .18), new("🧳", .82, .52), new("🪑", .78, .75)
             ]),
-            new("Quel mot français signifie « quai » ?", "Le quai", 1,
+            new("Welk Frans woord betekent « perron »?", "Le quai", 1,
             [
                 new("la rue", .24, .68), new("le quai", .50, .60), new("la maison", .77, .68)
             ])
         ]),
-        new("🚄 Monter dans le train", "scene_platform.jpg",
+        new("🚄 In de trein stappen", "scene_platform.jpg",
         [
-            new("Le billet indique le wagon 7. Trouve-le !", "Le wagon numéro sept", 1,
+            new("Op het ticket staat wagon 7. Zoek hem!", "Le wagon numéro sept", 1,
             [
                 new("5", .30, .31), new("7", .53, .28), new("9", .76, .31)
             ]),
-            new("Trouve la porte du train", "La porte du train", 2,
+            new("Zoek de deur van de trein.", "La porte du train", 2,
             [
                 new("🪑", .22, .50), new("🧳", .79, .56), new("🚪", .68, .35)
             ]),
-            new("Que disent-ils en montant ?", "Bonjour, voici nos billets", 0,
+            new("Wat zeggen ze wanneer ze instappen?", "Bonjour, voici nos billets", 0,
             [
                 new("Voici nos billets", .30, .66), new("Bonne nuit", .53, .60),
                 new("Je ne sais pas", .76, .66)
@@ -238,7 +238,7 @@ public sealed class AdventureScenePage : ContentPage
             $"{_missionIndex + 1}/{_scene.Missions.Length}   ⚡ 10   ⭐ {Preferences.Default.Get("stars", 0)}";
         var spokenInstruction = mission.Instruction.Split('·')[0].Trim();
         await TextToSpeech.Default.SpeakAsync(spokenInstruction,
-            new SpeechOptions { Locale = await FindFrenchLocale() });
+            new SpeechOptions { Locale = await FindDutchLocale() });
     }
 
     private async Task CheckChoice(int choiceIndex, Button button)
@@ -299,9 +299,9 @@ public sealed class AdventureScenePage : ContentPage
             var currentProgress = Preferences.Default.Get("adventure_stage", 0);
             Preferences.Default.Set("adventure_stage",
                 Math.Max(currentProgress, _sceneIndex + 1));
-            await DisplayAlert("🌤️ Zone découverte !",
-                "Bravo ! Zayd et Razan ont terminé cette scène et la prochaine étape est ouverte.",
-                "Continuer");
+            await DisplayAlert("🌤️ Zone ontdekt!",
+                "Goed gedaan! Zayd en Razan hebben deze scène voltooid. De volgende etappe is nu open.",
+                "Verder");
             await Navigation.PopAsync();
             return;
         }
@@ -330,9 +330,9 @@ public sealed class AdventureScenePage : ContentPage
         await _heroes.TranslateTo(destinationX, destinationY, 80);
     }
 
-    private static async Task<Locale?> FindFrenchLocale() =>
+    private static async Task<Locale?> FindDutchLocale() =>
         (await TextToSpeech.Default.GetLocalesAsync())
-        .FirstOrDefault(x => x.Language.StartsWith("fr",
+        .FirstOrDefault(x => x.Language.StartsWith("nl",
             StringComparison.OrdinalIgnoreCase));
 }
 

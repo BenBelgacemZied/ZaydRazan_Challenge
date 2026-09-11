@@ -6,7 +6,7 @@ public static class GameUi
     {
         page.ToolbarItems.Add(new ToolbarItem
         {
-            Text = "✕ Accueil",
+            Text = "✕ Start",
             Order = ToolbarItemOrder.Primary,
             Command = new Command(async () => await page.Navigation.PopToRootAsync())
         });
