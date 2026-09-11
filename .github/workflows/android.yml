@@ -47,7 +47,7 @@ jobs:
             -c Release `
             -f net9.0-android `
             --no-restore `
-            -p:AndroidPackageFormats="'apk;aab'" `
+            -p:AndroidPackageFormats=apk%3Baab `
             -p:AndroidKeyStore=true `
             -p:AndroidSigningKeyStore="$env:RUNNER_TEMP\zrlingotrip-upload-key.jks" `
             -p:AndroidSigningStorePass="$env:STORE_PASSWORD" `
