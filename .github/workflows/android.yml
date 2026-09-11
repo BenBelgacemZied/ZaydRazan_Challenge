@@ -36,7 +36,7 @@ jobs:
             [Convert]::FromBase64String($env:KEYSTORE_BASE64)
           )
 
-      - name: Build signed APK and AAB
+      - name: Build signed development APK
         shell: pwsh
         env:
           STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -47,19 +47,17 @@ jobs:
             -c Release `
             -f net9.0-android `
             --no-restore `
-            -p:AndroidPackageFormats=apk%3Baab `
+            -p:AndroidPackageFormats=apk `
             -p:AndroidKeyStore=true `
             -p:AndroidSigningKeyStore="$env:RUNNER_TEMP\zrlingotrip-upload-key.jks" `
             -p:AndroidSigningStorePass="$env:STORE_PASSWORD" `
             -p:AndroidSigningKeyAlias="$env:KEY_ALIAS" `
             -p:AndroidSigningKeyPass="$env:KEY_PASSWORD"
 
-      - name: Upload signed Play Store files
+      - name: Upload signed development APK
         uses: actions/upload-artifact@v4
         with:
-          name: ZR-LingoTrip-PlayStore
-          path: |
-            ZaydRazanChallenge/bin/Release/net9.0-android/publish/*-Signed.apk
-            ZaydRazanChallenge/bin/Release/net9.0-android/publish/*-Signed.aab
+          name: ZR-LingoTrip-Android
+          path: ZaydRazanChallenge/bin/Release/net9.0-android/publish/*-Signed.apk
           if-no-files-found: error
           retention-days: 30
