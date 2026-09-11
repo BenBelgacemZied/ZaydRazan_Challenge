@@ -284,7 +284,9 @@ public sealed class AdventurePage : ContentPage
             {
                 if (stageNumber == _stageIndex)
                 {
-                    if (stageNumber < 4)
+                    if (stageNumber == 0)
+                        await Navigation.PushAsync(new AdventureMissionHubPage());
+                    else if (stageNumber < 4)
                         await Navigation.PushAsync(new AdventureScenePage(stageNumber));
                     else
                     {

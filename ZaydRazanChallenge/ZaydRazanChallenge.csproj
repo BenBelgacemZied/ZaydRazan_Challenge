@@ -9,8 +9,8 @@
     <Nullable>enable</Nullable>
     <ApplicationTitle>Zayd &amp; Razan Challenge</ApplicationTitle>
     <ApplicationId>com.zaydrazan.challenge</ApplicationId>
-    <ApplicationDisplayVersion>2.2</ApplicationDisplayVersion>
-    <ApplicationVersion>13</ApplicationVersion>
+    <ApplicationDisplayVersion>2.3</ApplicationDisplayVersion>
+    <ApplicationVersion>14</ApplicationVersion>
     <SupportedOSPlatformVersion>23.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -18,6 +18,7 @@
     <MauiImage Include="Resources/Images/splash.jpg" />
     <MauiImage Include="Resources/Images/adventure_map.jpg" />
     <MauiImage Include="Resources/Images/scene_*.jpg" />
+    <MauiImage Include="Resources/Images/mission_pack_*.jpg" />
     <MauiImage Include="Resources/Images/zayd_razan_walk.png" />
     <MauiImage Include="Resources/Images/*_puzzle.jpg" />
     <MauiImage Include="Resources/Images/Puzzle/*" />
