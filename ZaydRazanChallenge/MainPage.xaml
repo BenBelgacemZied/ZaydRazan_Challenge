@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ZaydRazanChallenge.MainPage"
-             Title="Zayd &amp; Razan"
+             Title="ZR LingoTrip"
              BackgroundColor="#DFF4FF">
     <Grid RowDefinitions="Auto,*">
         <Image Grid.RowSpan="2"
@@ -19,11 +19,11 @@
                 StrokeShape="RoundRectangle 22">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                 <VerticalStackLayout Grid.Column="0" Spacing="0">
-                    <Label Text="🗺️ Zayd &amp; Razan"
+                    <Label Text="🌍 ZR LingoTrip"
                            TextColor="White"
                            FontSize="21"
                            FontAttributes="Bold" />
-                    <Label Text="Avontuur naar Parijs"
+                    <Label Text="Avec Zayd &amp; Razan · Paris"
                            TextColor="#DBEAFE"
                            FontSize="13" />
                 </VerticalStackLayout>

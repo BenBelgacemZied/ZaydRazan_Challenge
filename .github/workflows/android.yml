@@ -1,4 +1,4 @@
-name: Android APK
+name: ZR LingoTrip Android
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-apk:
+  build-android:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,13 +23,13 @@ jobs:
       - name: Restore
         run: dotnet restore ZaydRazanChallenge/ZaydRazanChallenge.csproj
 
-      - name: Publish APK
+      - name: Build ZR LingoTrip APK
         run: dotnet publish ZaydRazanChallenge/ZaydRazanChallenge.csproj -c Release -f net9.0-android --no-restore -p:AndroidPackageFormats=apk
 
-      - name: Upload installable APK
+      - name: Upload ZR LingoTrip APK
         uses: actions/upload-artifact@v4
         with:
-          name: ZaydRazan-Challenge-Android
+          name: ZR-LingoTrip-Android
           path: ZaydRazanChallenge/bin/Release/net9.0-android/publish/*.apk
           if-no-files-found: error
           retention-days: 30

@@ -1,6 +1,6 @@
-# Zayd & Razan Challenge
+# ZR LingoTrip
 
-Application Android éducative pour les enfants de 8 à 12 ans. Elle permet
+**ZR LingoTrip** est une application Android éducative pour les enfants de 8 à 12 ans. Elle permet
 d'apprendre le français et le néerlandais en voyageant avec Zayd et Razan.
 
 ## Première destination : Paris
