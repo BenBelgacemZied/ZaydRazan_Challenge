@@ -6,34 +6,20 @@ public sealed class SplashPage : ContentPage
 
     public SplashPage()
     {
-        Background = new LinearGradientBrush(
-            new GradientStopCollection
-            {
-                new GradientStop(Color.FromArgb("#38BDF8"), 0),
-                new GradientStop(Color.FromArgb("#E0F2FE"), 1)
-            }, new Point(0, 0), new Point(0, 1));
-        var title = new VerticalStackLayout
+        BackgroundColor = Color.FromArgb("#DDF2FF");
+        Content = new Grid
         {
-            Spacing = 0,
-            VerticalOptions = LayoutOptions.Center,
             Children =
             {
-                new Label { Text = "ZR LingoTrip", FontSize = 42, FontAttributes = FontAttributes.Bold, TextColor = Colors.White, HorizontalTextAlignment = TextAlignment.Center },
-                new Label { Text = "Op reis met Zayd en Razan", FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D"), HorizontalTextAlignment = TextAlignment.Center }
+                new Image
+                {
+                    Source = "splash.jpg",
+                    Aspect = Aspect.AspectFill,
+                    HorizontalOptions = LayoutOptions.Fill,
+                    VerticalOptions = LayoutOptions.Fill
+                }
             }
         };
-        var characters = GameUi.OfficialCharacters(390);
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition(new GridLength(1, GridUnitType.Star)),
-                new RowDefinition(new GridLength(2.2, GridUnitType.Star))
-            }
-        };
-        grid.Add(title, 0, 0);
-        grid.Add(characters, 0, 1);
-        Content = grid;
     }
 
     protected override async void OnAppearing()

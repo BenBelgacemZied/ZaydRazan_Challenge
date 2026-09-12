@@ -7,16 +7,17 @@ public sealed class TrainMissionHubPage : ContentPage
     private sealed record TrainObject(string Key, string Icon, string Dutch, string French, double X, double Y);
     private static readonly TrainObject[] Objects =
     [
-        new("train_door", "🚪", "de deur", "la porte", .18, .32),
-        new("train_seat", "💺", "de stoel", "le siège", .10, .61),
-        new("train_rack", "🧳", "het bagagerek", "le porte-bagages", .70, .15),
-        new("train_window", "🪟", "het raam", "la fenêtre", .86, .43),
-        new("train_table", "▰", "de tafel", "la table", .84, .67)
+        new("train_door", "🚪", "de deur", "la porte", .27, .34),
+        new("train_seat", "💺", "de stoel", "le siège", .09, .61),
+        new("train_rack", "🧳", "het bagagerek", "le porte-bagages", .72, .14),
+        new("train_window", "🪟", "het raam", "la fenêtre", .84, .42),
+        new("train_table", "▰", "de tafel", "la table", .84, .60)
     ];
     private readonly AbsoluteLayout _playground = new();
     private readonly List<View> _markers = [];
     private readonly Label _stars = new() { FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Colors.White };
     private readonly Label _instruction = new() { FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D"), HorizontalTextAlignment = TextAlignment.Center };
+    private readonly Label _discovery = new() { FontSize = 24, FontAttributes = FontAttributes.Bold, TextColor = Colors.White, HorizontalTextAlignment = TextAlignment.Center, IsVisible = false };
     private bool _introPlayed;
 
     public TrainMissionHubPage()
@@ -28,8 +29,8 @@ public sealed class TrainMissionHubPage : ContentPage
         AbsoluteLayout.SetLayoutBounds(scene, new Rect(0, 0, 1, 1));
         AbsoluteLayout.SetLayoutFlags(scene, AbsoluteLayoutFlags.All);
         _playground.Add(scene);
-        var characters = GameUi.OfficialCharacters(285);
-        AbsoluteLayout.SetLayoutBounds(characters, new Rect(.5, .89, 285, 315));
+        var characters = GameUi.OfficialCharacters(205);
+        AbsoluteLayout.SetLayoutBounds(characters, new Rect(.5, .92, 205, 225));
         AbsoluteLayout.SetLayoutFlags(characters, AbsoluteLayoutFlags.PositionProportional);
         _playground.Add(characters);
         var hud = new Border { Padding = new Thickness(13, 9), Margin = 12, BackgroundColor = Color.FromArgb("#D917324D"), Stroke = Colors.White, StrokeThickness = 1, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 }, Content = new Grid { ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) }, Children = { new Label { Text = "🚄  TREINAVONTUUR", FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Colors.White }, _stars } } };
@@ -42,6 +43,11 @@ public sealed class TrainMissionHubPage : ContentPage
         AbsoluteLayout.SetLayoutBounds(listen, new Rect(.91, .12, 56, 56));
         AbsoluteLayout.SetLayoutFlags(listen, AbsoluteLayoutFlags.PositionProportional);
         _playground.Add(listen);
+        var discoveryPanel = new Border { Padding = new Thickness(16, 10), BackgroundColor = Color.FromArgb("#D917324D"), Stroke = Colors.White, StrokeThickness = 2, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 }, Content = _discovery };
+        AbsoluteLayout.SetLayoutBounds(discoveryPanel, new Rect(.5, .22, 260, 60));
+        AbsoluteLayout.SetLayoutFlags(discoveryPanel, AbsoluteLayoutFlags.PositionProportional);
+        _playground.Add(discoveryPanel);
+        discoveryPanel.SetBinding(IsVisibleProperty, new Binding(nameof(Label.IsVisible), source: _discovery));
         var panel = new Border { Padding = new Thickness(14, 10), Margin = new Thickness(18, 0, 18, 14), BackgroundColor = Color.FromArgb("#EFFFFFFF"), Stroke = Color.FromArgb("#F59E0B"), StrokeThickness = 2, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 24 }, Content = _instruction };
         AbsoluteLayout.SetLayoutBounds(panel, new Rect(0, 1, 1, 74));
         AbsoluteLayout.SetLayoutFlags(panel, AbsoluteLayoutFlags.WidthProportional | AbsoluteLayoutFlags.YProportional);
@@ -51,7 +57,13 @@ public sealed class TrainMissionHubPage : ContentPage
 
     protected override async void OnAppearing()
     {
-        base.OnAppearing(); Render();
+        base.OnAppearing();
+        if (!Preferences.Default.Get("train_mission_v2_initialized", false))
+        {
+            foreach (var item in Objects) Preferences.Default.Remove(item.Key);
+            Preferences.Default.Set("train_mission_v2_initialized", true);
+        }
+        Render();
         if (_introPlayed) return;
         _introPlayed = true; await Task.Delay(400); await SpeakCurrentInstruction();
     }
@@ -82,18 +94,22 @@ public sealed class TrainMissionHubPage : ContentPage
 
     private void AddMarker(int index, TrainObject item, bool unlocked, bool done)
     {
-        var button = new Button { Text = done ? $"✓\n{item.Icon}" : unlocked ? $"{index + 1}\n{item.Icon}" : "☁️\n🔒", FontSize = 21, FontAttributes = FontAttributes.Bold, Padding = 0, WidthRequest = 72, HeightRequest = 72, CornerRadius = 36, BackgroundColor = done ? Color.FromArgb("#16A34A") : unlocked ? Color.FromArgb("#F59E0B") : Color.FromArgb("#BBD1D5DB"), TextColor = Colors.White, BorderColor = Colors.White, BorderWidth = 3, Shadow = new Shadow { Brush = Colors.Black, Opacity = .45f, Radius = 9, Offset = new Point(0, 4) } };
+        var button = new Button { Text = done ? $"✓\n{item.Icon}" : unlocked ? $"{index + 1}\n{item.Icon}" : "🔒", FontSize = 23, FontAttributes = FontAttributes.Bold, Padding = 0, WidthRequest = 86, HeightRequest = 86, CornerRadius = 43, BackgroundColor = done ? Color.FromArgb("#B316A34A") : unlocked ? Color.FromArgb("#E6F59E0B") : Color.FromArgb("#66334155"), TextColor = Colors.White, BorderColor = Colors.White, BorderWidth = unlocked ? 4 : 2, IsEnabled = unlocked, Shadow = new Shadow { Brush = Colors.Black, Opacity = .5f, Radius = 12, Offset = new Point(0, 5) } };
         button.Clicked += async (_, _) =>
         {
-            if (!unlocked) { await GameFeedback.FailureAsync(); await SpeakDutchAsync("Zoek eerst het lichtende voorwerp."); return; }
             if (done) { await SpeakFrenchAsync(item.French); return; }
             Preferences.Default.Set(item.Key, true);
             Preferences.Default.Set("stars", Preferences.Default.Get("stars", 0) + 1);
-            await GameFeedback.SuccessAsync(); await SpeakFrenchAsync(item.French);
+            await GameFeedback.SuccessAsync();
+            _discovery.Text = $"{item.Icon}  {item.French}";
+            _discovery.IsVisible = true;
+            await SpeakFrenchAsync(item.French);
             await button.ScaleTo(1.25, 180, Easing.CubicOut); await button.ScaleTo(1, 180, Easing.CubicIn);
+            await Task.Delay(650);
+            _discovery.IsVisible = false;
             Render(); if (index + 1 < Objects.Length) await SpeakCurrentInstruction();
         };
-        AbsoluteLayout.SetLayoutBounds(button, new Rect(item.X, item.Y, 72, 72));
+        AbsoluteLayout.SetLayoutBounds(button, new Rect(item.X, item.Y, 86, 86));
         AbsoluteLayout.SetLayoutFlags(button, AbsoluteLayoutFlags.PositionProportional);
         _playground.Add(button); _markers.Add(button);
         if (unlocked && !done) _ = PulseAsync(button);

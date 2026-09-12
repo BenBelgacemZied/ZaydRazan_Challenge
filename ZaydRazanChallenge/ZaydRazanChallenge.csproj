@@ -9,8 +9,8 @@
     <Nullable>enable</Nullable>
     <ApplicationTitle>ZR LingoTrip</ApplicationTitle>
     <ApplicationId>com.zrlingotrip.app</ApplicationId>
-    <ApplicationDisplayVersion>2.14</ApplicationDisplayVersion>
-    <ApplicationVersion>25</ApplicationVersion>
+    <ApplicationDisplayVersion>2.15</ApplicationDisplayVersion>
+    <ApplicationVersion>26</ApplicationVersion>
     <SupportedOSPlatformVersion>23.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
