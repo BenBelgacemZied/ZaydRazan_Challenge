@@ -90,12 +90,8 @@ public sealed class StationMiniMissionPage : ContentPage
         await Task.Delay(650);
         await DisplayAlert("⭐ Missie voltooid!", _mission.Success, "Verder");
         if (_index == Missions.Length - 1)
-        {
             Preferences.Default.Set("adventure_stage", 3);
-            await Navigation.PopAsync();
-            await Navigation.PopAsync();
-            return;
-        }
+
         await Navigation.PopAsync();
     }
 
