@@ -54,7 +54,18 @@ public sealed class StationMissionHubPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        var mustLeaveCompletedStation =
+            Keys.All(k => Preferences.Default.Get(k, false)) &&
+            Preferences.Default.Get("adventure_stage", 0) <= 2;
         RenderMarkers();
+        if (mustLeaveCompletedStation)
+        {
+            Preferences.Default.Set("adventure_stage", 3);
+            await Task.Delay(450);
+            await SpeakDutchAsync("Het station is voltooid. Ga verder naar de trein.");
+            await Navigation.PopAsync();
+            return;
+        }
         if (_introPlayed) return;
         _introPlayed = true;
         await Task.Delay(400);
