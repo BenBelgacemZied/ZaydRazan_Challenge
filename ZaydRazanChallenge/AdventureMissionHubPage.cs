@@ -21,6 +21,11 @@ public sealed class AdventureMissionHubPage : ContentPage
         AbsoluteLayout.SetLayoutFlags(scene, AbsoluteLayoutFlags.All);
         _playground.Add(scene);
 
+        var characters = GameUi.OfficialCharacters(330);
+        AbsoluteLayout.SetLayoutBounds(characters, new Rect(.5, .91, 330, 360));
+        AbsoluteLayout.SetLayoutFlags(characters, AbsoluteLayoutFlags.PositionProportional);
+        _playground.Add(characters);
+
         var hud = new Border
         {
             Padding = new Thickness(13, 9), Margin = 12, BackgroundColor = Color.FromArgb("#C917324D"), Stroke = Colors.White, StrokeThickness = 1,

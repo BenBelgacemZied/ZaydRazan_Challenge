@@ -7,26 +7,11 @@ public sealed class StationMiniMissionPage : ContentPage
 
     private static readonly Mission[] Missions =
     [
-        new("station_find_counter", "Het loket vinden",
-            "Zayd en Razan komen het station binnen. De hal is groot. Ze zoeken waar ze hun tickets kunnen kopen.",
-            "Zoek het bord van het loket. Welk symbool toont de tickets?", "station_concourse.jpg",
-            "🎫 Les billets", ["🎫 Les billets", "☕ Café", "🧳 Bagages"], "Daar is het loket!"),
-        new("station_ask_tickets", "Tickets vragen",
-            "Razan staat aan het loket. Ze wil beleefd twee tickets naar Parijs vragen.",
-            "Wat moet Razan zeggen?", "station_ticket_counter.jpg",
-            "Deux billets pour Paris, s'il vous plaît.", ["Où est le café ?", "Deux billets pour Paris, s'il vous plaît.", "Au revoir Paris !"], "De medewerker maakt de twee tickets klaar."),
-        new("station_pay", "De tickets betalen",
-            "De tickets kosten twintig euro. Zayd kijkt naar de betaalterminal en de munten op de balie.",
-            "Hoe zeg je « betalen » in het Frans?", "station_ticket_counter.jpg",
-            "payer", ["voyager", "payer", "manger"], "De betaling is gelukt!"),
-        new("station_find_platform", "Het perron vinden",
-            "Op het bord staat de trein naar Parijs. Op het ticket staat perron drie.",
-            "Kies het juiste perron.", "station_concourse.jpg",
-            "Quai 3", ["Quai 1", "Quai 3", "Quai 8"], "Perron 3 is gevonden!"),
-        new("station_find_wagon", "De wagon vinden",
-            "Op het perron houdt Zayd de tickets vast. Razan zoekt het nummer van hun wagon.",
-            "Op het ticket staat wagon zeven. Welke wagon kiezen ze?", "scene_platform.jpg",
-            "Wagon 7", ["Wagon 2", "Wagon 7", "Wagon 10"], "Ze stappen in de juiste wagon!")
+        new("station_find_counter", "Vind het loket", "Zayd en Razan zoeken het loket.", "Welk symbool hoort bij de tickets?", "station_concourse.jpg", "🎫 Les billets", ["🎫 Les billets", "☕ Le café", "🧳 Les bagages"], "Jullie hebben het loket gevonden!"),
+        new("station_ask_tickets", "Vraag de tickets", "Razan staat aan het loket.", "Welke Franse zin moet Razan zeggen?", "station_ticket_counter.jpg", "Deux billets pour Paris, s'il vous plaît.", ["Où est le café ?", "Deux billets pour Paris, s'il vous plaît.", "Au revoir Paris !"], "De twee tickets zijn klaar!"),
+        new("station_pay", "Betaal de tickets", "Zayd ziet het betaaltoestel.", "Welk Frans woord betekent ‘betalen’?", "station_ticket_counter.jpg", "payer", ["voyager", "payer", "manger"], "De betaling is gelukt!"),
+        new("station_find_platform", "Vind het spoor", "De trein naar Parijs vertrekt op spoor drie.", "Kies het juiste spoor.", "station_concourse.jpg", "Quai 3", ["Quai 1", "Quai 3", "Quai 8"], "Spoor drie is gevonden!"),
+        new("station_find_wagon", "Vind de wagon", "Razan zoekt het nummer op de wagon.", "Kies wagon zeven.", "scene_platform.jpg", "Wagon 7", ["Wagon 2", "Wagon 7", "Wagon 10"], "Jullie zitten in de juiste wagon!")
     ];
 
     private readonly int _index;
@@ -34,6 +19,7 @@ public sealed class StationMiniMissionPage : ContentPage
     private readonly VerticalStackLayout _choices = new() { Spacing = 10 };
     private readonly Label _feedback = new() { FontSize = 19, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center };
     private bool _answered;
+    private readonly Button _listen = new() { Text = "🔊", FontSize = 24, BackgroundColor = Color.FromArgb("#F59E0B"), TextColor = Colors.White, CornerRadius = 26, WidthRequest = 54, HeightRequest = 54, Padding = 0, HorizontalOptions = LayoutOptions.Center };
 
     public StationMiniMissionPage(int index)
     {
@@ -42,6 +28,7 @@ public sealed class StationMiniMissionPage : ContentPage
         Title = $"Mission {index + 1}";
         BackgroundColor = Color.FromArgb("#EFF6FF");
         GameUi.AddHomeButton(this);
+        _listen.Clicked += async (_, _) => await SpeakDutch(_mission.Story + " " + _mission.Instruction);
 
         foreach (var choice in _mission.Choices.OrderBy(_ => Random.Shared.Next()))
         {
@@ -56,13 +43,14 @@ public sealed class StationMiniMissionPage : ContentPage
             {
                 new Image { Source = _mission.Image, Aspect = Aspect.AspectFill },
                 new BoxView { Color = Color.FromArgb("#3310203A") },
+                GameUi.OfficialCharacters(235),
                 new Border { Margin = 12, Padding = 12, VerticalOptions = LayoutOptions.Start, BackgroundColor = Color.FromArgb("#D917324D"), StrokeThickness = 0, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 18 }, Content =
                     new Label { Text = $"MISSION {_index + 1}/5 · {_mission.Title}", FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = Colors.White }}
             }},
             new VerticalStackLayout { Padding = 18, Spacing = 12, Children =
             {
-                new Label { Text = _mission.Story, FontSize = 17, LineHeight = 1.25 },
-                new Label { Text = "🔊 " + _mission.Instruction, FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D") },
+                _listen,
+                new Label { Text = _mission.Instruction, FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D"), HorizontalTextAlignment = TextAlignment.Center },
                 _choices, _feedback
             }}
         }}};
@@ -72,7 +60,7 @@ public sealed class StationMiniMissionPage : ContentPage
     {
         base.OnAppearing();
         await Task.Delay(300);
-        await Speak(_mission.Story + " " + _mission.Instruction);
+        await SpeakDutch(_mission.Story + " " + _mission.Instruction);
     }
 
     private async Task Check(string answer, Button selected)
@@ -82,7 +70,7 @@ public sealed class StationMiniMissionPage : ContentPage
         if (!correct)
         {
             selected.BackgroundColor = Color.FromArgb("#DC2626");
-            _feedback.Text = "Probeer opnieuw. Kijk naar de scène en luister naar de opdracht.";
+            _feedback.Text = "Kijk goed en probeer opnieuw.";
             _feedback.TextColor = Color.FromArgb("#DC2626");
             await GameFeedback.FailureAsync();
             await selected.TranslateTo(-10, 0, 70); await selected.TranslateTo(10, 0, 70); await selected.TranslateTo(0, 0, 70);
@@ -98,13 +86,16 @@ public sealed class StationMiniMissionPage : ContentPage
         _feedback.Text = $"⭐ {_mission.Success}";
         _feedback.TextColor = Color.FromArgb("#16A34A");
         await GameFeedback.SuccessAsync();
-        await Speak("Goed gedaan! " + _mission.Success);
+        await SpeakDutch("Goed gedaan! " + _mission.Success);
         await Task.Delay(650);
-        await DisplayAlert("Missie voltooid", _mission.Success + " Je verdient een ster.", "Verder");
+        await DisplayAlert("⭐ Missie voltooid!", _mission.Success, "Verder");
+        if (_index == Missions.Length - 1)
+            Preferences.Default.Set("adventure_stage", 3);
+
         await Navigation.PopAsync();
     }
 
-    private static async Task Speak(string text)
+    private static async Task SpeakDutch(string text)
     {
         try
         {
