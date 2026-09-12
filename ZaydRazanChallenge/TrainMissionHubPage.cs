@@ -24,7 +24,7 @@ public sealed class TrainMissionHubPage : ContentPage
         Title = "In de trein";
         BackgroundColor = Color.FromArgb("#172554");
         GameUi.AddHomeButton(this);
-        var scene = new Image { Source = "scene_train_interior.png", Aspect = Aspect.AspectFill };
+        var scene = new Image { Source = "scene_train_interior.jpg", Aspect = Aspect.AspectFill };
         AbsoluteLayout.SetLayoutBounds(scene, new Rect(0, 0, 1, 1));
         AbsoluteLayout.SetLayoutFlags(scene, AbsoluteLayoutFlags.All);
         _playground.Add(scene);
