@@ -98,7 +98,7 @@ public sealed class PackingMissionPage : ContentPage
         {
             var button = new Button
             {
-                Text = $"{item.Emoji}  {item.French}\n{item.Dutch}", FontSize = 15, CornerRadius = 17,
+                Text = $"{item.Emoji}  {item.French}", FontSize = 17, CornerRadius = 17,
                 BackgroundColor = Colors.White, TextColor = Color.FromArgb("#172554"), Margin = 5,
                 Padding = new Thickness(13, 8), FontAttributes = FontAttributes.Bold
             };
