@@ -77,8 +77,29 @@ public sealed class StationMissionHubPage : ContentPage
         }
         if (Keys.All(k => Preferences.Default.Get(k, false)))
         {
-            Preferences.Default.Set("adventure_stage", Math.Max(2, Preferences.Default.Get("adventure_stage", 0)));
-            _instruction.Text = "☀️ Goed gedaan! De trein is klaar.";
+            Preferences.Default.Set("adventure_stage", Math.Max(3, Preferences.Default.Get("adventure_stage", 0)));
+            _instruction.Text = "☀️ Goed gedaan! Ga verder naar de trein.";
+            var next = new Button
+            {
+                Text = "▶  VERDER",
+                FontSize = 18,
+                FontAttributes = FontAttributes.Bold,
+                CornerRadius = 24,
+                HeightRequest = 52,
+                BackgroundColor = Color.FromArgb("#16A34A"),
+                TextColor = Colors.White,
+                BorderColor = Colors.White,
+                BorderWidth = 2
+            };
+            next.Clicked += async (_, _) =>
+            {
+                await SpeakDutchAsync("Goed gedaan! Ga verder naar de trein.");
+                await Navigation.PopAsync();
+            };
+            AbsoluteLayout.SetLayoutBounds(next, new Rect(.5, .84, 190, 52));
+            AbsoluteLayout.SetLayoutFlags(next, AbsoluteLayoutFlags.PositionProportional);
+            _playground.Add(next);
+            _markers.Add(next);
         }
         else _instruction.Text = "🔊 Tik op de lichtende missie";
     }
