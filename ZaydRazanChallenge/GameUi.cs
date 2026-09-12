@@ -2,6 +2,16 @@ namespace ZaydRazanChallenge;
 
 public static class GameUi
 {
+    public static Image OfficialCharacters(double width = 310) => new()
+    {
+        Source = "zayd_razan_official.png",
+        Aspect = Aspect.AspectFit,
+        WidthRequest = width,
+        HorizontalOptions = LayoutOptions.Center,
+        VerticalOptions = LayoutOptions.End,
+        InputTransparent = true
+    };
+
     public static void AddHomeButton(ContentPage page)
     {
         page.ToolbarItems.Add(new ToolbarItem
