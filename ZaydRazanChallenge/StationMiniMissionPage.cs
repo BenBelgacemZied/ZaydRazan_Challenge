@@ -43,6 +43,7 @@ public sealed class StationMiniMissionPage : ContentPage
             {
                 new Image { Source = _mission.Image, Aspect = Aspect.AspectFill },
                 new BoxView { Color = Color.FromArgb("#3310203A") },
+                GameUi.OfficialCharacters(235),
                 new Border { Margin = 12, Padding = 12, VerticalOptions = LayoutOptions.Start, BackgroundColor = Color.FromArgb("#D917324D"), StrokeThickness = 0, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 18 }, Content =
                     new Label { Text = $"MISSION {_index + 1}/5 · {_mission.Title}", FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = Colors.White }}
             }},

@@ -28,6 +28,10 @@ public sealed class TrainMissionHubPage : ContentPage
         AbsoluteLayout.SetLayoutBounds(scene, new Rect(0, 0, 1, 1));
         AbsoluteLayout.SetLayoutFlags(scene, AbsoluteLayoutFlags.All);
         _playground.Add(scene);
+        var characters = GameUi.OfficialCharacters(285);
+        AbsoluteLayout.SetLayoutBounds(characters, new Rect(.5, .89, 285, 315));
+        AbsoluteLayout.SetLayoutFlags(characters, AbsoluteLayoutFlags.PositionProportional);
+        _playground.Add(characters);
         var hud = new Border { Padding = new Thickness(13, 9), Margin = 12, BackgroundColor = Color.FromArgb("#D917324D"), Stroke = Colors.White, StrokeThickness = 1, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 }, Content = new Grid { ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) }, Children = { new Label { Text = "🚄  TREINAVONTUUR", FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Colors.White }, _stars } } };
         Grid.SetColumn(_stars, 1);
         AbsoluteLayout.SetLayoutBounds(hud, new Rect(0, 0, 1, 72));

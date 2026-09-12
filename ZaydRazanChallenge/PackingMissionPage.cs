@@ -31,6 +31,7 @@ public sealed class PackingMissionPage : ContentPage
             {
                 new Image { Source = image, Aspect = Aspect.AspectFill },
                 new BoxView { Color = Color.FromArgb("#4410203A") },
+                GameUi.OfficialCharacters(270),
                 new Border
                 {
                     Margin = 12, Padding = new Thickness(14, 10), VerticalOptions = LayoutOptions.Start,
@@ -60,7 +61,7 @@ public sealed class PackingMissionPage : ContentPage
         BuildObjects();
     }
 
-    public static PackingMissionPage ForZayd() => new("Missie · Zayds koffer", "Zayd", "mission_pack_zayd.jpg", "home_pack_zayd",
+    public static PackingMissionPage ForZayd() => new("Missie · Zayds koffer", "Zayd", "scene_home.jpg", "home_pack_zayd",
     [
         new("👕", "un tee-shirt", "een T-shirt", true), new("👖", "un pantalon", "een broek", true),
         new("📖", "un livre", "een boek", true), new("🪥", "une brosse à dents", "een tandenborstel", true),
@@ -68,7 +69,7 @@ public sealed class PackingMissionPage : ContentPage
         new("🛩️", "un avion jouet", "een speelgoedvliegtuig", false), new("🥾", "une grosse botte", "een grote laars", false)
     ]);
 
-    public static PackingMissionPage ForRazan() => new("Missie · Razans koffer", "Razan", "mission_pack_razan.jpg", "home_pack_razan",
+    public static PackingMissionPage ForRazan() => new("Missie · Razans koffer", "Razan", "scene_home.jpg", "home_pack_razan",
     [
         new("👚", "un tee-shirt rose", "een roze T-shirt", true), new("👖", "un pantalon bleu", "een blauwe broek", true),
         new("📕", "un livre sur Paris", "een boek over Parijs", true), new("📷", "un appareil photo", "een fototoestel", true),

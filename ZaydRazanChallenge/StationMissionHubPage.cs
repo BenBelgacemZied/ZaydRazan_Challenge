@@ -27,6 +27,11 @@ public sealed class StationMissionHubPage : ContentPage
         AbsoluteLayout.SetLayoutFlags(shade, AbsoluteLayoutFlags.All);
         _playground.Add(shade);
 
+        var characters = GameUi.OfficialCharacters(300);
+        AbsoluteLayout.SetLayoutBounds(characters, new Rect(.5, .88, 300, 330));
+        AbsoluteLayout.SetLayoutFlags(characters, AbsoluteLayoutFlags.PositionProportional);
+        _playground.Add(characters);
+
         var hud = new Border
         {
             Padding = new Thickness(13, 9), Margin = 12, BackgroundColor = Color.FromArgb("#D917324D"), Stroke = Colors.White, StrokeThickness = 1,
