@@ -1,4 +1,4 @@
-name: Android APK
+name: ZR LingoTrip Android
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-apk:
+  build-android:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,13 +23,41 @@ jobs:
       - name: Restore
         run: dotnet restore ZaydRazanChallenge/ZaydRazanChallenge.csproj
 
-      - name: Publish APK
-        run: dotnet publish ZaydRazanChallenge/ZaydRazanChallenge.csproj -c Release -f net9.0-android --no-restore -p:AndroidPackageFormats=apk
+      - name: Prepare Android upload key
+        shell: pwsh
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:KEYSTORE_BASE64)) {
+            throw "Le secret ANDROID_KEYSTORE_BASE64 est absent."
+          }
+          [IO.File]::WriteAllBytes(
+            "$env:RUNNER_TEMP\zrlingotrip-upload-key.jks",
+            [Convert]::FromBase64String($env:KEYSTORE_BASE64)
+          )
 
-      - name: Upload installable APK
+      - name: Build signed development APK
+        shell: pwsh
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          dotnet publish ZaydRazanChallenge/ZaydRazanChallenge.csproj `
+            -c Release `
+            -f net9.0-android `
+            --no-restore `
+            -p:AndroidPackageFormats=apk `
+            -p:AndroidKeyStore=true `
+            -p:AndroidSigningKeyStore="$env:RUNNER_TEMP\zrlingotrip-upload-key.jks" `
+            -p:AndroidSigningStorePass="$env:STORE_PASSWORD" `
+            -p:AndroidSigningKeyAlias="$env:KEY_ALIAS" `
+            -p:AndroidSigningKeyPass="$env:KEY_PASSWORD"
+
+      - name: Upload signed development APK
         uses: actions/upload-artifact@v4
         with:
-          name: ZaydRazan-Challenge-Android
-          path: ZaydRazanChallenge/bin/Release/net9.0-android/publish/*.apk
+          name: ZR-LingoTrip-Android
+          path: ZaydRazanChallenge/bin/Release/net9.0-android/publish/*-Signed.apk
           if-no-files-found: error
           retention-days: 30

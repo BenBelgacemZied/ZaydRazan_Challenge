@@ -25,7 +25,7 @@ public sealed class AdventurePage : ContentPage
         new("🧭", "Op weg · En route",
             "Zayd leest de kaart en Razan kiest het pad naar het station. Samen vinden ze de juiste richting.",
             "Où est la gare ?",
-            "Quel mot signifie « waar »?", "où",
+            "Welk Frans woord betekent « waar »?", "où",
             ["où", "quand", "merci"], "#FFEDD5", .63, .69),
 
         new("🚉", "Het station · La gare",
@@ -37,7 +37,7 @@ public sealed class AdventurePage : ContentPage
         new("🚄", "In de trein · Dans le train",
             "Ze stappen zelfstandig in, zoeken hun zitplaatsen en zien het landschap snel voorbijgaan.",
             "Nous voyageons en train.",
-            "Comment dit-on « wij reizen »?", "nous voyageons",
+            "Hoe zeg je « wij reizen » in het Frans?", "nous voyageons",
             ["nous voyageons", "nous mangeons", "nous dormons"], "#DBEAFE", .49, .46),
 
         new("🗺️", "Aankomst · Arrivée à Paris",
@@ -49,7 +49,7 @@ public sealed class AdventurePage : ContentPage
         new("🗼", "La tour Eiffel",
             "Ze volgen de route langs de Seine. Razan ontdekt als eerste de top van de Eiffeltoren.",
             "La tour Eiffel est très haute.",
-            "Quel mot signifie « hoog »?", "haut",
+            "Welk Frans woord betekent « hoog »?", "haut",
             ["bas", "haut", "petit"], "#FCE7F3", .36, .25),
 
         new("🖼️", "Le musée du Louvre",
@@ -61,7 +61,7 @@ public sealed class AdventurePage : ContentPage
         new("🏛️", "L’Arc de Triomphe",
             "De wolken verdwijnen: Zayd en Razan bereiken zelfstandig de laatste halte van hun Parijse avontuur!",
             "Merci et au revoir, Paris !",
-            "Que signifie « au revoir »?", "tot ziens",
+            "Wat betekent « au revoir »?", "tot ziens",
             ["dank je", "tot ziens", "goedemorgen"], "#CCFBF1", .72, .18)
     ];
 
@@ -132,6 +132,7 @@ public sealed class AdventurePage : ContentPage
     {
         Title = "Avontuur naar Parijs";
         BackgroundColor = Color.FromArgb("#E0F2FE");
+        GameUi.AddHomeButton(this);
         _stageIndex = Math.Min(Preferences.Default.Get("adventure_stage", 0), Stages.Length - 1);
 
         var display = DeviceDisplay.Current.MainDisplayInfo;
@@ -239,6 +240,19 @@ public sealed class AdventurePage : ContentPage
         ShowStage();
     }
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        var savedStage = Math.Min(
+            Preferences.Default.Get("adventure_stage", 0),
+            Stages.Length - 1);
+        if (savedStage != _stageIndex)
+        {
+            _stageIndex = savedStage;
+            ShowStage();
+        }
+    }
+
     private void RenderMap()
     {
         _mapLayer.Clear();
@@ -270,9 +284,18 @@ public sealed class AdventurePage : ContentPage
             {
                 if (stageNumber == _stageIndex)
                 {
-                    _missionCard.IsVisible = true;
-                    await _missionCard.FadeTo(1, 180);
-                    await _scroll.ScrollToAsync(_missionCard, ScrollToPosition.Start, true);
+                    if (stageNumber == 0)
+                        await Navigation.PushAsync(new AdventureMissionHubPage());
+                    else if (stageNumber == 2)
+                        await Navigation.PushAsync(new StationMissionHubPage());
+                    else if (stageNumber < 4)
+                        await Navigation.PushAsync(new AdventureScenePage(stageNumber));
+                    else
+                    {
+                        _missionCard.IsVisible = true;
+                        await _missionCard.FadeTo(1, 180);
+                        await _scroll.ScrollToAsync(_missionCard, ScrollToPosition.Start, true);
+                    }
                 }
                 else if (stageNumber < _stageIndex)
                     await DisplayAlert($"Etappe {stageNumber + 1} · {Stages[stageNumber].Place}",
@@ -353,6 +376,7 @@ public sealed class AdventurePage : ContentPage
         selected.BackgroundColor = correct
             ? Color.FromArgb("#16A34A")
             : Color.FromArgb("#DC2626");
+        await (correct ? GameFeedback.SuccessAsync() : GameFeedback.FailureAsync());
         _feedback.TextColor = selected.BackgroundColor;
         _feedback.Text = correct
             ? "Bravo! +1 ⭐ De wolken verdwijnen..."

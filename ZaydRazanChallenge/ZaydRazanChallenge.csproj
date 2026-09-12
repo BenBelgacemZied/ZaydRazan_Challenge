@@ -7,16 +7,20 @@
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <ApplicationTitle>Zayd &amp; Razan Challenge</ApplicationTitle>
-    <ApplicationId>com.zaydrazan.challenge</ApplicationId>
-    <ApplicationDisplayVersion>1.7</ApplicationDisplayVersion>
-    <ApplicationVersion>8</ApplicationVersion>
+    <ApplicationTitle>ZR LingoTrip</ApplicationTitle>
+    <ApplicationId>com.zrlingotrip.app</ApplicationId>
+    <ApplicationDisplayVersion>2.8</ApplicationDisplayVersion>
+    <ApplicationVersion>19</ApplicationVersion>
     <SupportedOSPlatformVersion>23.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
     <MauiIcon Include="Resources/AppIcon/appicon.png" BaseSize="1024,1024" />
     <MauiImage Include="Resources/Images/splash.jpg" />
     <MauiImage Include="Resources/Images/adventure_map.jpg" />
+    <MauiImage Include="Resources/Images/scene_*.jpg" />
+    <MauiImage Include="Resources/Images/mission_pack_*.jpg" />
+    <MauiImage Include="Resources/Images/station_*.jpg" />
+    <MauiImage Include="Resources/Images/zayd_razan_walk.png" />
     <MauiImage Include="Resources/Images/*_puzzle.jpg" />
     <MauiImage Include="Resources/Images/Puzzle/*" />
   </ItemGroup>

@@ -40,8 +40,9 @@ public sealed class PuzzlePage : ContentPage
         var display = DeviceDisplay.Current.MainDisplayInfo;
         _boardSize = Math.Min(390d, Math.Max(280d, display.Width / display.Density - 44d));
 
-        Title = "Défi surprise";
+        Title = "Verrassingspuzzel";
         BackgroundColor = Color.FromArgb("#FFF8E7");
+        GameUi.AddHomeButton(this);
 
         for (var i = 0; i < _gridSize; i++)
         {
@@ -53,7 +54,7 @@ public sealed class PuzzlePage : ContentPage
 
         var newChallengeButton = new Button
         {
-            Text = "🎲 Autre défi aléatoire",
+            Text = "🎲 Andere willekeurige puzzel",
             BackgroundColor = Color.FromArgb("#0891B2"),
             TextColor = Colors.White,
             FontAttributes = FontAttributes.Bold
@@ -188,7 +189,7 @@ public sealed class PuzzlePage : ContentPage
         _completed = false;
         _selectedPosition = null;
         _messageLabel.TextColor = Color.FromArgb("#334155");
-        _messageLabel.Text = $"Encore {_maxMoves} déplacements";
+        _messageLabel.Text = $"Nog {_maxMoves} zetten";
 
         var minimumShuffle = Math.Max(3, (int)Math.Ceiling(_maxMoves * .35));
         var maximumShuffle = Math.Max(minimumShuffle, (int)Math.Floor(_maxMoves * .60));
@@ -275,7 +276,7 @@ public sealed class PuzzlePage : ContentPage
         if (_selectedPosition is null)
         {
             _selectedPosition = position;
-            _messageLabel.Text = "Choisis le deuxième bloc";
+            _messageLabel.Text = "Kies het tweede blok.";
             RenderPuzzle();
             return;
         }
@@ -286,7 +287,7 @@ public sealed class PuzzlePage : ContentPage
             Swap(source, position);
         else
         {
-            _messageLabel.Text = $"Encore {_maxMoves - _moves} déplacements";
+            _messageLabel.Text = $"Nog {_maxMoves - _moves} zetten";
             RenderPuzzle();
         }
     }
@@ -312,18 +313,19 @@ public sealed class PuzzlePage : ContentPage
             _messageLabel.TextColor = remaining <= 3
                 ? Color.FromArgb("#DC2626")
                 : Color.FromArgb("#334155");
-            _messageLabel.Text = $"Encore {remaining} déplacement{(remaining == 1 ? "" : "s")}";
+            _messageLabel.Text = $"Nog {remaining} zet{(remaining == 1 ? "" : "ten")}";
             return;
         }
 
         _completed = true;
+        await GameFeedback.FailureAsync();
         _messageLabel.TextColor = Color.FromArgb("#DC2626");
-        _messageLabel.Text = "Défi terminé. Essaie encore!";
+        _messageLabel.Text = "Geen zetten meer. Probeer opnieuw!";
         var retry = await DisplayAlert(
-            "⏱️ Limite atteinte",
-            $"Tu as utilisé les {_maxMoves} déplacements. Veux-tu remélanger cette image?",
-            "Recommencer",
-            "Autre image");
+            "⏱️ Limiet bereikt",
+            $"Je hebt alle {_maxMoves} zetten gebruikt. Wil je deze afbeelding opnieuw mengen?",
+            "Opnieuw",
+            "Andere afbeelding");
         if (retry)
             Shuffle();
         else
@@ -333,6 +335,7 @@ public sealed class PuzzlePage : ContentPage
     private async Task CompletePuzzle()
     {
         _completed = true;
+        await GameFeedback.SuccessAsync();
         var ratio = (double)_moves / _maxMoves;
         var reward = ratio <= .50 ? 3 : ratio <= .75 ? 2 : 1;
         var stars = Preferences.Default.Get("stars", 0) + reward;
@@ -346,20 +349,13 @@ public sealed class PuzzlePage : ContentPage
 
         var starText = new string('⭐', reward);
         _messageLabel.TextColor = Color.FromArgb("#16A34A");
-        _messageLabel.Text = $"Bravo! {_puzzle.FrenchName} {starText}";
+        _messageLabel.Text = $"Goed gedaan! {_puzzle.FrenchName} {starText}";
 
         await _puzzleGrid.ScaleTo(1.04, 180, Easing.CubicOut);
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
 
-        var next = await DisplayAlert(
-            $"🎓 À découvrir · {_puzzle.FrenchName}",
-            $"Résultat: {_moves}/{_maxMoves} déplacements · {starText}\n\n{_puzzle.Description}",
-            "Nouveau défi",
-            "Retour");
-        if (next)
-            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
-        else
-            await Navigation.PopAsync();
+        await Navigation.PushAsync(
+            new PuzzleDiscoveryPage(_puzzle, _moves, _maxMoves, reward));
     }
 
     private bool IsSolved() =>
