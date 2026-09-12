@@ -288,7 +288,10 @@ public sealed class AdventurePage : ContentPage
                         await Navigation.PushAsync(new AdventureMissionHubPage());
                     else if (stageNumber == 2)
                         await Navigation.PushAsync(new StationMissionHubPage());
-                    else if (stageNumber == 3)\n                        await Navigation.PushAsync(new TrainMissionHubPage());\n                    else if (stageNumber < 4)\n                        await Navigation.PushAsync(new AdventureScenePage(stageNumber));
+                    else if (stageNumber == 3)
+                        await Navigation.PushAsync(new TrainMissionHubPage());
+                    else if (stageNumber < 4)
+                        await Navigation.PushAsync(new AdventureScenePage(stageNumber));
                     else
                     {
                         _missionCard.IsVisible = true;
