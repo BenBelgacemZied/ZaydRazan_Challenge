@@ -121,11 +121,6 @@ public sealed class TrainMissionHubPage : ContentPage
         var completed = Objects.Count(x => Preferences.Default.Get(x.Key, false));
         _stars.Text = $"⭐ {completed}/5";
         BuildChoices(completed);
-        for (var i = 0; i < Objects.Length; i++)
-        {
-            var done = Preferences.Default.Get(Objects[i].Key, false);
-            AddMarker(i, Objects[i], i == 0 || Preferences.Default.Get(Objects[i - 1].Key, false), done);
-        }
         if (completed == Objects.Length)
         {
             Preferences.Default.Set("adventure_stage", Math.Max(4, Preferences.Default.Get("adventure_stage", 0)));
@@ -137,20 +132,6 @@ public sealed class TrainMissionHubPage : ContentPage
             _playground.Add(next); _markers.Add(next);
         }
         else _instruction.Text = $"🔎 Zoek {Objects[completed].Dutch}";
-    }
-
-    private void AddMarker(int index, TrainObject item, bool unlocked, bool done)
-    {
-        var button = new Button { Text = done ? $"✓\n{item.Icon}" : $"{index + 1}\n{item.Icon}", FontSize = 23, FontAttributes = FontAttributes.Bold, Padding = 0, WidthRequest = 86, HeightRequest = 86, CornerRadius = 43, BackgroundColor = done ? Color.FromArgb("#B316A34A") : Color.FromArgb("#E6F59E0B"), TextColor = Colors.White, BorderColor = Colors.White, BorderWidth = 4, IsEnabled = unlocked, IsVisible = unlocked || done, Shadow = new Shadow { Brush = Colors.Black, Opacity = .5f, Radius = 12, Offset = new Point(0, 5) } };
-        button.Clicked += async (_, _) =>
-        {
-            if (done) { await SpeakFrenchAsync(item.French); return; }
-            await CompleteObjectAsync(index, button);
-        };
-        AbsoluteLayout.SetLayoutBounds(button, new Rect(item.X, item.Y, 86, 86));
-        AbsoluteLayout.SetLayoutFlags(button, AbsoluteLayoutFlags.PositionProportional);
-        _playground.Add(button); _markers.Add(button);
-        if (unlocked && !done) _ = PulseAsync(button);
     }
 
     private void BuildChoices(int expectedIndex)
@@ -218,7 +199,6 @@ public sealed class TrainMissionHubPage : ContentPage
         var completed = Objects.Count(x => Preferences.Default.Get(x.Key, false));
         await SpeakDutchAsync(completed >= Objects.Length ? "Goed gedaan! Parijs komt dichterbij." : $"Zoek {Objects[completed].Dutch}.");
     }
-    private static async Task PulseAsync(View view) { while (view.Parent is not null && view.IsVisible) { await view.ScaleTo(1.12, 550, Easing.SinInOut); await view.ScaleTo(1, 550, Easing.SinInOut); } }
     private static async Task SpeakDutchAsync(string text) { try { var locales = await TextToSpeech.Default.GetLocalesAsync(); var locale = locales.FirstOrDefault(x => x.Language.StartsWith("nl", StringComparison.OrdinalIgnoreCase)); await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Locale = locale }); } catch { } }
     private static async Task SpeakFrenchAsync(string text) { try { var locales = await TextToSpeech.Default.GetLocalesAsync(); var locale = locales.FirstOrDefault(x => x.Language.StartsWith("fr", StringComparison.OrdinalIgnoreCase)); await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Locale = locale }); } catch { } }
 }
