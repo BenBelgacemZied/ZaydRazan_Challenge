@@ -29,7 +29,7 @@ public sealed class StationMissionHubPage : ContentPage
         HorizontalTextAlignment = TextAlignment.Center
     };
 
-    private bool _flowStarted;
+    private int _launchedMission = -1;
 
     public StationMissionHubPage()
     {
@@ -107,43 +107,44 @@ public sealed class StationMissionHubPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (_flowStarted) return;
 
-        _flowStarted = true;
-        await RunMissionFlowAsync();
-    }
-
-    private async Task RunMissionFlowAsync()
-    {
-        while (true)
+        if (_launchedMission >= 0)
         {
-            var nextIndex = Array.FindIndex(Keys,
-                key => !Preferences.Default.Get(key, false));
+            var completed = Preferences.Default.Get(Keys[_launchedMission], false);
+            _launchedMission = -1;
 
-            _stars.Text = $"⭐ {Keys.Count(key => Preferences.Default.Get(key, false))}/5";
-
-            if (nextIndex < 0)
+            if (!completed)
             {
-                Preferences.Default.Set("adventure_stage",
-                    Math.Max(3, Preferences.Default.Get("adventure_stage", 0)));
-                _instruction.Text = "☀️ Goed gedaan! Ga verder naar de trein.";
-                await SpeakDutchAsync("Het station is voltooid. Ga verder naar de trein.");
-                await Task.Delay(350);
-                await Navigation.PopAsync();
-                return;
-            }
-
-            _instruction.Text = "🎯 De volgende vraag begint...";
-            await Task.Delay(250);
-            await Navigation.PushAsync(new StationMiniMissionPage(nextIndex));
-
-            if (!Preferences.Default.Get(Keys[nextIndex], false))
-            {
-                _flowStarted = false;
-                await Navigation.PopAsync();
+                _instruction.Text = "↩️ De missie is gestopt.";
                 return;
             }
         }
+
+        await OpenNextMissionAsync();
+    }
+
+    private async Task OpenNextMissionAsync()
+    {
+        var nextIndex = Array.FindIndex(Keys,
+            key => !Preferences.Default.Get(key, false));
+
+        _stars.Text = $"⭐ {Keys.Count(key => Preferences.Default.Get(key, false))}/5";
+
+        if (nextIndex < 0)
+        {
+            Preferences.Default.Set("adventure_stage",
+                Math.Max(3, Preferences.Default.Get("adventure_stage", 0)));
+            _instruction.Text = "☀️ Goed gedaan! Ga verder naar de trein.";
+            await SpeakDutchAsync("Het station is voltooid. Ga verder naar de trein.");
+            await Task.Delay(350);
+            await Navigation.PopAsync();
+            return;
+        }
+
+        _instruction.Text = "🎯 De volgende vraag begint...";
+        _launchedMission = nextIndex;
+        await Task.Delay(250);
+        await Navigation.PushAsync(new StationMiniMissionPage(nextIndex));
     }
 
     private static async Task SpeakDutchAsync(string text)
