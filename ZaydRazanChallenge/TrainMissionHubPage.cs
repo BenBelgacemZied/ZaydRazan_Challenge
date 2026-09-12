@@ -144,7 +144,7 @@ public sealed class TrainMissionHubPage : ContentPage
             var item = Objects[i];
             var choice = new Button
             {
-                Text = $"{item.Icon}  {item.Dutch}",
+                Text = $"{item.Icon}  {item.French}",
                 FontSize = 17,
                 FontAttributes = FontAttributes.Bold,
                 Padding = new Thickness(6),
