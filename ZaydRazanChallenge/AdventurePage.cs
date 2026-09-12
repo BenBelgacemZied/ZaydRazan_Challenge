@@ -19,8 +19,8 @@ public sealed class AdventurePage : ContentPage
         new("🎒", "Thuis · À la maison",
             "Zayd en Razan controleren zelf hun rugzakken, tickets en paspoorten. Hun avontuur kan beginnen!",
             "Nos sacs sont prêts !",
-            "Wat betekent « un sac »?", "een tas",
-            ["een tas", "een trein", "een kaart"], "#FEF3C7", .59, .86),
+            "Hoe zeg je « een tas » in het Frans?", "un sac",
+            ["un sac", "un train", "une carte"], "#FEF3C7", .59, .86),
 
         new("🧭", "Op weg · En route",
             "Zayd leest de kaart en Razan kiest het pad naar het station. Samen vinden ze de juiste richting.",
@@ -31,8 +31,8 @@ public sealed class AdventurePage : ContentPage
         new("🚉", "Het station · La gare",
             "Razan vindt het juiste perron op het vertrekbord. Zayd bewaart de tickets voor de controle.",
             "Le train part du quai trois.",
-            "Wat betekent « le quai »?", "het perron",
-            ["het perron", "de koffer", "de toren"], "#DCFCE7", .69, .57),
+            "Hoe zeg je « het perron » in het Frans?", "le quai",
+            ["le quai", "la valise", "la tour"], "#DCFCE7", .69, .57),
 
         new("🚄", "In de trein · Dans le train",
             "Ze stappen zelfstandig in, zoeken hun zitplaatsen en zien het landschap snel voorbijgaan.",
@@ -43,8 +43,8 @@ public sealed class AdventurePage : ContentPage
         new("🗺️", "Aankomst · Arrivée à Paris",
             "Zayd en Razan komen aan in Parijs. Ze openen hun stadskaart en kiezen samen de volgende halte.",
             "Bonjour Paris, nous sommes arrivés !",
-            "Wat betekent « arrivés »?", "aangekomen",
-            ["verdwaald", "aangekomen", "vertrokken"], "#EDE9FE", .43, .36),
+            "Welk Frans woord betekent « aangekomen »?", "arrivés",
+            ["perdus", "arrivés", "partis"], "#EDE9FE", .43, .36),
 
         new("🗼", "La tour Eiffel",
             "Ze volgen de route langs de Seine. Razan ontdekt als eerste de top van de Eiffeltoren.",
@@ -61,8 +61,8 @@ public sealed class AdventurePage : ContentPage
         new("🏛️", "L’Arc de Triomphe",
             "De wolken verdwijnen: Zayd en Razan bereiken zelfstandig de laatste halte van hun Parijse avontuur!",
             "Merci et au revoir, Paris !",
-            "Wat betekent « au revoir »?", "tot ziens",
-            ["dank je", "tot ziens", "goedemorgen"], "#CCFBF1", .72, .18)
+            "Welke Franse uitdrukking betekent « tot ziens »?", "au revoir",
+            ["merci", "au revoir", "bonjour"], "#CCFBF1", .72, .18)
     ];
 
     public static int StageCount => Stages.Length;
