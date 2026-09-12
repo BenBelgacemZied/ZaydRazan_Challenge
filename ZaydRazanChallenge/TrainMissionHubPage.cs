@@ -25,13 +25,13 @@ public sealed class TrainMissionHubPage : ContentPage
         ColumnDefinitions =
         {
             new ColumnDefinition(GridLength.Star),
-            new ColumnDefinition(GridLength.Star),
             new ColumnDefinition(GridLength.Star)
         },
         RowDefinitions =
         {
-            new RowDefinition(new GridLength(76)),
-            new RowDefinition(new GridLength(76))
+            new RowDefinition(new GridLength(66)),
+            new RowDefinition(new GridLength(66)),
+            new RowDefinition(new GridLength(66))
         }
     };
     private bool _busy;
@@ -93,7 +93,7 @@ public sealed class TrainMissionHubPage : ContentPage
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star),
-                new RowDefinition(new GridLength(226))
+                new RowDefinition(new GridLength(276))
             }
         };
         root.Add(_playground, 0, 0);
@@ -145,10 +145,10 @@ public sealed class TrainMissionHubPage : ContentPage
             var choice = new Button
             {
                 Text = $"{item.Icon}  {item.French}",
-                FontSize = 17,
+                FontSize = 15,
                 FontAttributes = FontAttributes.Bold,
                 Padding = new Thickness(6),
-                HeightRequest = 76,
+                HeightRequest = 66,
                 CornerRadius = 18,
                 BackgroundColor = Color.FromArgb("#2563EB"),
                 TextColor = Colors.White,
@@ -170,7 +170,7 @@ public sealed class TrainMissionHubPage : ContentPage
                 }
                 await CompleteObjectAsync(choiceIndex, choice);
             };
-            _choices.Add(choice, i % 3, i / 3);
+            _choices.Add(choice, i % 2, i / 2);
         }
     }
 
