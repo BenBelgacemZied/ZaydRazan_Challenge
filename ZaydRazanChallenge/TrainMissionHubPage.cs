@@ -18,7 +18,22 @@ public sealed class TrainMissionHubPage : ContentPage
     private readonly Label _stars = new() { FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Colors.White };
     private readonly Label _instruction = new() { FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D"), HorizontalTextAlignment = TextAlignment.Center };
     private readonly Label _discovery = new() { FontSize = 24, FontAttributes = FontAttributes.Bold, TextColor = Colors.White, HorizontalTextAlignment = TextAlignment.Center, IsVisible = false };
-    private readonly HorizontalStackLayout _choices = new() { Spacing = 6, HorizontalOptions = LayoutOptions.Center };
+    private readonly Grid _choices = new()
+    {
+        ColumnSpacing = 8,
+        RowSpacing = 8,
+        ColumnDefinitions =
+        {
+            new ColumnDefinition(GridLength.Star),
+            new ColumnDefinition(GridLength.Star),
+            new ColumnDefinition(GridLength.Star)
+        },
+        RowDefinitions =
+        {
+            new RowDefinition(new GridLength(76)),
+            new RowDefinition(new GridLength(76))
+        }
+    };
     private bool _busy;
     private bool _introPlayed;
 
@@ -31,8 +46,8 @@ public sealed class TrainMissionHubPage : ContentPage
         AbsoluteLayout.SetLayoutBounds(scene, new Rect(0, 0, 1, 1));
         AbsoluteLayout.SetLayoutFlags(scene, AbsoluteLayoutFlags.All);
         _playground.Add(scene);
-        var characters = GameUi.OfficialCharacters(205);
-        AbsoluteLayout.SetLayoutBounds(characters, new Rect(.5, .92, 205, 225));
+        var characters = GameUi.OfficialCharacters(300);
+        AbsoluteLayout.SetLayoutBounds(characters, new Rect(.5, .96, 300, 330));
         AbsoluteLayout.SetLayoutFlags(characters, AbsoluteLayoutFlags.PositionProportional);
         _playground.Add(characters);
         var hud = new Border { Padding = new Thickness(13, 9), Margin = 12, BackgroundColor = Color.FromArgb("#D917324D"), Stroke = Colors.White, StrokeThickness = 1, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 }, Content = new Grid { ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) }, Children = { new Label { Text = "🚄  TREINAVONTUUR", FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Colors.White }, _stars } } };
@@ -50,24 +65,40 @@ public sealed class TrainMissionHubPage : ContentPage
         AbsoluteLayout.SetLayoutFlags(discoveryPanel, AbsoluteLayoutFlags.PositionProportional);
         _playground.Add(discoveryPanel);
         discoveryPanel.SetBinding(IsVisibleProperty, new Binding(nameof(Label.IsVisible), source: _discovery));
-        var choicesPanel = new Border
+        var bottomPanel = new Border
         {
-            Padding = new Thickness(8, 7),
-            Margin = new Thickness(8, 0),
-            BackgroundColor = Color.FromArgb("#E617324D"),
-            Stroke = Colors.White,
-            StrokeThickness = 2,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 },
-            Content = _choices
+            Padding = new Thickness(10),
+            BackgroundColor = Color.FromArgb("#17324D"),
+            StrokeThickness = 0,
+            Content = new VerticalStackLayout
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new Border
+                    {
+                        Padding = new Thickness(10, 7),
+                        BackgroundColor = Colors.White,
+                        Stroke = Color.FromArgb("#F59E0B"),
+                        StrokeThickness = 2,
+                        StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 20 },
+                        Content = _instruction
+                    },
+                    _choices
+                }
+            }
         };
-        AbsoluteLayout.SetLayoutBounds(choicesPanel, new Rect(0, .82, 1, 88));
-        AbsoluteLayout.SetLayoutFlags(choicesPanel, AbsoluteLayoutFlags.WidthProportional | AbsoluteLayoutFlags.YProportional);
-        _playground.Add(choicesPanel);
-        var panel = new Border { Padding = new Thickness(14, 10), Margin = new Thickness(18, 0, 18, 14), BackgroundColor = Color.FromArgb("#EFFFFFFF"), Stroke = Color.FromArgb("#F59E0B"), StrokeThickness = 2, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 24 }, Content = _instruction };
-        AbsoluteLayout.SetLayoutBounds(panel, new Rect(0, 1, 1, 74));
-        AbsoluteLayout.SetLayoutFlags(panel, AbsoluteLayoutFlags.WidthProportional | AbsoluteLayoutFlags.YProportional);
-        _playground.Add(panel);
-        Content = _playground;
+        var root = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition(GridLength.Star),
+                new RowDefinition(new GridLength(226))
+            }
+        };
+        root.Add(_playground, 0, 0);
+        root.Add(bottomPanel, 0, 1);
+        Content = root;
     }
 
     protected override async void OnAppearing()
@@ -132,15 +163,16 @@ public sealed class TrainMissionHubPage : ContentPage
             var item = Objects[i];
             var choice = new Button
             {
-                Text = $"{item.Icon}\n{item.Dutch}",
-                FontSize = 12,
+                Text = $"{item.Icon}  {item.Dutch}",
+                FontSize = 17,
                 FontAttributes = FontAttributes.Bold,
-                Padding = new Thickness(3),
-                WidthRequest = 64,
-                HeightRequest = 70,
-                CornerRadius = 15,
-                BackgroundColor = Colors.White,
-                TextColor = Color.FromArgb("#17324D")
+                Padding = new Thickness(6),
+                HeightRequest = 76,
+                CornerRadius = 18,
+                BackgroundColor = Color.FromArgb("#2563EB"),
+                TextColor = Colors.White,
+                BorderColor = Colors.White,
+                BorderWidth = 2
             };
             choice.Clicked += async (_, _) =>
             {
@@ -148,16 +180,16 @@ public sealed class TrainMissionHubPage : ContentPage
                 if (choiceIndex != Objects.Count(x => Preferences.Default.Get(x.Key, false)))
                 {
                     _busy = true;
-                    choice.BackgroundColor = Color.FromArgb("#FCA5A5");
+                    choice.BackgroundColor = Color.FromArgb("#DC2626");
                     await GameFeedback.FailureAsync();
                     await SpeakDutchAsync("Dat is niet juist. Probeer opnieuw.");
-                    choice.BackgroundColor = Colors.White;
+                    choice.BackgroundColor = Color.FromArgb("#2563EB");
                     _busy = false;
                     return;
                 }
                 await CompleteObjectAsync(choiceIndex, choice);
             };
-            _choices.Add(choice);
+            _choices.Add(choice, i % 3, i / 3);
         }
     }
 
