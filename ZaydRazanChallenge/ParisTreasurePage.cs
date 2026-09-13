@@ -49,7 +49,7 @@ public sealed class ParisTreasurePage : ContentPage
     private readonly AbsoluteLayout _scene = new();
     private readonly Label _status = new() { FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Colors.White };
     private readonly Label _instruction = new() { FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D"), HorizontalTextAlignment = TextAlignment.Center };
-    private readonly VerticalStackLayout _answers = new() { Spacing = 6 };
+    private readonly bool[] _discovered = new bool[3];
     private int _clueIndex;
     private bool _busy;
     private bool _finished;
@@ -63,7 +63,9 @@ public sealed class ParisTreasurePage : ContentPage
         BackgroundColor = Color.FromArgb("#17324D");
         GameUi.AddHomeButton(this);
 
-        var image = new Image { Source = "adventure_map.jpg", Aspect = Aspect.AspectFill };
+        // Each hunt has its own Parisian setting instead of reusing the adventure map.
+        var scenes = new[] { "scene_station.jpg", "eiffel_puzzle.jpg", "louvre_puzzle.jpg", "arc_puzzle.jpg", "baguette_puzzle.jpg" };
+        var image = new Image { Source = scenes[stage - 4], Aspect = Aspect.AspectFill };
         AbsoluteLayout.SetLayoutBounds(image, new Rect(0, 0, 1, 1));
         AbsoluteLayout.SetLayoutFlags(image, AbsoluteLayoutFlags.All);
         _scene.Add(image);
@@ -74,7 +76,7 @@ public sealed class ParisTreasurePage : ContentPage
         top.Add(_status);
         top.Add(hear, 1, 0);
 
-        var bottom = new VerticalStackLayout { Padding = new Thickness(15, 8), Spacing = 7, BackgroundColor = Color.FromArgb("#F8FAFC"), Children = { _instruction, _answers } };
+        var bottom = new VerticalStackLayout { Padding = new Thickness(15, 12), Spacing = 7, BackgroundColor = Color.FromArgb("#F8FAFC"), Children = { _instruction } };
         var layout = new Grid { RowDefinitions = { new RowDefinition(new GridLength(70)), new RowDefinition(GridLength.Star), new RowDefinition(GridLength.Auto) } };
         layout.Add(top, 0, 0);
         layout.Add(_scene, 0, 1);
@@ -92,35 +94,37 @@ public sealed class ParisTreasurePage : ContentPage
     private void Render()
     {
         foreach (var child in _scene.Children.Skip(1).ToArray()) _scene.Remove(child);
-        _answers.Clear();
         if (_finished) return;
         if (_clueIndex < _quest.Clues.Length)
         {
-            var clue = _quest.Clues[_clueIndex];
             _status.Text = $"{_quest.Emoji}  {_quest.Title}  ·  {_clueIndex + 1}/3";
-            _instruction.Text = $"🔎 {clue.Question}";
-            var spot = new Button { Text = "✉️", FontSize = 28, BackgroundColor = Color.FromArgb("#F59E0B"), TextColor = Colors.White, BorderColor = Colors.White, BorderWidth = 3, CornerRadius = 38 };
-            spot.Clicked += async (_, _) => await SpeakDutchAsync(clue.Hint + " " + clue.Question);
-            AbsoluteLayout.SetLayoutBounds(spot, HintPlaces[_clueIndex]);
-            AbsoluteLayout.SetLayoutFlags(spot, AbsoluteLayoutFlags.PositionProportional);
-            _scene.Add(spot);
-            foreach (var answer in clue.Choices.OrderBy(_ => Random.Shared.Next()))
+            if (_clueIndex == 0) _instruction.Text = "🔎 Tik op drie verborgen aanwijzingen in het decor.";
+            for (var index = 0; index < _quest.Clues.Length; index++)
             {
-                var selected = answer;
-                var button = new Button { Text = selected, FontSize = 17, HeightRequest = 48, BackgroundColor = Color.FromArgb("#2563EB"), TextColor = Colors.White, CornerRadius = 14 };
-                button.Clicked += async (_, _) => await AnswerAsync(selected, button);
-                _answers.Add(button);
+                var clueIndex = index;
+                var spot = new Button
+                {
+                    Text = _discovered[index] ? "✅" : new[] { "🧭", "🔍", "✉️" }[index],
+                    FontSize = 28,
+                    BackgroundColor = _discovered[index] ? Color.FromArgb("#166534") : Color.FromArgb("#F59E0B"),
+                    TextColor = Colors.White, BorderColor = Colors.White, BorderWidth = 3, CornerRadius = 38,
+                    AutomationId = $"paris-clue-{index}"
+                };
+                spot.Clicked += async (_, _) => await DiscoverAsync(clueIndex);
+                AbsoluteLayout.SetLayoutBounds(spot, HintPlaces[index]);
+                AbsoluteLayout.SetLayoutFlags(spot, AbsoluteLayoutFlags.PositionProportional);
+                _scene.Add(spot);
             }
         }
         else
         {
             _status.Text = $"{_quest.Emoji}  {_quest.Title}  ·  🎯";
-            _instruction.Text = "Luister en tik het juiste voorwerp aan op de kaart.";
+            _instruction.Text = "🎯 Alle aanwijzingen gevonden! Tik de schat aan in het decor.";
             foreach (var entry in _quest.Objects.Select((value, index) => (value, index)))
             {
                 var parts = entry.value.Split('|');
                 var target = parts[1];
-                var button = new Button { Text = $"{parts[0]}\n{target}", FontSize = 15, FontAttributes = FontAttributes.Bold, BackgroundColor = Color.FromArgb("#EAFBF8"), TextColor = Color.FromArgb("#17324D"), BorderColor = Color.FromArgb("#F59E0B"), BorderWidth = 3, CornerRadius = 19 };
+                var button = new Button { Text = parts[0], FontSize = 32, FontAttributes = FontAttributes.Bold, BackgroundColor = Color.FromArgb("#EAFBF8"), TextColor = Color.FromArgb("#17324D"), BorderColor = Color.FromArgb("#F59E0B"), BorderWidth = 3, CornerRadius = 19, AutomationId = $"paris-object-{entry.index}" };
                 button.Clicked += async (_, _) => await FindAsync(target, button);
                 AbsoluteLayout.SetLayoutBounds(button, ObjectPlaces[entry.index]);
                 AbsoluteLayout.SetLayoutFlags(button, AbsoluteLayoutFlags.PositionProportional);
@@ -129,28 +133,27 @@ public sealed class ParisTreasurePage : ContentPage
         }
     }
 
-    private async Task AnswerAsync(string answer, Button button)
+    private async Task DiscoverAsync(int index)
     {
         if (_busy) return;
         _busy = true;
-        var clue = _quest.Clues[_clueIndex];
-        if (answer != clue.Word)
+        var clue = _quest.Clues[index];
+        _instruction.Text = $"🔎 {clue.Hint}  🇫🇷 {clue.Word}";
+        if (!_discovered[index])
         {
-            button.BackgroundColor = Color.FromArgb("#DC2626");
-            AdventureSave.Set("stars", Math.Max(0, AdventureSave.Get("stars", 0) - 1));
-            await GameFeedback.FailureAsync();
-            await SpeakDutchAsync("Probeer opnieuw. Luister naar de aanwijzing.");
-            button.BackgroundColor = Color.FromArgb("#2563EB");
-            _busy = false;
-            return;
+            _discovered[index] = true;
+            _clueIndex++;
+            await GameFeedback.SuccessAsync();
         }
-        button.BackgroundColor = Color.FromArgb("#16A34A");
-        await GameFeedback.SuccessAsync();
+        await SpeakDutchAsync(clue.Hint);
         await SpeakFrenchAsync(clue.Word);
-        _clueIndex++;
+        if (_clueIndex == _quest.Clues.Length)
+        {
+            Render();
+            await SpeakCurrentAsync();
+        }
+        else Render();
         _busy = false;
-        Render();
-        await SpeakCurrentAsync();
     }
 
     private async Task FindAsync(string name, Button button)
@@ -186,8 +189,7 @@ public sealed class ParisTreasurePage : ContentPage
         if (_finished) return;
         if (_clueIndex < _quest.Clues.Length)
         {
-            var clue = _quest.Clues[_clueIndex];
-            await SpeakDutchAsync(clue.Hint + " " + clue.Question);
+            await SpeakDutchAsync(_quest.Intro + " Tik op drie aanwijzingen in het decor.");
         }
         else await SpeakDutchAsync($"Zoek {_quest.Title}. Tik op het juiste voorwerp.");
     }
