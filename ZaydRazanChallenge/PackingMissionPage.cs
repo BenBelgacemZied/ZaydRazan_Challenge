@@ -31,6 +31,7 @@ public sealed class PackingMissionPage : ContentPage
             {
                 new Image { Source = image, Aspect = Aspect.AspectFill },
                 new BoxView { Color = Color.FromArgb("#4410203A") },
+                GameUi.OfficialCharacters(270),
                 new Border
                 {
                     Margin = 12, Padding = new Thickness(14, 10), VerticalOptions = LayoutOptions.Start,
@@ -53,14 +54,14 @@ public sealed class PackingMissionPage : ContentPage
             scene,
             new VerticalStackLayout { Padding = 14, Spacing = 10, Children =
             {
-                new Label { Text = "Tik op een voorwerp om het in de koffer te leggen.", FontSize = 18, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.White },
+                new Label { Text = "Tik op een voorwerp", FontSize = 18, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.White },
                 _objects
             }}
         }}};
         BuildObjects();
     }
 
-    public static PackingMissionPage ForZayd() => new("Missie · De koffer van Zayd", "Zayd", "mission_pack_zayd.jpg", "home_pack_zayd",
+    public static PackingMissionPage ForZayd() => new("Missie · Zayds koffer", "Zayd", "scene_home.jpg", "home_pack_zayd",
     [
         new("👕", "un tee-shirt", "een T-shirt", true), new("👖", "un pantalon", "een broek", true),
         new("📖", "un livre", "een boek", true), new("🪥", "une brosse à dents", "een tandenborstel", true),
@@ -68,7 +69,7 @@ public sealed class PackingMissionPage : ContentPage
         new("🛩️", "un avion jouet", "een speelgoedvliegtuig", false), new("🥾", "une grosse botte", "een grote laars", false)
     ]);
 
-    public static PackingMissionPage ForRazan() => new("Missie · De koffer van Razan", "Razan", "mission_pack_razan.jpg", "home_pack_razan",
+    public static PackingMissionPage ForRazan() => new("Missie · Razans koffer", "Razan", "scene_home.jpg", "home_pack_razan",
     [
         new("👚", "un tee-shirt rose", "een roze T-shirt", true), new("👖", "un pantalon bleu", "een blauwe broek", true),
         new("📕", "un livre sur Paris", "een boek over Parijs", true), new("📷", "un appareil photo", "een fototoestel", true),
@@ -76,7 +77,7 @@ public sealed class PackingMissionPage : ContentPage
         new("🧸", "un gros nounours", "een grote knuffel", false), new("🧥", "un manteau trop lourd", "een te zware jas", false)
     ]);
 
-    public static PackingMissionPage ForDocuments() => new("Missie · Reisdocumenten", "Zayd et Razan", "scene_home.jpg", "home_documents",
+    public static PackingMissionPage ForDocuments() => new("Missie · Reispapieren", "Zayd en Razan", "scene_home.jpg", "home_documents",
     [
         new("🛂", "les passeports", "de paspoorten", true), new("🎫", "les billets", "de tickets", true),
         new("🗺️", "le plan de Paris", "de kaart van Parijs", true), new("📒", "le carnet de voyage", "het reisboekje", true),
@@ -87,7 +88,7 @@ public sealed class PackingMissionPage : ContentPage
     {
         base.OnAppearing();
         await Task.Delay(350);
-        await SpeakAsync($"Help {_hero}. Kies de nuttige voorwerpen voor de reis.");
+        await SpeakDutchAsync($"Help {_hero}. Kies de spullen die nodig zijn voor de reis.");
     }
 
     private void BuildObjects()
@@ -97,7 +98,7 @@ public sealed class PackingMissionPage : ContentPage
         {
             var button = new Button
             {
-                Text = $"{item.Emoji}  {item.French}\n{item.Dutch}", FontSize = 15, CornerRadius = 17,
+                Text = $"{item.Emoji}  {item.French}", FontSize = 17, CornerRadius = 17,
                 BackgroundColor = Colors.White, TextColor = Color.FromArgb("#172554"), Margin = 5,
                 Padding = new Thickness(13, 8), FontAttributes = FontAttributes.Bold
             };
@@ -114,7 +115,7 @@ public sealed class PackingMissionPage : ContentPage
         {
             button.BackgroundColor = Color.FromArgb("#FCA5A5");
             await GameFeedback.FailureAsync();
-            await SpeakAsync($"Dat voorwerp hebben we niet nodig. Zoek een nuttig voorwerp.");
+            await SpeakDutchAsync("Dat hebben we niet nodig. Kies een ander voorwerp.");
             await button.TranslateTo(-12, 0, 70); await button.TranslateTo(12, 0, 70); await button.TranslateTo(0, 0, 70);
             button.BackgroundColor = Colors.White;
             _busy = false;
@@ -125,7 +126,7 @@ public sealed class PackingMissionPage : ContentPage
         button.IsEnabled = false;
         button.BackgroundColor = Color.FromArgb("#86EFAC");
         await GameFeedback.SuccessAsync();
-        await SpeakAsync($"Goed gedaan!");
+        await SpeakFrenchAsync(item.French);
         await button.ScaleTo(.65, 180, Easing.CubicIn);
         await button.TranslateTo(0, -120, 350, Easing.CubicIn);
         button.IsVisible = false;
@@ -137,8 +138,8 @@ public sealed class PackingMissionPage : ContentPage
             Preferences.Default.Set(_preferenceKey, true);
             var stars = Preferences.Default.Get("stars", 0) + 1;
             Preferences.Default.Set("stars", stars);
-            await SpeakAsync($"Missie voltooid! De koffer van {_hero} is klaar.");
-            await DisplayAlert("⭐ Missie voltooid!", $"De koffer van {_hero} is klaar. Je verdient een ster!", "Verder");
+            await SpeakDutchAsync($"Goed gedaan! De koffer van {_hero} is klaar.");
+            await DisplayAlert("⭐ Missie voltooid!", $"De koffer van {_hero} is klaar.", "Verder");
             await Navigation.PopAsync();
         }
         _busy = false;
@@ -151,13 +152,24 @@ public sealed class PackingMissionPage : ContentPage
         _counter.Text = $"{_packed.Count}/{target}";
     }
 
-    private static async Task SpeakAsync(string text)
+    private static async Task SpeakDutchAsync(string text)
     {
         try
         {
             var locales = await TextToSpeech.Default.GetLocalesAsync();
             var dutch = locales.FirstOrDefault(x => x.Language.StartsWith("nl", StringComparison.OrdinalIgnoreCase));
             await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Locale = dutch });
+        }
+        catch { }
+    }
+
+    private static async Task SpeakFrenchAsync(string text)
+    {
+        try
+        {
+            var locales = await TextToSpeech.Default.GetLocalesAsync();
+            var french = locales.FirstOrDefault(x => x.Language.StartsWith("fr", StringComparison.OrdinalIgnoreCase));
+            await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Locale = french });
         }
         catch { }
     }
