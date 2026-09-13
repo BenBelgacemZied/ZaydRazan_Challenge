@@ -62,7 +62,13 @@ public sealed class AdventurePage : ContentPage
             "De wolken verdwijnen: Zayd en Razan bereiken zelfstandig de laatste halte van hun Parijse avontuur!",
             "Merci et au revoir, Paris !",
             "Welke Franse uitdrukking betekent « tot ziens »?", "au revoir",
-            ["merci", "au revoir", "bonjour"], "#CCFBF1", .72, .18)
+            ["merci", "au revoir", "bonjour"], "#CCFBF1", .72, .18),
+
+        new("🥖", "La boulangerie · La baguette",
+            "Zayd en Razan ontdekken een warme bakkerij. Ze zoeken samen een knapperige baguette.",
+            "Une baguette, s’il vous plaît.",
+            "Hoe zeg je « stokbrood » in het Frans?", "la baguette",
+            ["la baguette", "la carte", "le billet"], "#FEF3C7", .55, .11)
     ];
 
     public static int StageCount => Stages.Length;
@@ -249,9 +255,7 @@ public sealed class AdventurePage : ContentPage
         base.OnAppearing();
         if (_testStage.HasValue)
         {
-            _missionCard.IsVisible = true;
-            _missionCard.Opacity = 1;
-            Dispatcher.Dispatch(async () => await _scroll.ScrollToAsync(_missionCard, ScrollToPosition.Start, false));
+            Dispatcher.Dispatch(async () => await Navigation.PushAsync(new ParisTreasurePage(_testStage.Value)));
             return;
         }
         var savedStage = CurrentSavedStage();
@@ -318,11 +322,7 @@ public sealed class AdventurePage : ContentPage
                     else if (stageNumber < 4)
                         await Navigation.PushAsync(new AdventureScenePage(stageNumber));
                     else
-                    {
-                        _missionCard.IsVisible = true;
-                        await _missionCard.FadeTo(1, 180);
-                        await _scroll.ScrollToAsync(_missionCard, ScrollToPosition.Start, true);
-                    }
+                        await Navigation.PushAsync(new ParisTreasurePage(stageNumber));
                 }
                 else if (stageNumber < _stageIndex)
                     await DisplayAlert($"Etappe {stageNumber + 1} · {Stages[stageNumber].Place}",

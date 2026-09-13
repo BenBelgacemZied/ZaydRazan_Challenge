@@ -51,11 +51,11 @@ public sealed class AdventureTestMenuPage : ContentPage
         }
 
         AddSection(items, "🗼 Parijs");
-        var paris = new[] { "Aankomst in Parijs", "De Eiffeltoren", "Het Louvre", "De Arc de Triomphe" };
+        var paris = new[] { "De stadskaart", "La tour Eiffel", "Le musée du Louvre", "L’Arc de Triomphe", "La baguette" };
         for (var i = 0; i < paris.Length; i++)
         {
             var stage = i + 4;
-            AddOption(items, paris[i], () => new AdventurePage(stage));
+            AddOption(items, paris[i], () => new ParisTreasurePage(stage));
         }
 
         Content = new ScrollView { Content = items };
