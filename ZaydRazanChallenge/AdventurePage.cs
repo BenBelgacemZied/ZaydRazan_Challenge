@@ -62,7 +62,13 @@ public sealed class AdventurePage : ContentPage
             "De wolken verdwijnen: Zayd en Razan bereiken zelfstandig de laatste halte van hun Parijse avontuur!",
             "Merci et au revoir, Paris !",
             "Welke Franse uitdrukking betekent « tot ziens »?", "au revoir",
-            ["merci", "au revoir", "bonjour"], "#CCFBF1", .72, .18)
+            ["merci", "au revoir", "bonjour"], "#CCFBF1", .72, .18),
+
+        new("🥖", "La boulangerie · La baguette",
+            "Zayd en Razan ontdekken een warme bakkerij. Ze zoeken samen een knapperige baguette.",
+            "Une baguette, s’il vous plaît.",
+            "Hoe zeg je « stokbrood » in het Frans?", "la baguette",
+            ["la baguette", "la carte", "le billet"], "#FEF3C7", .55, .11)
     ];
 
     public static int StageCount => Stages.Length;
@@ -126,14 +132,18 @@ public sealed class AdventurePage : ContentPage
     private readonly double _mapWidth;
     private readonly double _mapHeight;
     private int _stageIndex;
+    private readonly int? _testStage;
     private bool _answered;
 
-    public AdventurePage()
+    public AdventurePage(int? testStage = null)
     {
+        _testStage = testStage;
+        if (testStage is int stage && (stage < 4 || stage >= Stages.Length))
+            throw new ArgumentOutOfRangeException(nameof(testStage));
         Title = "Avontuur naar Parijs";
         BackgroundColor = Color.FromArgb("#E0F2FE");
         GameUi.AddHomeButton(this);
-        _stageIndex = Math.Min(Preferences.Default.Get("adventure_stage", 0), Stages.Length - 1);
+        _stageIndex = testStage ?? CurrentSavedStage();
 
         var display = DeviceDisplay.Current.MainDisplayInfo;
         _mapWidth = Math.Min(430d, Math.Max(300d, display.Width / display.Density));
@@ -243,14 +253,33 @@ public sealed class AdventurePage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        var savedStage = Math.Min(
-            Preferences.Default.Get("adventure_stage", 0),
-            Stages.Length - 1);
+        if (_testStage.HasValue)
+        {
+            Dispatcher.Dispatch(async () => await Navigation.PushAsync(new ParisTreasurePage(_testStage.Value)));
+            return;
+        }
+        var savedStage = CurrentSavedStage();
         if (savedStage != _stageIndex)
         {
             _stageIndex = savedStage;
             ShowStage();
         }
+    }
+
+    private static int CurrentSavedStage()
+    {
+        var stage = AdventureSave.Get("adventure_stage", 0);
+        // Older APKs routed completed home missions to a legacy ticket screen.
+        // Restore the full station chapter without erasing any saved answers.
+        if (stage == 1 &&
+            AdventureSave.Get("home_pack_zayd", false) &&
+            AdventureSave.Get("home_pack_razan", false) &&
+            AdventureSave.Get("home_documents", false))
+        {
+            stage = 2;
+            AdventureSave.Set("adventure_stage", stage);
+        }
+        return Math.Clamp(stage, 0, Stages.Length - 1);
     }
 
     private void RenderMap()
@@ -293,11 +322,7 @@ public sealed class AdventurePage : ContentPage
                     else if (stageNumber < 4)
                         await Navigation.PushAsync(new AdventureScenePage(stageNumber));
                     else
-                    {
-                        _missionCard.IsVisible = true;
-                        await _missionCard.FadeTo(1, 180);
-                        await _scroll.ScrollToAsync(_missionCard, ScrollToPosition.Start, true);
-                    }
+                        await Navigation.PushAsync(new ParisTreasurePage(stageNumber));
                 }
                 else if (stageNumber < _stageIndex)
                     await DisplayAlert($"Etappe {stageNumber + 1} · {Stages[stageNumber].Place}",
@@ -334,7 +359,7 @@ public sealed class AdventurePage : ContentPage
         _missionCard.IsVisible = false;
         _missionCard.Opacity = 0;
         var stage = Stages[_stageIndex];
-        _stars.Text = $"⭐ {Preferences.Default.Get("stars", 0)}";
+        _stars.Text = $"⭐ {AdventureSave.Get("stars", 0)}";
         _step.Text = $"MISSIE {_stageIndex + 1} / {Stages.Length}";
         _progress.Progress = (double)(_stageIndex + 1) / Stages.Length;
         _place.Text = $"{stage.Emoji} {stage.Place}";
@@ -369,9 +394,9 @@ public sealed class AdventurePage : ContentPage
             if (child is Button button) button.IsEnabled = false;
 
         var correct = answer == Stages[_stageIndex].CorrectAnswer;
-        var stars = Preferences.Default.Get("stars", 0);
+        var stars = AdventureSave.Get("stars", 0);
         stars = correct ? stars + 1 : Math.Max(0, stars - 1);
-        Preferences.Default.Set("stars", stars);
+        AdventureSave.Set("stars", stars);
         _stars.Text = $"⭐ {stars}";
         _energy.Text = correct ? "⚡ 10" : "⚡ 9";
 
@@ -387,6 +412,13 @@ public sealed class AdventurePage : ContentPage
         await _missionCard.ScaleTo(1.025, 160, Easing.CubicOut);
         await _missionCard.ScaleTo(1, 160, Easing.CubicIn);
 
+        if (_testStage.HasValue && AdventureSave.IsTestMode)
+        {
+            await DisplayAlert("Testmodus", "Vraag getest. Kies een andere scène in het testmenu.", "Verder");
+            await Navigation.PopAsync();
+            return;
+        }
+
         var nextStage = _stageIndex + 1;
         if (nextStage < Stages.Length && _heroes is not null)
         {
@@ -401,7 +433,7 @@ public sealed class AdventurePage : ContentPage
             await Task.Delay(350);
         }
 
-        Preferences.Default.Set("adventure_stage", Math.Min(nextStage, Stages.Length));
+        AdventureSave.Set("adventure_stage", Math.Min(nextStage, Stages.Length));
 
         if (nextStage >= Stages.Length)
         {
@@ -412,7 +444,7 @@ public sealed class AdventurePage : ContentPage
                 "Naar start");
             if (replay)
             {
-                Preferences.Default.Set("adventure_stage", 0);
+                AdventureSave.Set("adventure_stage", 0);
                 _stageIndex = 0;
                 ShowStage();
                 await _scroll.ScrollToAsync(0, 0, true);

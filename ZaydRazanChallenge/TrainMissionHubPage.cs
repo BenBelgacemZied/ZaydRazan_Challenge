@@ -36,9 +36,17 @@ public sealed class TrainMissionHubPage : ContentPage
     };
     private bool _busy;
     private bool _introPlayed;
+    private readonly int? _testEndAt;
 
-    public TrainMissionHubPage()
+    public TrainMissionHubPage(int? testIndex = null)
     {
+        _testEndAt = testIndex;
+        if (testIndex is int index && AdventureSave.IsTestMode)
+        {
+            if (index < 0 || index >= Objects.Length) throw new ArgumentOutOfRangeException(nameof(testIndex));
+            AdventureSave.Set("train_mission_v3_initialized", true);
+            for (var i = 0; i < index; i++) AdventureSave.Set(Objects[i].Key, true);
+        }
         Title = "In de trein";
         BackgroundColor = Color.FromArgb("#172554");
         GameUi.AddHomeButton(this);
@@ -104,10 +112,10 @@ public sealed class TrainMissionHubPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (!Preferences.Default.Get("train_mission_v3_initialized", false))
+        if (!AdventureSave.Get("train_mission_v3_initialized", false))
         {
-            foreach (var item in Objects) Preferences.Default.Remove(item.Key);
-            Preferences.Default.Set("train_mission_v3_initialized", true);
+            foreach (var item in Objects) AdventureSave.Remove(item.Key);
+            AdventureSave.Set("train_mission_v3_initialized", true);
         }
         Render();
         if (_introPlayed) return;
@@ -118,12 +126,12 @@ public sealed class TrainMissionHubPage : ContentPage
     {
         foreach (var marker in _markers) _playground.Remove(marker);
         _markers.Clear();
-        var completed = Objects.Count(x => Preferences.Default.Get(x.Key, false));
+        var completed = Objects.Count(x => AdventureSave.Get(x.Key, false));
         _stars.Text = $"⭐ {completed}/5";
         BuildChoices(completed);
         if (completed == Objects.Length)
         {
-            Preferences.Default.Set("adventure_stage", Math.Max(4, Preferences.Default.Get("adventure_stage", 0)));
+            AdventureSave.Set("adventure_stage", Math.Max(4, AdventureSave.Get("adventure_stage", 0)));
             _instruction.Text = "☀️ Goed gedaan! Parijs komt dichterbij.";
             var next = new Button { Text = "▶  VERDER", FontSize = 18, FontAttributes = FontAttributes.Bold, CornerRadius = 24, WidthRequest = 190, HeightRequest = 52, BackgroundColor = Color.FromArgb("#16A34A"), TextColor = Colors.White, BorderColor = Colors.White, BorderWidth = 2 };
             next.Clicked += async (_, _) => await Navigation.PopAsync();
@@ -158,7 +166,7 @@ public sealed class TrainMissionHubPage : ContentPage
             choice.Clicked += async (_, _) =>
             {
                 if (_busy) return;
-                if (choiceIndex != Objects.Count(x => Preferences.Default.Get(x.Key, false)))
+                if (choiceIndex != Objects.Count(x => AdventureSave.Get(x.Key, false)))
                 {
                     _busy = true;
                     choice.BackgroundColor = Color.FromArgb("#DC2626");
@@ -176,11 +184,11 @@ public sealed class TrainMissionHubPage : ContentPage
 
     private async Task CompleteObjectAsync(int index, View selected)
     {
-        if (_busy || index >= Objects.Length || Preferences.Default.Get(Objects[index].Key, false)) return;
+        if (_busy || index >= Objects.Length || AdventureSave.Get(Objects[index].Key, false)) return;
         _busy = true;
         var item = Objects[index];
-        Preferences.Default.Set(item.Key, true);
-        Preferences.Default.Set("stars", Preferences.Default.Get("stars", 0) + 1);
+        AdventureSave.Set(item.Key, true);
+        AdventureSave.Set("stars", AdventureSave.Get("stars", 0) + 1);
         await GameFeedback.SuccessAsync();
         _discovery.Text = $"{item.Icon}  {item.French}";
         _discovery.IsVisible = true;
@@ -190,13 +198,18 @@ public sealed class TrainMissionHubPage : ContentPage
         await Task.Delay(550);
         _discovery.IsVisible = false;
         _busy = false;
+        if (_testEndAt.HasValue && AdventureSave.IsTestMode)
+        {
+            await Navigation.PopAsync();
+            return;
+        }
         Render();
         if (index + 1 < Objects.Length) await SpeakCurrentInstruction();
     }
 
     private async Task SpeakCurrentInstruction()
     {
-        var completed = Objects.Count(x => Preferences.Default.Get(x.Key, false));
+        var completed = Objects.Count(x => AdventureSave.Get(x.Key, false));
         await SpeakDutchAsync(completed >= Objects.Length ? "Goed gedaan! Parijs komt dichterbij." : $"Zoek {Objects[completed].Dutch}.");
     }
     private static async Task SpeakDutchAsync(string text) { try { var locales = await TextToSpeech.Default.GetLocalesAsync(); var locale = locales.FirstOrDefault(x => x.Language.StartsWith("nl", StringComparison.OrdinalIgnoreCase)); await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Locale = locale }); } catch { } }

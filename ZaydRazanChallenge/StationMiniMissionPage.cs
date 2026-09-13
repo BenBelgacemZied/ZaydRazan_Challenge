@@ -80,9 +80,9 @@ public sealed class StationMiniMissionPage : ContentPage
 
         _answered = true;
         selected.BackgroundColor = Color.FromArgb("#16A34A");
-        Preferences.Default.Set(_mission.Key, true);
-        var stars = Preferences.Default.Get("stars", 0) + 1;
-        Preferences.Default.Set("stars", stars);
+        AdventureSave.Set(_mission.Key, true);
+        var stars = AdventureSave.Get("stars", 0) + 1;
+        AdventureSave.Set("stars", stars);
         _feedback.Text = $"⭐ {_mission.Success}";
         _feedback.TextColor = Color.FromArgb("#16A34A");
         await GameFeedback.SuccessAsync();
@@ -90,7 +90,7 @@ public sealed class StationMiniMissionPage : ContentPage
         await Task.Delay(650);
         await DisplayAlert("⭐ Missie voltooid!", _mission.Success, "Verder");
         if (_index == Missions.Length - 1)
-            Preferences.Default.Set("adventure_stage", 3);
+            AdventureSave.Set("adventure_stage", 3);
 
         await Navigation.PopAsync();
     }

@@ -110,7 +110,7 @@ public sealed class StationMissionHubPage : ContentPage
 
         if (_launchedMission >= 0)
         {
-            var completed = Preferences.Default.Get(Keys[_launchedMission], false);
+            var completed = AdventureSave.Get(Keys[_launchedMission], false);
             _launchedMission = -1;
 
             if (!completed)
@@ -126,14 +126,14 @@ public sealed class StationMissionHubPage : ContentPage
     private async Task OpenNextMissionAsync()
     {
         var nextIndex = Array.FindIndex(Keys,
-            key => !Preferences.Default.Get(key, false));
+            key => !AdventureSave.Get(key, false));
 
-        _stars.Text = $"⭐ {Keys.Count(key => Preferences.Default.Get(key, false))}/5";
+        _stars.Text = $"⭐ {Keys.Count(key => AdventureSave.Get(key, false))}/5";
 
         if (nextIndex < 0)
         {
-            Preferences.Default.Set("adventure_stage",
-                Math.Max(3, Preferences.Default.Get("adventure_stage", 0)));
+            AdventureSave.Set("adventure_stage",
+                Math.Max(3, AdventureSave.Get("adventure_stage", 0)));
             _instruction.Text = "☀️ Goed gedaan! Ga verder naar de trein.";
             await SpeakDutchAsync("Het station is voltooid. Ga verder naar de trein.");
             await Task.Delay(350);

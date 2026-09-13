@@ -235,7 +235,7 @@ public sealed class AdventureScenePage : ContentPage
         }
 
         _counter.Text =
-            $"{_missionIndex + 1}/{_scene.Missions.Length}   ⚡ 10   ⭐ {Preferences.Default.Get("stars", 0)}";
+            $"{_missionIndex + 1}/{_scene.Missions.Length}   ⚡ 10   ⭐ {AdventureSave.Get("stars", 0)}";
         var spokenInstruction = mission.Instruction.Split('·')[0].Trim();
         await TextToSpeech.Default.SpeakAsync(spokenInstruction,
             new SpeechOptions { Locale = await FindDutchLocale() });
@@ -251,8 +251,8 @@ public sealed class AdventureScenePage : ContentPage
         {
             await GameFeedback.FailureAsync();
             button.BackgroundColor = Color.FromArgb("#FCA5A5");
-            Preferences.Default.Set("stars",
-                Math.Max(0, Preferences.Default.Get("stars", 0) - 1));
+            AdventureSave.Set("stars",
+                Math.Max(0, AdventureSave.Get("stars", 0) - 1));
             await button.ShakeAsync();
             _checking = false;
             return;
@@ -260,8 +260,8 @@ public sealed class AdventureScenePage : ContentPage
 
         await GameFeedback.SuccessAsync();
         button.BackgroundColor = Color.FromArgb("#86EFAC");
-        Preferences.Default.Set("stars",
-            Preferences.Default.Get("stars", 0) + 1);
+        AdventureSave.Set("stars",
+            AdventureSave.Get("stars", 0) + 1);
 
         var target = mission.Choices[choiceIndex];
         await WalkHeroesTo(
@@ -296,8 +296,8 @@ public sealed class AdventureScenePage : ContentPage
 
         if (_missionIndex >= _scene.Missions.Length)
         {
-            var currentProgress = Preferences.Default.Get("adventure_stage", 0);
-            Preferences.Default.Set("adventure_stage",
+            var currentProgress = AdventureSave.Get("adventure_stage", 0);
+            AdventureSave.Set("adventure_stage",
                 Math.Max(currentProgress, _sceneIndex + 1));
             await DisplayAlert("🌤️ Zone ontdekt!",
                 "Goed gedaan! Zayd en Razan hebben deze scène voltooid. De volgende etappe is nu open.",
