@@ -150,10 +150,10 @@ public sealed class AdventureMissionHubPage : ContentPage
             if (nextIndex < 0)
             {
                 Preferences.Default.Set("adventure_stage",
-                    Math.Max(1, Preferences.Default.Get("adventure_stage", 0)));
+                    Math.Max(2, Preferences.Default.Get("adventure_stage", 0)));
                 _speech.Text = "☀️ Goed gedaan! Op naar het station.";
                 // Replace the hub in the navigation stack so Back returns to the map.
-                Navigation.InsertPageBefore(new AdventureScenePage(1), this);
+                Navigation.InsertPageBefore(new StationMissionHubPage(), this);
                 await Navigation.PopAsync();
                 return;
             }
