@@ -133,7 +133,7 @@ public sealed class AdventurePage : ContentPage
         Title = "Avontuur naar Parijs";
         BackgroundColor = Color.FromArgb("#E0F2FE");
         GameUi.AddHomeButton(this);
-        _stageIndex = Math.Min(Preferences.Default.Get("adventure_stage", 0), Stages.Length - 1);
+        _stageIndex = CurrentSavedStage();
 
         var display = DeviceDisplay.Current.MainDisplayInfo;
         _mapWidth = Math.Min(430d, Math.Max(300d, display.Width / display.Density));
@@ -243,14 +243,28 @@ public sealed class AdventurePage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        var savedStage = Math.Min(
-            Preferences.Default.Get("adventure_stage", 0),
-            Stages.Length - 1);
+        var savedStage = CurrentSavedStage();
         if (savedStage != _stageIndex)
         {
             _stageIndex = savedStage;
             ShowStage();
         }
+    }
+
+    private static int CurrentSavedStage()
+    {
+        var stage = Preferences.Default.Get("adventure_stage", 0);
+        // Older APKs routed completed home missions to a legacy ticket screen.
+        // Restore the full station chapter without erasing any saved answers.
+        if (stage == 1 &&
+            Preferences.Default.Get("home_pack_zayd", false) &&
+            Preferences.Default.Get("home_pack_razan", false) &&
+            Preferences.Default.Get("home_documents", false))
+        {
+            stage = 2;
+            Preferences.Default.Set("adventure_stage", stage);
+        }
+        return Math.Clamp(stage, 0, Stages.Length - 1);
     }
 
     private void RenderMap()
