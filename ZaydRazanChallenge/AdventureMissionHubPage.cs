@@ -122,7 +122,7 @@ public sealed class AdventureMissionHubPage : ContentPage
 
         if (_launchedMission >= 0)
         {
-            var completed = Preferences.Default.Get(Keys[_launchedMission], false);
+            var completed = AdventureSave.Get(Keys[_launchedMission], false);
             _launchedMission = -1;
             if (!completed)
             {
@@ -144,16 +144,17 @@ public sealed class AdventureMissionHubPage : ContentPage
         try
         {
             var nextIndex = Array.FindIndex(Keys,
-                key => !Preferences.Default.Get(key, false));
-            _stars.Text = $"⭐ {Keys.Count(key => Preferences.Default.Get(key, false))}/3";
+                key => !AdventureSave.Get(key, false));
+            _stars.Text = $"⭐ {Keys.Count(key => AdventureSave.Get(key, false))}/3";
 
             if (nextIndex < 0)
             {
-                Preferences.Default.Set("adventure_stage",
-                    Math.Max(2, Preferences.Default.Get("adventure_stage", 0)));
+                AdventureSave.Set("adventure_stage",
+                    Math.Max(2, AdventureSave.Get("adventure_stage", 0)));
                 _speech.Text = "☀️ Goed gedaan! Op naar het station.";
                 // Replace the hub in the navigation stack so Back returns to the map.
-                Navigation.InsertPageBefore(new StationMissionHubPage(), this);
+                if (!AdventureSave.IsTestMode)
+                    Navigation.InsertPageBefore(new StationMissionHubPage(), this);
                 await Navigation.PopAsync();
                 return;
             }

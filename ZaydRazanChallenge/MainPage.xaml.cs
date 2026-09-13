@@ -7,6 +7,7 @@ public partial class MainPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        AdventureSave.EndTest();
         StarsLabel.Text = $"⭐ {Preferences.Default.Get("stars", 0)}";
         var stage = Preferences.Default.Get("adventure_stage", 0);
         var total = AdventurePage.StageCount;
@@ -22,6 +23,9 @@ public partial class MainPage : ContentPage
 
     private async void OnAdventureClicked(object sender, EventArgs e) =>
         await Navigation.PushAsync(new AdventurePage());
+
+    private async void OnAdventureTestClicked(object sender, EventArgs e) =>
+        await Navigation.PushAsync(new AdventureTestMenuPage());
 
     private async void OnMatchingClicked(object sender, EventArgs e) =>
         await Navigation.PushAsync(new GamePage(GameMode.Matching));

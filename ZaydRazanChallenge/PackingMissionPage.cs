@@ -135,9 +135,9 @@ public sealed class PackingMissionPage : ContentPage
 
         if (_packed.Count == _items.Count(x => x.Useful))
         {
-            Preferences.Default.Set(_preferenceKey, true);
-            var stars = Preferences.Default.Get("stars", 0) + 1;
-            Preferences.Default.Set("stars", stars);
+            AdventureSave.Set(_preferenceKey, true);
+            var stars = AdventureSave.Get("stars", 0) + 1;
+            AdventureSave.Set("stars", stars);
             await SpeakDutchAsync($"Goed gedaan! De koffer van {_hero} is klaar.");
             await DisplayAlert("⭐ Missie voltooid!", $"De koffer van {_hero} is klaar.", "Verder");
             await Navigation.PopAsync();
