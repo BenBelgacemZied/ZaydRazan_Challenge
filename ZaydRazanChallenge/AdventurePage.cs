@@ -71,7 +71,7 @@ public sealed class AdventurePage : ContentPage
             ["la baguette", "la carte", "le billet"], "#FEF3C7", .55, .11)
     ];
 
-    public static int StageCount => Stages.Length;
+    public static int StageCount => ParisTreasureCatalog.FirstStage + ParisTreasureCatalog.Count;
 
     private readonly Label _stars = new()
     {
@@ -126,6 +126,7 @@ public sealed class AdventurePage : ContentPage
     };
     private readonly VerticalStackLayout _answers = new() { Spacing = 9 };
     private readonly AbsoluteLayout _mapLayer = new();
+    private readonly Image _mapImage = new() { Source = "adventure_map.jpg", Aspect = Aspect.AspectFill };
     private readonly Border _missionCard;
     private readonly ScrollView _scroll;
     private Label? _heroes;
@@ -138,7 +139,7 @@ public sealed class AdventurePage : ContentPage
     public AdventurePage(int? testStage = null)
     {
         _testStage = testStage;
-        if (testStage is int stage && (stage < 4 || stage >= Stages.Length))
+        if (testStage is int stage && (stage < ParisTreasureCatalog.FirstStage || stage >= StageCount))
             throw new ArgumentOutOfRangeException(nameof(testStage));
         Title = "Avontuur naar Parijs";
         BackgroundColor = Color.FromArgb("#E0F2FE");
@@ -226,13 +227,7 @@ public sealed class AdventurePage : ContentPage
             HorizontalOptions = LayoutOptions.Center,
             Children =
             {
-                new Image
-                {
-                    Source = "adventure_map.jpg",
-                    Aspect = Aspect.AspectFill,
-                    WidthRequest = _mapWidth,
-                    HeightRequest = _mapHeight
-                },
+                _mapImage,
                 _mapLayer,
                 hud
             }
@@ -279,22 +274,23 @@ public sealed class AdventurePage : ContentPage
             stage = 2;
             AdventureSave.Set("adventure_stage", stage);
         }
-        return Math.Clamp(stage, 0, Stages.Length - 1);
+        return Math.Clamp(stage, 0, StageCount - 1);
     }
 
     private void RenderMap()
     {
         _mapLayer.Clear();
 
-        for (var i = 0; i < Stages.Length; i++)
+        for (var i = 0; i < ParisTreasureCatalog.FirstStage + 1; i++)
         {
             var stageNumber = i;
-            var unlocked = i <= _stageIndex;
-            var completed = i < _stageIndex;
-            var current = i == _stageIndex;
+            var activeMarker = Math.Min(_stageIndex, ParisTreasureCatalog.FirstStage);
+            var unlocked = i <= activeMarker;
+            var completed = i < activeMarker;
+            var current = i == activeMarker;
             var marker = new Button
             {
-                Text = (i + 1).ToString(),
+                Text = i == ParisTreasureCatalog.FirstStage ? "✉️" : (i + 1).ToString(),
                 FontSize = current ? 25 : 20,
                 FontAttributes = FontAttributes.Bold,
                 CornerRadius = 30,
@@ -311,7 +307,7 @@ public sealed class AdventurePage : ContentPage
             };
             marker.Clicked += async (_, _) =>
             {
-                if (stageNumber == _stageIndex)
+                if (stageNumber == Math.Min(_stageIndex, ParisTreasureCatalog.FirstStage))
                 {
                     if (stageNumber == 0)
                         await Navigation.PushAsync(new AdventureMissionHubPage());
@@ -322,7 +318,7 @@ public sealed class AdventurePage : ContentPage
                     else if (stageNumber < 4)
                         await Navigation.PushAsync(new AdventureScenePage(stageNumber));
                     else
-                        await Navigation.PushAsync(new ParisTreasurePage(stageNumber));
+                        await Navigation.PushAsync(new ParisChapterPage());
                 }
                 else if (stageNumber < _stageIndex)
                     await DisplayAlert($"Etappe {stageNumber + 1} · {Stages[stageNumber].Place}",
@@ -337,6 +333,7 @@ public sealed class AdventurePage : ContentPage
             _mapLayer.Add(marker);
         }
 
+        if (_stageIndex >= ParisTreasureCatalog.FirstStage) return;
         var active = Stages[_stageIndex];
         _heroes = new Label
         {
@@ -358,10 +355,14 @@ public sealed class AdventurePage : ContentPage
         _answered = false;
         _missionCard.IsVisible = false;
         _missionCard.Opacity = 0;
-        var stage = Stages[_stageIndex];
+        var stage = Stages[Math.Min(_stageIndex, ParisTreasureCatalog.FirstStage)];
+        _mapImage.Source = _stageIndex >= ParisTreasureCatalog.FirstStage
+            ? "paris_letter_scene.jpg" : "adventure_map.jpg";
         _stars.Text = $"⭐ {AdventureSave.Get("stars", 0)}";
-        _step.Text = $"MISSIE {_stageIndex + 1} / {Stages.Length}";
-        _progress.Progress = (double)(_stageIndex + 1) / Stages.Length;
+        _step.Text = _stageIndex >= ParisTreasureCatalog.FirstStage
+            ? $"PARIJS · {Math.Min(ParisTreasureCatalog.Count, _stageIndex - 3)} / {ParisTreasureCatalog.Count}"
+            : $"MISSIE {_stageIndex + 1} / {StageCount}";
+        _progress.Progress = (double)(_stageIndex + 1) / StageCount;
         _place.Text = $"{stage.Emoji} {stage.Place}";
         _story.Text = stage.Narration;
         _phrase.Text = $"« {stage.FrenchPhrase} »";
