@@ -47,15 +47,15 @@ public sealed class ParisTreasurePage : ContentPage
     private readonly Treasure _quest;
     private readonly AbsoluteLayout _scene = new();
     private readonly Label _status = new() { FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Colors.White };
-    private readonly Label _instruction = new() { FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D"), HorizontalTextAlignment = TextAlignment.Center };
-    private readonly Label _dutch = new() { FontSize = 20, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#17324D") };
-    private readonly Label _french = new() { FontSize = 17, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#4338CA") };
-    private readonly Label _feedback = new() { FontSize = 15, HorizontalTextAlignment = TextAlignment.Center };
+    private readonly Label _instruction = new() { FontSize = 15, FontAttributes = FontAttributes.Bold, TextColor = Colors.White, HorizontalTextAlignment = TextAlignment.Center };
+    private readonly Label _dutch = new() { FontSize = 17, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.White };
+    private readonly Label _french = new() { FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FDE68A") };
+    private readonly Label _feedback = new() { FontSize = 13, HorizontalTextAlignment = TextAlignment.Center };
     private readonly Grid _choices = new() { ColumnSpacing = 5 };
     private readonly BoxView _fog = new() { Color = Color.FromArgb("#9AA8B8"), Opacity = .70, InputTransparent = true };
     private readonly Label[] _clouds = new Label[3];
-    private readonly Button _letter = new() { Text = "✉️", FontSize = 37, BackgroundColor = Color.FromArgb("#F59E0B"), TextColor = Colors.White, CornerRadius = 38, BorderColor = Colors.White, BorderWidth = 3, AutomationId = "paris-open-letter" };
-    private readonly VerticalStackLayout _letterPanel = new() { Spacing = 7, Padding = new Thickness(13, 10) };
+    private readonly Button _letter = new() { Text = "✉️ Open de brief", FontSize = 16, BackgroundColor = Color.FromArgb("#F59E0B"), TextColor = Colors.White, CornerRadius = 16, BorderColor = Colors.White, BorderWidth = 2, AutomationId = "paris-open-letter" };
+    private readonly VerticalStackLayout _letterPanel = new() { Spacing = 3, Padding = new Thickness(0, 2) };
     private int _clueIndex;
     private bool _letterOpen;
     private bool _busy;
@@ -71,7 +71,9 @@ public sealed class ParisTreasurePage : ContentPage
         GameUi.AddHomeButton(this);
 
         // Each hunt has its own Parisian setting instead of reusing the adventure map.
-        var scenes = new[] { "scene_station.jpg", "eiffel_puzzle.jpg", "louvre_puzzle.jpg", "arc_puzzle.jpg", "baguette_puzzle.jpg" };
+        // The station illustration has different-looking children in it. Use
+        // the empty concourse and never draw another child over any scene.
+        var scenes = new[] { "station_concourse.jpg", "eiffel_puzzle.jpg", "louvre_puzzle.jpg", "arc_puzzle.jpg", "baguette_puzzle.jpg" };
         var image = new Image { Source = scenes[stage - 4], Aspect = Aspect.AspectFill };
         AbsoluteLayout.SetLayoutBounds(image, new Rect(0, 0, 1, 1));
         AbsoluteLayout.SetLayoutFlags(image, AbsoluteLayoutFlags.All);
@@ -90,37 +92,33 @@ public sealed class ParisTreasurePage : ContentPage
             _scene.Add(cloud);
         }
 
-        var heroes = new Image { Source = "zayd_razan_official.png", Aspect = Aspect.AspectFit, InputTransparent = true };
-        AbsoluteLayout.SetLayoutBounds(heroes, new Rect(.06, .96, 126, 128));
-        AbsoluteLayout.SetLayoutFlags(heroes, AbsoluteLayoutFlags.PositionProportional);
-        _scene.Add(heroes);
         _letter.Clicked += async (_, _) => await OpenLetterAsync();
-        AbsoluteLayout.SetLayoutBounds(_letter, new Rect(.67, .72, 76, 76));
+        AbsoluteLayout.SetLayoutBounds(_letter, new Rect(.54, .75, 158, 52));
         AbsoluteLayout.SetLayoutFlags(_letter, AbsoluteLayoutFlags.PositionProportional);
         _scene.Add(_letter);
 
-        var hear = new Button { Text = "🔊", FontSize = 24, BackgroundColor = Color.FromArgb("#F59E0B"), TextColor = Colors.White, CornerRadius = 30, WidthRequest = 58, HeightRequest = 58 };
+        var hear = new Button { Text = "🔊", FontSize = 21, BackgroundColor = Color.FromArgb("#F59E0B"), TextColor = Colors.White, CornerRadius = 24, WidthRequest = 46, HeightRequest = 46 };
         hear.Clicked += async (_, _) => await SpeakCurrentAsync();
-        var top = new Grid { Padding = new Thickness(16, 6), ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) } };
+        var top = new Grid { Padding = new Thickness(12, 3), VerticalOptions = LayoutOptions.Start, BackgroundColor = Color.FromArgb("#C817324D"), ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) } };
         top.Add(_status);
         top.Add(hear, 1, 0);
 
         _choices.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         _choices.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         _choices.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
-        _letterPanel.Children.Add(new Label { Text = (stage % 2 == 0 ? "👧 Razan" : "👦 Zayd") + " opent de brief", FontSize = 16, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#92400E") });
+        _letterPanel.Children.Add(new Label { Text = (stage % 2 == 0 ? "Razan" : "Zayd") + " opent de brief", FontSize = 14, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#FDE68A") });
         _letterPanel.Children.Add(_dutch);
         _letterPanel.Children.Add(_french);
         _letterPanel.Children.Add(_choices);
         _letterPanel.Children.Add(_feedback);
         _letterPanel.IsVisible = false;
-        var bottom = new VerticalStackLayout { Padding = new Thickness(15, 10), Spacing = 4, BackgroundColor = Color.FromArgb("#FFFBEB"), Children = { _instruction, _letterPanel } };
-        var layout = new Grid { RowDefinitions = { new RowDefinition(new GridLength(70)), new RowDefinition(GridLength.Star), new RowDefinition(GridLength.Auto) } };
-        layout.Add(top, 0, 0);
-        layout.Add(_scene, 0, 1);
-        layout.Add(bottom, 0, 2);
+        var bottom = new VerticalStackLayout { Padding = new Thickness(12, 7), Spacing = 2, VerticalOptions = LayoutOptions.End, BackgroundColor = Color.FromArgb("#E817324D"), Children = { _instruction, _letterPanel } };
+        var layout = new Grid();
+        layout.Add(_scene);
+        layout.Add(top);
+        layout.Add(bottom);
         Content = layout;
-        _instruction.Text = "☁️ De foto is bewolkt. Tik op de brief bij Zayd en Razan.";
+        _instruction.Text = "☁️ Open de brief en onthul de foto.";
         _status.Text = $"{_quest.Emoji} {_quest.Title}";
     }
 
@@ -143,7 +141,7 @@ public sealed class ParisTreasurePage : ContentPage
             Spans =
             {
                 new Span { Text = clue.DutchSentence[..start] },
-                new Span { Text = clue.DutchSentence.Substring(start, clue.Highlight.Length), TextColor = Color.FromArgb("#D02665"), FontAttributes = FontAttributes.Bold },
+                new Span { Text = clue.DutchSentence.Substring(start, clue.Highlight.Length), TextColor = Color.FromArgb("#FDE047"), FontAttributes = FontAttributes.Bold },
                 new Span { Text = clue.DutchSentence[(start + clue.Highlight.Length)..] }
             }
         };
@@ -153,9 +151,9 @@ public sealed class ParisTreasurePage : ContentPage
             var choice = answer;
             var button = new Button
             {
-                Text = choice, FontSize = 15, FontAttributes = FontAttributes.Bold,
+                Text = choice, FontSize = 14, FontAttributes = FontAttributes.Bold,
                 BackgroundColor = Color.FromArgb("#2563EB"), TextColor = Colors.White,
-                CornerRadius = 12, HeightRequest = 48, Padding = new Thickness(3, 0),
+                CornerRadius = 12, HeightRequest = 42, Padding = new Thickness(3, 0),
                 AutomationId = "paris-answer-" + choice
             };
             button.Clicked += async (_, _) => await AnswerAsync(choice, button);
@@ -171,7 +169,7 @@ public sealed class ParisTreasurePage : ContentPage
         _letter.Text = "📜";
         _letter.IsVisible = false;
         _letterPanel.IsVisible = true;
-        _instruction.Text = "Lees de brief en kies het Franse woord.";
+        _instruction.Text = "Kies het Franse woord.";
         Render();
         await SpeakCurrentAsync();
         _busy = false;
@@ -186,7 +184,7 @@ public sealed class ParisTreasurePage : ContentPage
         {
             button.BackgroundColor = Color.FromArgb("#DC2626");
             AdventureSave.Set("stars", Math.Max(0, AdventureSave.Get("stars", 0) - 1));
-            _feedback.TextColor = Color.FromArgb("#B91C1C");
+            _feedback.TextColor = Color.FromArgb("#FCA5A5");
             _feedback.Text = "Probeer opnieuw. Luister naar het gekleurde woord.";
             await GameFeedback.FailureAsync();
             await SpeakDutchAsync("Probeer opnieuw.");
@@ -198,7 +196,7 @@ public sealed class ParisTreasurePage : ContentPage
         foreach (var child in _choices.Children)
             if (child is Button choice) choice.IsEnabled = false;
         button.BackgroundColor = Color.FromArgb("#16A34A");
-        _feedback.TextColor = Color.FromArgb("#166534");
+        _feedback.TextColor = Color.FromArgb("#86EFAC");
         _feedback.Text = $"Goed zo! {clue.Highlight} = {clue.Word}  ☀️";
         await GameFeedback.SuccessAsync();
         await SpeakFrenchAsync(clue.Word);
