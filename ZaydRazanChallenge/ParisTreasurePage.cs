@@ -4,63 +4,8 @@ namespace ZaydRazanChallenge;
 
 public sealed class ParisTreasurePage : ContentPage
 {
-    private sealed record Clue(string DutchSentence, string Highlight, string FrenchPrompt, string Word, string[] Choices);
-    private sealed record Treasure(string Title, string Emoji, string Target, string Intro, Clue[] Clues, string[] Objects);
-
-    private static readonly Treasure[] Quests =
-    [
-        new("De stadskaart", "🗺️", "la carte", "Zayd en Razan zijn in Parijs. Zoek eerst drie aanwijzingen voor hun kaart.",
-            [
-                new("Zayd zoekt de kaart.", "kaart", "Zayd cherche ...", "la carte", ["la carte", "le pain", "la porte"]),
-                new("De straat leidt naar de toren.", "straat", "La ... mène à la tour.", "rue", ["rue", "gare", "table"]),
-                new("Razan ziet de stad.", "stad", "Razan voit la ...", "ville", ["ville", "valise", "porte"])
-            ], ["🗺️|la carte", "🥖|la baguette", "🎟️|le billet"]),
-        new("La tour Eiffel", "🗼", "la tour Eiffel", "Razan zoekt een hoge toren. Ontdek drie aanwijzingen.",
-            [
-                new("Het is van ijzer gemaakt.", "ijzer", "C'est fait en ...", "fer", ["bois", "fer", "diamant"]),
-                new("De toren is heel hoog.", "hoog", "La tour est très ...", "haute", ["haute", "petite", "rouge"]),
-                new("Je ziet de top van de toren.", "top", "Tu vois le ... de la tour.", "sommet", ["sommet", "pain", "quai"])
-            ], ["🗼|la tour Eiffel", "🏛️|l'Arc de Triomphe", "🥖|la baguette"]),
-        new("Le musée du Louvre", "🖼️", "le Louvre", "Zayd zoekt een beroemd museum. Luister naar de aanwijzingen.",
-            [
-                new("In het museum zie je kunst.", "museum", "On voit de l'art au ...", "musée", ["musée", "train", "parc"]),
-                new("Hier hangt de Mona Lisa.", "Mona Lisa", "En français, c'est ...", "la Joconde", ["la fenêtre", "la Joconde", "la valise"]),
-                new("Zayd zoekt een schilderij.", "schilderij", "Zayd cherche un ...", "tableau", ["billet", "tableau", "train"])
-            ], ["🖼️|le Louvre", "🗼|la tour Eiffel", "🥖|la baguette"]),
-        new("L'Arc de Triomphe", "🏛️", "l'Arc de Triomphe", "Ze zoeken een grote boog in Parijs.",
-            [
-                new("De grote boog staat aan een plein.", "plein", "Le grand arc est sur une ...", "place", ["place", "table", "porte"]),
-                new("De boog is een monument.", "monument", "L'arc est un ...", "monument", ["musée", "monument", "train"]),
-                new("Je ziet een grote boog.", "boog", "Tu vois un grand ...", "arc", ["arc", "quai", "pain"])
-            ], ["🏛️|l'Arc de Triomphe", "🖼️|le Louvre", "🗺️|la carte"]),
-        new("La baguette", "🥖", "la baguette", "Zayd ruikt vers brood. Waar is de baguette?",
-            [
-                new("De bakker maakt vers brood.", "bakker", "Le ... prépare du pain.", "boulanger", ["boulanger", "musée", "quai"]),
-                new("In de bakkerij koop je brood.", "bakkerij", "On achète du pain à la ...", "boulangerie", ["gare", "boulangerie", "tour"]),
-                new("Een baguette is lang brood.", "brood", "La baguette est du ...", "pain", ["train", "siège", "pain"])
-            ], ["🗺️|la carte", "🥖|la baguette", "🖼️|le Louvre"])
-    ];
-
-    private static readonly string[][] PhotoChoices =
-    [
-        ["paris_map_choice.jpg", "baguette_puzzle.jpg", "paris_ticket_choice.jpg"],
-        ["eiffel_puzzle.jpg", "arc_puzzle.jpg", "baguette_puzzle.jpg"],
-        ["louvre_puzzle.jpg", "eiffel_puzzle.jpg", "baguette_puzzle.jpg"],
-        ["arc_puzzle.jpg", "louvre_puzzle.jpg", "paris_map_choice.jpg"],
-        ["paris_map_choice.jpg", "baguette_puzzle.jpg", "louvre_puzzle.jpg"]
-    ];
-
-    private static readonly string[] Stories =
-    [
-        "Op de kaart ontdekken Zayd en Razan de weg door Parijs. Samen kiezen ze hun volgende halte.",
-        "De Eiffeltoren is een ijzeren toren. Vanaf de top kun je ver over Parijs kijken.",
-        "In het Louvre hangt de Mona Lisa. In het Frans heet dit beroemde schilderij la Joconde.",
-        "De Arc de Triomphe is een grote triomfboog. Hij staat aan de Place Charles-de-Gaulle.",
-        "Een baguette is een lang, knapperig brood. Zayd en Razan ontdekken het in de bakkerij."
-    ];
-
     private readonly int _stage;
-    private readonly Treasure _quest;
+    private readonly ParisQuest _quest;
     private readonly Grid _root = new();
     private readonly AbsoluteLayout _scene = new();
     private readonly Label _status = new() { FontSize = 16, FontAttributes = FontAttributes.Bold, TextColor = Colors.White };
@@ -79,9 +24,10 @@ public sealed class ParisTreasurePage : ContentPage
 
     public ParisTreasurePage(int stage)
     {
-        if (stage < 4 || stage > 8) throw new ArgumentOutOfRangeException(nameof(stage));
+        if (stage < ParisTreasureCatalog.FirstStage || stage >= ParisTreasureCatalog.FirstStage + ParisTreasureCatalog.Count)
+            throw new ArgumentOutOfRangeException(nameof(stage));
         _stage = stage;
-        _quest = Quests[stage - 4];
+        _quest = ParisTreasureCatalog.Quests[stage - ParisTreasureCatalog.FirstStage];
         Title = "Schattenjacht in Parijs";
         BackgroundColor = Color.FromArgb("#17324D");
         GameUi.AddHomeButton(this);
@@ -128,7 +74,7 @@ public sealed class ParisTreasurePage : ContentPage
     private void RenderClue()
     {
         _questionReady = false;
-        _status.Text = $"☁️ Parijs · aanwijzing {_clueIndex + 1}/3";
+        _status.Text = $"☁️ Parijs {(_stage - 3)}/30 · aanwijzing {_clueIndex + 1}/3";
         _instruction.Text = (_stage + _clueIndex) % 2 == 0 ? "Razan leest de brief voor:" : "Zayd leest de brief voor:";
         _feedback.Text = "";
         _choices.Children.Clear();
@@ -217,7 +163,7 @@ public sealed class ParisTreasurePage : ContentPage
         _question.Text = "Welke foto past bij de brief?";
         _feedback.Text = "Kies een van de drie foto's.";
         _choices.Children.Clear();
-        var photos = PhotoChoices[_stage - 4];
+        var photos = ParisTreasureCatalog.PhotosFor(_stage - ParisTreasureCatalog.FirstStage);
         for (var i = 0; i < photos.Length; i++)
         {
             var index = i;
@@ -237,7 +183,7 @@ public sealed class ParisTreasurePage : ContentPage
     {
         if (_busy || _finished) return;
         _busy = true;
-        if (index != Array.IndexOf(_quest.Objects, _quest.Objects.First(x => x.Split('|')[1] == _quest.Target)))
+        if (index != (_stage - ParisTreasureCatalog.FirstStage) % 3)
         {
             AdventureSave.Set("stars", Math.Max(0, AdventureSave.Get("stars", 0) - 1));
             await GameFeedback.FailureAsync();
@@ -251,7 +197,12 @@ public sealed class ParisTreasurePage : ContentPage
             if (child is ImageButton choice) choice.IsEnabled = false;
         await GameFeedback.SuccessAsync();
         await SpeakFrenchAsync(_quest.Target);
-        AdventureSave.Set("stars", AdventureSave.Get("stars", 0) + 1);
+        var completionKey = $"paris_complete_{_stage}";
+        if (!AdventureSave.Get(completionKey, false))
+        {
+            AdventureSave.Set(completionKey, true);
+            AdventureSave.Set("stars", AdventureSave.Get("stars", 0) + 1);
+        }
         if (!AdventureSave.IsTestMode)
             AdventureSave.Set("adventure_stage", Math.Max(_stage + 1, AdventureSave.Get("adventure_stage", 0)));
         ShowDiscovery();
@@ -261,11 +212,11 @@ public sealed class ParisTreasurePage : ContentPage
     {
         _root.Children.Clear();
         var discovered = new Grid { RowDefinitions = { new RowDefinition(GridLength.Star), new RowDefinition(GridLength.Auto) }, BackgroundColor = Color.FromArgb("#17324D") };
-        var photo = new Image { Source = PhotoChoices[_stage - 4][Array.FindIndex(_quest.Objects, x => x.Split('|')[1] == _quest.Target)], Aspect = Aspect.AspectFit, Margin = new Thickness(5), AutomationId = "paris-discovered-photo" };
+        var photo = new Image { Source = _quest.Photo, Aspect = Aspect.AspectFit, Margin = new Thickness(5), AutomationId = "paris-discovered-photo" };
         discovered.Add(photo, 0, 0);
         var story = new VerticalStackLayout { Padding = 16, Spacing = 12, BackgroundColor = Color.FromArgb("#17324D") };
         story.Children.Add(new Label { Text = "⭐ " + _quest.Title, FontSize = 23, FontAttributes = FontAttributes.Bold, TextColor = Colors.White });
-        story.Children.Add(new Label { Text = Stories[_stage - 4], FontSize = 17, TextColor = Colors.White });
+        story.Children.Add(new Label { Text = _quest.Story, FontSize = 17, TextColor = Colors.White });
         var listen = new Button { Text = "🔊 Luister naar het verhaal", BackgroundColor = Color.FromArgb("#2051A3"), TextColor = Colors.White };
         listen.Clicked += async (_, _) => await TellStoryAsync();
         story.Children.Add(listen);
@@ -280,7 +231,7 @@ public sealed class ParisTreasurePage : ContentPage
     private async Task TellStoryAsync()
     {
         await SpeakFrenchAsync(_quest.Target);
-        await SpeakDutchAsync(Stories[_stage - 4]);
+        await SpeakDutchAsync(_quest.Story);
     }
 
     private async Task SpeakCurrentAsync()

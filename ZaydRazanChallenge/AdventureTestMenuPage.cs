@@ -50,12 +50,11 @@ public sealed class AdventureTestMenuPage : ContentPage
             AddOption(items, train[i], () => new TrainMissionHubPage(index));
         }
 
-        AddSection(items, "🗼 Parijs");
-        var paris = new[] { "De stadskaart", "La tour Eiffel", "Le musée du Louvre", "L’Arc de Triomphe", "La baguette" };
-        for (var i = 0; i < paris.Length; i++)
+        for (var i = 0; i < ParisTreasureCatalog.Count; i++)
         {
-            var stage = i + 4;
-            AddOption(items, paris[i], () => new ParisTreasurePage(stage));
+            if (i % 10 == 0) AddSection(items, $"☁️ Parijs · ontdekking {i + 1}–{Math.Min(i + 10, ParisTreasureCatalog.Count)}");
+            var stage = i + ParisTreasureCatalog.FirstStage;
+            AddOption(items, $"{i + 1:00} · {ParisTreasureCatalog.Quests[i].Title}", () => new ParisTreasurePage(stage));
         }
 
         Content = new ScrollView { Content = items };
