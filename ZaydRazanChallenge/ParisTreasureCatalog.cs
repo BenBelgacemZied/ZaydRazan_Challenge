@@ -200,11 +200,11 @@ internal static class ParisTreasureCatalog
         var first = Quests[(index + 7) % Count].Photo;
         var second = Quests[(index + 13) % Count].Photo;
         var correct = Quests[index].Photo;
-        return index % 3 switch
+        return (index % 3) switch
         {
-            0 => [correct, first, second],
-            1 => [first, correct, second],
-            _ => [first, second, correct]
+            0 => new[] { correct, first, second },
+            1 => new[] { first, correct, second },
+            _ => new[] { first, second, correct }
         };
     }
 }
