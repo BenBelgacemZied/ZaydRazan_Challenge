@@ -9,8 +9,8 @@
     <Nullable>enable</Nullable>
     <ApplicationTitle>ZR LingoTrip</ApplicationTitle>
     <ApplicationId>com.zrlingotrip.app</ApplicationId>
-    <ApplicationDisplayVersion>2.32</ApplicationDisplayVersion>
-    <ApplicationVersion>43</ApplicationVersion>
+    <ApplicationDisplayVersion>2.33</ApplicationDisplayVersion>
+    <ApplicationVersion>44</ApplicationVersion>
     <SupportedOSPlatformVersion>23.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -23,6 +23,7 @@
     <MauiImage Include="Resources/Images/zayd_razan_walk.png" />
     <MauiImage Include="Resources/Images/zayd_razan_official.png" />
     <MauiImage Include="Resources/Images/paris_letter_scene.jpg" />
+    <MauiImage Include="Resources/Images/paris_journey_*.jpg" />
     <MauiImage Include="Resources/Images/paris_map_choice.jpg" />
     <MauiImage Include="Resources/Images/paris_ticket_choice.jpg" />
     <MauiImage Include="Resources/Images/paris_*.jpg" Exclude="Resources/Images/paris_letter_scene.jpg;Resources/Images/paris_map_choice.jpg;Resources/Images/paris_ticket_choice.jpg" />
