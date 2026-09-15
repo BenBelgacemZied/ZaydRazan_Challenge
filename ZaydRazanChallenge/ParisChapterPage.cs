@@ -106,7 +106,6 @@ public sealed class ParisChapterPage : ContentPage
                 {
                     Text = discovered ? $"✓  ETAPPE {index + 1:00}  ·  {ParisTreasureCatalog.Quests[index].Title}" : unlocked ? $"▶  ETAPPE {index + 1:00}  ·  Vertrek" : $"🔒  ETAPPE {index + 1:00}",
                     HorizontalOptions = LayoutOptions.Fill,
-                    HorizontalTextAlignment = TextAlignment.Start,
                     FontSize = 14, FontAttributes = FontAttributes.Bold,
                     HeightRequest = 50, CornerRadius = 13,
                     TextColor = Colors.White,
