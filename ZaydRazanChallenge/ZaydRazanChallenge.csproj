@@ -23,7 +23,6 @@
     <MauiImage Include="Resources/Images/zayd_razan_walk.png" />
     <MauiImage Include="Resources/Images/zayd_razan_official.png" />
     <MauiImage Include="Resources/Images/paris_letter_scene.jpg" />
-    <MauiImage Include="Resources/Images/paris_journey_*.jpg" />
     <MauiImage Include="Resources/Images/paris_map_choice.jpg" />
     <MauiImage Include="Resources/Images/paris_ticket_choice.jpg" />
     <MauiImage Include="Resources/Images/paris_*.jpg" Exclude="Resources/Images/paris_letter_scene.jpg;Resources/Images/paris_map_choice.jpg;Resources/Images/paris_ticket_choice.jpg" />
