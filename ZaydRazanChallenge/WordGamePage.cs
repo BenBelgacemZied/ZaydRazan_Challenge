@@ -180,61 +180,151 @@ public sealed class WordGamePage : ContentPage
 
     private void ShowBuildWord(VocabularyWord word)
     {
-        var target = Normalize(word.French);
-        var current = "";
+        var target = word.French.ToLowerInvariant();
+        var letterPositions = Enumerable.Range(0, target.Length).Where(index => char.IsLetter(target[index])).ToArray();
+        var slotValues = new char?[target.Length];
+        var slotTiles = new Button?[target.Length];
+        var slotLabels = new Dictionary<int, Label>();
+        var slotBorders = new Dictionary<int, Border>();
+        var tileValues = new Dictionary<Button, char>();
+        var hintsUsed = 0;
         _question.Text = $"Bouw het Franse woord voor ‘{word.Dutch}’";
-        var answer = new Label { Text = "_ _ _", FontSize = 27, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#7C3AED") };
+        var answerSlots = new FlexLayout { Wrap = FlexWrap.Wrap, JustifyContent = FlexJustify.Center, AlignItems = FlexAlignItems.Center };
         var letters = new FlexLayout { Wrap = FlexWrap.Wrap, JustifyContent = FlexJustify.Center, AlignItems = FlexAlignItems.Center };
         var letterButtons = new List<Button>();
 
-        void ResetLetters()
+        for (var index = 0; index < target.Length; index++)
         {
-            current = "";
-            answer.Text = "_ _ _";
-            foreach (var tile in letterButtons) tile.IsEnabled = true;
+            if (char.IsLetter(target[index]))
+            {
+                var label = new Label { Text = "_", FontSize = 21, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, VerticalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#17324D") };
+                var border = new Border { Content = label, WidthRequest = 38, HeightRequest = 44, Margin = 2, Padding = 0, BackgroundColor = Colors.White, Stroke = Color.FromArgb("#60A5FA"), StrokeThickness = 2, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 9 } };
+                slotLabels[index] = label;
+                slotBorders[index] = border;
+                answerSlots.Add(border);
+            }
+            else if (char.IsWhiteSpace(target[index]))
+                answerSlots.Add(new BoxView { WidthRequest = 16, HeightRequest = 44, Color = Colors.Transparent });
+            else
+                answerSlots.Add(new Label { Text = target[index].ToString(), FontSize = 24, WidthRequest = 13, HeightRequest = 44, HorizontalTextAlignment = TextAlignment.Center, VerticalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#17324D") });
         }
 
-        foreach (var letter in target.OrderBy(_ => Random.Shared.Next()))
+        var help = MakeButton("💡  Hulp 3/3", "#D97706");
+
+        void UpdateSlots()
+        {
+            foreach (var position in letterPositions)
+            {
+                var placed = slotValues[position];
+                slotLabels[position].Text = placed?.ToString().ToUpperInvariant() ?? "_";
+                slotBorders[position].BackgroundColor = placed is null ? Colors.White : Color.FromArgb("#ECFDF5");
+                slotBorders[position].Stroke = placed is null ? Color.FromArgb("#60A5FA") : Color.FromArgb("#22C55E");
+            }
+        }
+
+        void SetTileUsed(Button tile, bool used)
+        {
+            tile.IsEnabled = !used;
+            tile.Opacity = used ? .35 : 1;
+            tile.BackgroundColor = Color.FromArgb(used ? "#94A3B8" : "#DBEAFE");
+        }
+
+        void ResetLetters()
+        {
+            foreach (var position in letterPositions)
+            {
+                slotValues[position] = null;
+                slotTiles[position] = null;
+            }
+            foreach (var tile in letterButtons) SetTileUsed(tile, false);
+            UpdateSlots();
+        }
+
+        async Task CheckCompletedAsync()
+        {
+            if (letterPositions.Any(position => slotValues[position] is null)) return;
+            var correct = letterPositions.All(position => slotValues[position] == target[position]);
+            _busy = true;
+            if (correct)
+            {
+                _score++;
+                _feedback.Text = $"Goed zo! {word.Dutch} = {word.French}";
+                _feedback.TextColor = Color.FromArgb("#15803D");
+                await GameFeedback.SuccessAsync();
+                await SpeakFrenchAsync(word.French);
+                await Task.Delay(650);
+                _index++;
+                ShowSingleWordRound();
+                return;
+            }
+
+            foreach (var position in letterPositions) slotBorders[position].Stroke = Color.FromArgb("#DC2626");
+            _feedback.Text = "De volgorde klopt nog niet. Probeer opnieuw.";
+            _feedback.TextColor = Color.FromArgb("#DC2626");
+            await GameFeedback.FailureAsync();
+            await Task.Delay(600);
+            ResetLetters();
+            _busy = false;
+        }
+
+        foreach (var letter in letterPositions.Select(position => target[position]).OrderBy(_ => Random.Shared.Next()))
         {
             var value = letter;
             var tile = new Button { Text = value.ToString().ToUpperInvariant(), FontSize = 20, FontAttributes = FontAttributes.Bold, WidthRequest = 51, HeightRequest = 51, CornerRadius = 14, Margin = 3, Padding = 0, BackgroundColor = Color.FromArgb("#DBEAFE"), TextColor = Color.FromArgb("#17324D") };
             letterButtons.Add(tile);
+            tileValues[tile] = value;
             tile.Clicked += async (_, _) =>
             {
                 if (_busy || !tile.IsEnabled) return;
-                tile.IsEnabled = false;
-                current += value;
-                answer.Text = string.Join(" ", current.ToUpperInvariant().ToCharArray());
-                if (current.Length != target.Length) return;
-                _busy = true;
-                if (current == target)
-                {
-                    _score++;
-                    _feedback.Text = $"Goed zo! {word.Dutch} = {word.French}";
-                    _feedback.TextColor = Color.FromArgb("#15803D");
-                    await GameFeedback.SuccessAsync();
-                    await SpeakFrenchAsync(word.French);
-                    await Task.Delay(650);
-                    _index++;
-                    ShowSingleWordRound();
-                }
-                else
-                {
-                    _feedback.Text = "De volgorde klopt nog niet. Probeer opnieuw.";
-                    _feedback.TextColor = Color.FromArgb("#DC2626");
-                    await GameFeedback.FailureAsync();
-                    await Task.Delay(500);
-                    ResetLetters();
-                    _busy = false;
-                }
+                var position = letterPositions.First(index => slotValues[index] is null);
+                slotValues[position] = value;
+                slotTiles[position] = tile;
+                SetTileUsed(tile, true);
+                UpdateSlots();
+                await CheckCompletedAsync();
             };
             letters.Add(tile);
         }
+
+        help.Clicked += async (_, _) =>
+        {
+            if (_busy || hintsUsed >= 3) return;
+            var position = letterPositions.FirstOrDefault(index => slotValues[index] != target[index], -1);
+            if (position < 0) return;
+            hintsUsed++;
+            help.Text = $"💡  Hulp {3 - hintsUsed}/3";
+            help.IsEnabled = hintsUsed < 3;
+
+            var correctLetter = target[position];
+            var sourcePosition = letterPositions.FirstOrDefault(index =>
+                index != position && slotValues[index] == correctLetter && slotValues[index] != target[index], -1);
+            if (sourcePosition >= 0)
+            {
+                (slotValues[position], slotValues[sourcePosition]) = (slotValues[sourcePosition], slotValues[position]);
+                (slotTiles[position], slotTiles[sourcePosition]) = (slotTiles[sourcePosition], slotTiles[position]);
+            }
+            else
+            {
+                var correctTile = letterButtons.First(tile => tile.IsEnabled && tileValues[tile] == correctLetter);
+                if (slotTiles[position] is Button replacedTile) SetTileUsed(replacedTile, false);
+                slotValues[position] = correctLetter;
+                slotTiles[position] = correctTile;
+                SetTileUsed(correctTile, true);
+            }
+            UpdateSlots();
+            slotBorders[position].BackgroundColor = Color.FromArgb("#FEF3C7");
+            _feedback.Text = $"Hulp gebruikt: de letter {correctLetter.ToString().ToUpperInvariant()} staat op haar plaats.";
+            _feedback.TextColor = Color.FromArgb("#92400E");
+            await SpeakFrenchAsync(correctLetter.ToString());
+            await CheckCompletedAsync();
+        };
+
         var reset = MakeButton("↶  Opnieuw", "#64748B");
         reset.Clicked += (_, _) => ResetLetters();
-        _gameArea.Add(answer);
-        _gameArea.Add(new Label { Text = "Zonder spaties of leestekens", FontSize = 13, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#64748B") });
+        _gameArea.Add(answerSlots);
+        _gameArea.Add(new Label { Text = "De spaties en leestekens staan al op hun plaats.", FontSize = 13, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#64748B") });
         _gameArea.Add(letters);
+        _gameArea.Add(help);
         _gameArea.Add(reset);
     }
 
