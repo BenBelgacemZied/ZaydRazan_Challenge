@@ -1,3 +1,5 @@
+using Microsoft.Maui.Layouts;
+
 namespace ZaydRazanChallenge;
 
 public enum WordGameMode { Connect, ThreeChoices, BuildWord, Listening }
