@@ -61,7 +61,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
                     },
                     new Image
                     {
-                        Source = $"{puzzle.Key}_puzzle.jpg",
+                        Source = puzzle.ImageSource,
                         HeightRequest = 250,
                         Aspect = Aspect.AspectFit
                     },
