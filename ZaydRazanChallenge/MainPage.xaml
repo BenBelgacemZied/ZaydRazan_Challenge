@@ -72,14 +72,6 @@
                                 CornerRadius="18"
                                 HeightRequest="58"
                                 Clicked="OnAdventureClicked" />
-                        <Button Text="🧪 Testmodus · kies een scène"
-                                FontSize="16"
-                                FontAttributes="Bold"
-                                BackgroundColor="#2563EB"
-                                TextColor="White"
-                                CornerRadius="18"
-                                HeightRequest="54"
-                                Clicked="OnAdventureTestClicked" />
                     </VerticalStackLayout>
                 </Border>
             </Grid>

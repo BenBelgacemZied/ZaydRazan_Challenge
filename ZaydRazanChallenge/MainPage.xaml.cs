@@ -24,9 +24,6 @@ public partial class MainPage : ContentPage
     private async void OnAdventureClicked(object sender, EventArgs e) =>
         await Navigation.PushAsync(new AdventurePage());
 
-    private async void OnAdventureTestClicked(object sender, EventArgs e) =>
-        await Navigation.PushAsync(new AdventureTestMenuPage());
-
     private async void OnMatchingClicked(object sender, EventArgs e) =>
         await Navigation.PushAsync(new WordGamesHubPage());
     private async void OnListeningClicked(object sender, EventArgs e) =>
