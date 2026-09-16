@@ -12,7 +12,11 @@
     <ApplicationDisplayVersion>2.37</ApplicationDisplayVersion>
     <ApplicationVersion>48</ApplicationVersion>
     <SupportedOSPlatformVersion>23.0</SupportedOSPlatformVersion>
+    <AndroidPackageFormats>aab;apk</AndroidPackageFormats>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
+  </ItemGroup>
   <ItemGroup>
     <MauiIcon Include="Resources/AppIcon/appicon.png" BaseSize="1024,1024" />
     <MauiImage Include="Resources/Images/splash.jpg" />
