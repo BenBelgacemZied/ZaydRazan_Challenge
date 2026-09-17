@@ -64,7 +64,7 @@ public sealed class PuzzlePage : ContentPage
 
         var preview = new Image
         {
-            Source = $"{puzzle.Key}_puzzle.jpg",
+            Source = puzzle.ImageSource,
             HeightRequest = 125,
             Aspect = Aspect.AspectFit
         };
@@ -228,7 +228,7 @@ public sealed class PuzzlePage : ContentPage
 
             var image = new Image
             {
-                Source = $"{_puzzle.Key}_puzzle.jpg",
+                Source = _puzzle.ImageSource,
                 Aspect = Aspect.AspectFill,
                 WidthRequest = _boardSize,
                 HeightRequest = _boardSize,
@@ -367,37 +367,47 @@ public sealed record PuzzleDefinition(
     string Title,
     string FrenchName,
     string Emoji,
-    string Description);
+    string Description,
+    string? Image = null)
+{
+    public string ImageSource => Image ?? $"{Key}_puzzle.jpg";
+}
 
 public static class PuzzleCatalog
 {
-    public static IReadOnlyList<PuzzleDefinition> Items { get; } =
+    private static readonly string[] AdventureEmojis =
     [
-        new("eiffel", "de Eiffeltoren", "La tour Eiffel", "🗼",
-            "La tour Eiffel werd gebouwd voor de Wereldtentoonstelling van 1889. In het Frans zegt men « la tour Eiffel »."),
-        new("louvre", "het Louvre", "Le Louvre", "🔺",
-            "Le Louvre is een beroemd museum in Parijs. Je vindt er duizenden kunstwerken uit de hele wereld."),
-        new("arc", "de Arc de Triomphe", "L’Arc de Triomphe", "🏛️",
-            "L’Arc de Triomphe staat aan het einde van de Champs-Élysées en eert belangrijke momenten uit de Franse geschiedenis."),
-        new("notre_dame", "Notre-Dame", "Notre-Dame de Paris", "⛪",
-            "Notre-Dame is een middeleeuwse kathedraal op het Île de la Cité, in het hart van Parijs."),
-        new("sacre_coeur", "Sacré-Cœur", "Le Sacré-Cœur", "🤍",
-            "Le Sacré-Cœur staat op de heuvel van Montmartre en biedt een prachtig uitzicht over Parijs."),
-        new("pantheon", "het Panthéon", "Le Panthéon", "🏛️",
-            "Le Panthéon is een groot monument waar beroemde Franse schrijvers, wetenschappers en helden worden geëerd."),
-        new("invalides", "Les Invalides", "Les Invalides", "✨",
-            "Les Invalides herken je aan de gouden koepel. Het gebouw vertelt veel over de militaire geschiedenis van Frankrijk."),
-        new("opera", "Opéra Garnier", "L’Opéra Garnier", "🎭",
-            "L’Opéra Garnier is een rijk versierd theater voor opera en ballet, gebouwd in de negentiende eeuw."),
-        new("joconde", "de Mona Lisa", "La Joconde", "🖼️",
-            "La Joconde werd geschilderd door Leonardo da Vinci. Het wereldberoemde portret hangt in het Louvre."),
-        new("croissant", "de croissant", "Le croissant", "🥐",
-            "Le croissant is een luchtig Frans gebak met veel dunne laagjes. Het wordt vaak bij het ontbijt gegeten."),
-        new("baguette", "het stokbrood", "La baguette", "🥖",
-            "La baguette is een lang, knapperig Frans brood. De Franse kennis en traditie rond baguettebrood zijn beroemd."),
-        new("versailles", "het paleis van Versailles", "Le château de Versailles", "👑",
-            "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen.")
+        "🗺️", "🗼", "🔺", "🏛️", "🥖", "⛪", "🤍", "🎭", "🏛️", "✨",
+        "🖼️", "🥐", "🎫", "🌊", "🎨", "🌳", "⛲", "🏘️", "🕰️", "🌈",
+        "🎨", "🌉", "🖌️", "🚇", "🚤", "🍪", "🧢", "🥞", "🛠️", "🔬"
     ];
+
+    public static IReadOnlyList<PuzzleDefinition> Items { get; } = BuildItems();
+
+    private static IReadOnlyList<PuzzleDefinition> BuildItems()
+    {
+        var adventure = ParisTreasureCatalog.Quests.Select((quest, index) =>
+            new PuzzleDefinition(
+                KeyFor(quest.Photo),
+                quest.Title,
+                quest.Target,
+                AdventureEmojis[index],
+                quest.Story,
+                quest.Photo));
+
+        return adventure.Append(new PuzzleDefinition(
+            "versailles",
+            "het paleis van Versailles",
+            "Le château de Versailles",
+            "👑",
+            "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen.")).ToArray();
+    }
+
+    private static string KeyFor(string photo) =>
+        Path.GetFileNameWithoutExtension(photo)
+            .Replace("paris_", "", StringComparison.Ordinal)
+            .Replace("_choice", "", StringComparison.Ordinal)
+            .Replace("_puzzle", "", StringComparison.Ordinal);
 
     public static PuzzleDefinition GetRandom(string? excludedKey = null)
     {

@@ -24,13 +24,10 @@ public partial class MainPage : ContentPage
     private async void OnAdventureClicked(object sender, EventArgs e) =>
         await Navigation.PushAsync(new AdventurePage());
 
-    private async void OnAdventureTestClicked(object sender, EventArgs e) =>
-        await Navigation.PushAsync(new AdventureTestMenuPage());
-
     private async void OnMatchingClicked(object sender, EventArgs e) =>
-        await Navigation.PushAsync(new GamePage(GameMode.Matching));
+        await Navigation.PushAsync(new WordGamesHubPage());
     private async void OnListeningClicked(object sender, EventArgs e) =>
-        await Navigation.PushAsync(new GamePage(GameMode.Listening));
+        await Navigation.PushAsync(new WordGamePage(WordGameMode.Listening));
     private async void OnMonumentsClicked(object sender, EventArgs e) =>
         await Navigation.PushAsync(new GamePage(GameMode.Monuments));
     private async void OnPuzzleClicked(object sender, EventArgs e) =>

@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:supportsRtl="true"
-        android:label="Zayd &amp; Razan Challenge"
+        android:usesCleartextTraffic="false"
+        android:label="ZR LingoTrip"
         android:icon="@mipmap/appicon"
         android:roundIcon="@mipmap/appicon_round"></application>
-    <uses-permission android:name="android.permission.INTERNET" />
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
 </manifest>

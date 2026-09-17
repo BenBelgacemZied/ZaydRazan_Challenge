@@ -44,14 +44,14 @@ public sealed class PuzzleGalleryPage : ContentPage
                     },
                     new Label
                     {
-                        Text = "De verrassingspuzzel van Frankrijk",
+                        Text = "Alle ontdekkingen worden puzzels",
                         FontSize = 29,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
                     new Label
                     {
-                        Text = "De afbeelding, het raster en het maximale aantal zetten worden willekeurig gekozen. Kijk goed, denk na en ontdek daarna een leuk weetje!",
+                        Text = "Alle 30 afbeeldingen uit het avontuur zitten nu in de verrassingspuzzel. Het raster en het maximale aantal zetten worden willekeurig gekozen.",
                         FontSize = 17,
                         LineHeight = 1.25,
                         HorizontalTextAlignment = TextAlignment.Center
@@ -85,7 +85,7 @@ public sealed class PuzzleGalleryPage : ContentPage
                     startButton,
                     new Label
                     {
-                        Text = "La Joconde · le croissant · la baguette · Versailles · Parijse monumenten en nog veel meer",
+                        Text = "30 avontuurlijke ontdekkingen uit Parijs · Versailles als bonus",
                         FontSize = 14,
                         TextColor = Color.FromArgb("#64748B"),
                         HorizontalTextAlignment = TextAlignment.Center
