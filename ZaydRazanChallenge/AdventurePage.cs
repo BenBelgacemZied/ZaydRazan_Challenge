@@ -140,7 +140,20 @@ public sealed class AdventurePage : ContentPage
         FontAttributes = FontAttributes.Bold,
         TextColor = Color.FromArgb("#2563EB")
     };
-    private readonly Label _routeStatus = new()\n    {\n        FontSize = 15,\n        FontAttributes = FontAttributes.Bold,\n        TextColor = Color.FromArgb("#17324D")\n    };\n    private readonly Label _routeLegend = new()\n    {\n        Text = "✅ Terminé    ▶ À jouer    🔒 Verrouillé",\n        FontSize = 12,\n        TextColor = Color.FromArgb("#64748B"),\n        HorizontalTextAlignment = TextAlignment.Center\n    };\n    private readonly ProgressBar _journeyProgress = new()
+    private readonly Label _routeStatus = new()
+    {
+        FontSize = 15,
+        FontAttributes = FontAttributes.Bold,
+        TextColor = Color.FromArgb("#17324D")
+    };
+    private readonly Label _routeLegend = new()
+    {
+        Text = "✅ Terminé    ▶ À jouer    🔒 Verrouillé",
+        FontSize = 12,
+        TextColor = Color.FromArgb("#64748B"),
+        HorizontalTextAlignment = TextAlignment.Center
+    };
+    private readonly ProgressBar _journeyProgress = new()
     {
         ProgressColor = Color.FromArgb("#F59E0B"),
         BackgroundColor = Color.FromArgb("#DBEAFE"),
@@ -348,7 +361,17 @@ public sealed class AdventurePage : ContentPage
             0,
             ParisTreasureCatalog.Count);
         _journeyProgress.Progress = (double)Math.Min(_stageIndex, StageCount) / StageCount;
-        _routeTitle.Text = "🧭 Ton voyage vers Paris";\n        _routeProgressText.Text = _stageIndex < ParisTreasureCatalog.FirstStage\n            ? $"{_stageIndex}/4"\n            : $"{parisCompleted}/30";\n        _routeStatus.Text = _stageIndex < ParisTreasureCatalog.FirstStage\n            ? $"Étape actuelle : {new[] { "Maison", "En route", "Gare", "Train", "Paris" }[_stageIndex]}"\n            : parisCompleted >= ParisTreasureCatalog.Count\n                ? "Étape actuelle : aventure de Paris terminée 🎉"\n                : $"Étape actuelle : Paris · niveau {parisCompleted + 1} sur 30";\n\n        if (_stageIndex < ParisTreasureCatalog.FirstStage)
+        _routeTitle.Text = "🧭 Ton voyage vers Paris";
+        _routeProgressText.Text = _stageIndex < ParisTreasureCatalog.FirstStage
+            ? $"{_stageIndex}/4"
+            : $"{parisCompleted}/30";
+        _routeStatus.Text = _stageIndex < ParisTreasureCatalog.FirstStage
+            ? $"Étape actuelle : {new[] { "Maison", "En route", "Gare", "Train", "Paris" }[_stageIndex]}"
+            : parisCompleted >= ParisTreasureCatalog.Count
+                ? "Étape actuelle : aventure de Paris terminée 🎉"
+                : $"Étape actuelle : Paris · niveau {parisCompleted + 1} sur 30";
+
+        if (_stageIndex < ParisTreasureCatalog.FirstStage)
         {
             _routeTitle.Text = "🧭 De reis naar Parijs";
             _chapterTabs.Add(MakeChapterChip("🚆 Départ", true, false));
