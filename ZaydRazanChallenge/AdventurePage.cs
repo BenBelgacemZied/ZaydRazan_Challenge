@@ -409,7 +409,12 @@ public sealed class AdventurePage : ContentPage
             "Aankomst", "Monumenten", "Stad", "Kunst", "Buurten", "Finale"
         };
         var chapterIcons = new[] { "🗺️", "🏛️", "🔭", "🎨", "🥐", "⭐" };
-        _routeTitle.Text = $"{chapterIcons[_selectedChapter]} {chapterTitles[_selectedChapter]}";
+        _routeTitle.Text = $"🧭 Voyage complet · {chapterIcons[_selectedChapter]} {chapterTitles[_selectedChapter]}";
+
+        // Keep the beginning of the adventure visible even after Paris is unlocked.
+        // This makes the complete route readable at a glance: home → station → train → Paris.
+        AddPrologueStops();
+        _routeStops.Add(MakeRouteConnector(true));
 
         for (var chapter = 0; chapter < chapterCount; chapter++)
         {
@@ -453,6 +458,44 @@ public sealed class AdventurePage : ContentPage
                 {
                     if (unlocked)
                         await Navigation.PushAsync(new ParisTreasurePage(stage));
+                }));
+        }
+    }
+
+    private void AddPrologueStops()
+    {
+        var prologue = new[]
+        {
+            ("Maison", "mission_pack_zayd.jpg"),
+            ("En route", "adventure_map.jpg"),
+            ("Gare", "station_concourse.jpg"),
+            ("Train", "scene_train_interior.jpg"),
+            ("Paris", "paris_letter_scene.jpg")
+        };
+
+        for (var i = 0; i < prologue.Length; i++)
+        {
+            var stageNumber = i;
+            if (i > 0)
+                _routeStops.Add(MakeRouteConnector(true));
+            _routeStops.Add(MakeRouteStop(
+                prologue[i].Item1,
+                prologue[i].Item2,
+                true,
+                false,
+                true,
+                async () =>
+                {
+                    if (stageNumber == 0)
+                        await Navigation.PushAsync(new AdventureMissionHubPage());
+                    else if (stageNumber == 2)
+                        await Navigation.PushAsync(new StationMissionHubPage());
+                    else if (stageNumber == 3)
+                        await Navigation.PushAsync(new TrainMissionHubPage());
+                    else if (stageNumber < ParisTreasureCatalog.FirstStage)
+                        await Navigation.PushAsync(new AdventureScenePage(stageNumber));
+                    else
+                        await Navigation.PushAsync(new ParisChapterPage());
                 }));
         }
     }
@@ -681,3 +724,4 @@ public sealed class AdventurePage : ContentPage
             new SpeechOptions { Locale = french });
     }
 }
+
