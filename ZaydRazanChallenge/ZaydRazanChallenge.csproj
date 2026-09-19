@@ -9,8 +9,8 @@
     <Nullable>enable</Nullable>
     <ApplicationTitle>ZR LingoTrip</ApplicationTitle>
     <ApplicationId>com.zrlingotrip.app</ApplicationId>
-    <ApplicationDisplayVersion>2.37</ApplicationDisplayVersion>
-    <ApplicationVersion>48</ApplicationVersion>
+    <ApplicationDisplayVersion>2.38</ApplicationDisplayVersion>
+    <ApplicationVersion>49</ApplicationVersion>
     <SupportedOSPlatformVersion>23.0</SupportedOSPlatformVersion>
     <AndroidPackageFormats>aab;apk</AndroidPackageFormats>
   </PropertyGroup>
