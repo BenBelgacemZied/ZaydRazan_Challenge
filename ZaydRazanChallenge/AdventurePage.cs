@@ -140,7 +140,7 @@ public sealed class AdventurePage : ContentPage
         FontAttributes = FontAttributes.Bold,
         TextColor = Color.FromArgb("#2563EB")
     };
-    private readonly ProgressBar _journeyProgress = new()
+    private readonly Label _routeStatus = new()\n    {\n        FontSize = 15,\n        FontAttributes = FontAttributes.Bold,\n        TextColor = Color.FromArgb("#17324D")\n    };\n    private readonly Label _routeLegend = new()\n    {\n        Text = "✅ Terminé    ▶ À jouer    🔒 Verrouillé",\n        FontSize = 12,\n        TextColor = Color.FromArgb("#64748B"),\n        HorizontalTextAlignment = TextAlignment.Center\n    };\n    private readonly ProgressBar _journeyProgress = new()
     {
         ProgressColor = Color.FromArgb("#F59E0B"),
         BackgroundColor = Color.FromArgb("#DBEAFE"),
@@ -348,14 +348,10 @@ public sealed class AdventurePage : ContentPage
             0,
             ParisTreasureCatalog.Count);
         _journeyProgress.Progress = (double)Math.Min(_stageIndex, StageCount) / StageCount;
-        _routeProgressText.Text = _stageIndex < ParisTreasureCatalog.FirstStage
-            ? $"{_stageIndex}/4"
-            : $"{parisCompleted}/30";
-
-        if (_stageIndex < ParisTreasureCatalog.FirstStage)
+        _routeTitle.Text = "🧭 Ton voyage vers Paris";\n        _routeProgressText.Text = _stageIndex < ParisTreasureCatalog.FirstStage\n            ? $"{_stageIndex}/4"\n            : $"{parisCompleted}/30";\n        _routeStatus.Text = _stageIndex < ParisTreasureCatalog.FirstStage\n            ? $"Étape actuelle : {new[] { "Maison", "En route", "Gare", "Train", "Paris" }[_stageIndex]}"\n            : parisCompleted >= ParisTreasureCatalog.Count\n                ? "Étape actuelle : aventure de Paris terminée 🎉"\n                : $"Étape actuelle : Paris · niveau {parisCompleted + 1} sur 30";\n\n        if (_stageIndex < ParisTreasureCatalog.FirstStage)
         {
             _routeTitle.Text = "🧭 De reis naar Parijs";
-            _chapterTabs.Add(MakeChapterChip("PROLOOG", true, false));
+            _chapterTabs.Add(MakeChapterChip("🚆 Départ", true, false));
             var prologue = new[]
             {
                 ("Thuis", "mission_pack_zayd.jpg"),
@@ -422,7 +418,7 @@ public sealed class AdventurePage : ContentPage
             var completedChapter = parisCompleted >= (chapter + 1) * 5;
             var unlockedChapter = chapter <= currentChapter;
             var chip = MakeChapterChip(
-                $"{chapterIcons[chapter]} {chapter + 1}",
+                $"{chapterIcons[chapter]} {chapterTitles[chapter]}",
                 chapter == _selectedChapter,
                 completedChapter,
                 unlockedChapter);
