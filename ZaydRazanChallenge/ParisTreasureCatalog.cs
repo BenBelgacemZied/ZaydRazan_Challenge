@@ -5,7 +5,7 @@ internal sealed record ParisQuest(string Title, string Target, string Photo, str
 
 internal static class ParisTreasureCatalog
 {
-    public const int FirstStage = 4;
+    public const int FirstStage = 5;
     public static int Count => Quests.Length;
     private static ParisClue C(string sentence, string highlight, string word, string other1, string other2) =>
         new(sentence, highlight, word, [word, other1, other2]);
