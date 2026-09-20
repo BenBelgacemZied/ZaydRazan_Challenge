@@ -350,10 +350,10 @@ public sealed class AdventurePage : ContentPage
         var currentLevel = Math.Clamp(_stageIndex, 0, StageCount);
         _journeyProgress.Progress = (double)currentLevel / StageCount;
         _routeTitle.Text = "📚 Niveaux de l'aventure";
-        _routeProgressText.Text = ${currentLevel}/${StageCount};
+        _routeProgressText.Text = $"{currentLevel}/{StageCount}";
         _routeStatus.Text = currentLevel >= StageCount
             ? "Aventure terminée 🎉"
-            : Niveau actuel : ${currentLevel + 1} sur ${StageCount};
+            : $"Niveau actuel : {currentLevel + 1} sur {StageCount}";
 
         var prologue = new[]
         {
@@ -376,8 +376,8 @@ public sealed class AdventurePage : ContentPage
             var stage = ParisTreasureCatalog.FirstStage + questIndex;
             AddLevelRow(
                 stage + 1,
-                Paris · ${ShortTitle(quest.Title)},
-                Découverte ${questIndex + 1} sur ${ParisTreasureCatalog.Count},
+$"Paris · {ShortTitle(quest.Title)}",
+$"Découverte {questIndex + 1} sur {ParisTreasureCatalog.Count}",
                 quest.Photo,
                 stage,
                 currentLevel);
