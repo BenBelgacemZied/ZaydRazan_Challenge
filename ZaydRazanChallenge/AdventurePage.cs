@@ -126,6 +126,7 @@ public sealed class AdventurePage : ContentPage
     };
     private readonly VerticalStackLayout _answers = new() { Spacing = 9 };
     private readonly Image _mapImage = new() { Source = "paris_letter_scene.jpg", Aspect = Aspect.AspectFill };
+    private readonly VerticalStackLayout _levelList = new() { Spacing = 7 };
     private readonly HorizontalStackLayout _chapterTabs = new() { Spacing = 8 };
     private readonly HorizontalStackLayout _routeStops = new() { Spacing = 8 };
     private readonly Label _routeTitle = new()
@@ -290,18 +291,7 @@ public sealed class AdventurePage : ContentPage
                         Children = { _routeTitle, _routeProgressText }
                     },
                     _journeyProgress,
-                    new ScrollView
-                    {
-                        Orientation = ScrollOrientation.Horizontal,
-                        HorizontalScrollBarVisibility = ScrollBarVisibility.Never,
-                        Content = _chapterTabs
-                    },
-                    new ScrollView
-                    {
-                        Orientation = ScrollOrientation.Horizontal,
-                        HorizontalScrollBarVisibility = ScrollBarVisibility.Never,
-                        Content = _routeStops
-                    }
+                    _levelList
                 }
             }
         };
@@ -355,130 +345,168 @@ public sealed class AdventurePage : ContentPage
     {
         _chapterTabs.Clear();
         _routeStops.Clear();
+        _levelList.Clear();
 
-        var parisCompleted = Math.Clamp(
-            _stageIndex - ParisTreasureCatalog.FirstStage,
-            0,
-            ParisTreasureCatalog.Count);
-        _journeyProgress.Progress = (double)Math.Min(_stageIndex, StageCount) / StageCount;
-        _routeTitle.Text = "🧭 Ton voyage vers Paris";
-        _routeProgressText.Text = _stageIndex < ParisTreasureCatalog.FirstStage
-            ? $"{_stageIndex}/4"
-            : $"{parisCompleted}/30";
-        _routeStatus.Text = _stageIndex < ParisTreasureCatalog.FirstStage
-            ? $"Étape actuelle : {new[] { "Maison", "En route", "Gare", "Train", "Paris" }[_stageIndex]}"
-            : parisCompleted >= ParisTreasureCatalog.Count
-                ? "Étape actuelle : aventure de Paris terminée 🎉"
-                : $"Étape actuelle : Paris · niveau {parisCompleted + 1} sur 30";
+        var currentLevel = Math.Clamp(_stageIndex, 0, StageCount);
+        _journeyProgress.Progress = (double)currentLevel / StageCount;
+        _routeTitle.Text = "📚 Niveaux de l'aventure";
+        _routeProgressText.Text = `${currentLevel}/${StageCount}`;
+        _routeStatus.Text = currentLevel >= StageCount
+            ? "Aventure terminée 🎉"
+            : `Niveau actuel : ${currentLevel + 1} sur ${StageCount}`;
 
-        if (_stageIndex < ParisTreasureCatalog.FirstStage)
+        var prologue = new[]
         {
-            _routeTitle.Text = "🧭 De reis naar Parijs";
-            _chapterTabs.Add(MakeChapterChip("🚆 Départ", true, false));
-            var prologue = new[]
-            {
-                ("Thuis", "mission_pack_zayd.jpg"),
-                ("Op weg", "adventure_map.jpg"),
-                ("Station", "station_concourse.jpg"),
-                ("Trein", "scene_train_interior.jpg"),
-                ("Parijs", "paris_letter_scene.jpg")
-            };
-
-            for (var i = 0; i < prologue.Length; i++)
-            {
-                var stageNumber = i;
-                var completed = i < _stageIndex;
-                var current = i == _stageIndex;
-                var unlocked = i <= _stageIndex;
-                if (i > 0)
-                    _routeStops.Add(MakeRouteConnector(i <= _stageIndex));
-                _routeStops.Add(MakeRouteStop(
-                    prologue[i].Item1,
-                    prologue[i].Item2,
-                    completed,
-                    current,
-                    unlocked,
-                    async () =>
-                    {
-                        if (!unlocked) return;
-                        if (stageNumber == 0)
-                            await Navigation.PushAsync(new AdventureMissionHubPage());
-                        else if (stageNumber == 2)
-                            await Navigation.PushAsync(new StationMissionHubPage());
-                        else if (stageNumber == 3)
-                            await Navigation.PushAsync(new TrainMissionHubPage());
-                        else if (stageNumber < ParisTreasureCatalog.FirstStage)
-                            await Navigation.PushAsync(new AdventureScenePage(stageNumber));
-                        else
-                            await Navigation.PushAsync(new ParisChapterPage());
-                    }));
-            }
-            return;
-        }
-
-        var chapterCount = 6;
-        var currentChapter = Math.Clamp(parisCompleted / 5, 0, chapterCount - 1);
-        if (_selectedChapter < 0 || _selectedChapter >= chapterCount || _selectedChapter > currentChapter)
-            _selectedChapter = currentChapter;
-        if (parisCompleted > 0 && parisCompleted % 5 == 0)
-            _selectedChapter = Math.Min(parisCompleted / 5, chapterCount - 1);
-
-        var chapterTitles = new[]
-        {
-            "Aankomst", "Monumenten", "Stad", "Kunst", "Buurten", "Finale"
+            ("Maison", "Préparer les valises", "mission_pack_zayd.jpg"),
+            ("En route", "Trouver le chemin", "adventure_map.jpg"),
+            ("Gare", "Billets et quai", "station_concourse.jpg"),
+            ("Train", "Monter dans le wagon", "scene_train_interior.jpg"),
+            ("Paris", "Arrivée à Paris", "paris_letter_scene.jpg")
         };
-        var chapterIcons = new[] { "🗺️", "🏛️", "🔭", "🎨", "🥐", "⭐" };
-        _routeTitle.Text = $"🧭 Voyage complet · {chapterIcons[_selectedChapter]} {chapterTitles[_selectedChapter]}";
 
-        // Keep the beginning of the adventure visible even after Paris is unlocked.
-        // This makes the complete route readable at a glance: home → station → train → Paris.
-        AddPrologueStops();
-        _routeStops.Add(MakeRouteConnector(true));
-
-        for (var chapter = 0; chapter < chapterCount; chapter++)
+        for (var stage = 0; stage < prologue.Length; stage++)
         {
-            var chapterIndex = chapter;
-            var completedChapter = parisCompleted >= (chapter + 1) * 5;
-            var unlockedChapter = chapter <= currentChapter;
-            var chip = MakeChapterChip(
-                $"{chapterIcons[chapter]} {chapterTitles[chapter]}",
-                chapter == _selectedChapter,
-                completedChapter,
-                unlockedChapter);
-            if (unlockedChapter)
-            {
-                chip.Clicked += (_, _) =>
-                {
-                    _selectedChapter = chapterIndex;
-                    RenderMap();
-                };
-            }
-            _chapterTabs.Add(chip);
+            var item = prologue[stage];
+            AddLevelRow(stage + 1, item.Item1, item.Item2, item.Item3, stage, currentLevel);
         }
 
-        var firstLevel = _selectedChapter * 5;
-        for (var offset = 0; offset < 5; offset++)
+        for (var questIndex = 0; questIndex < ParisTreasureCatalog.Count; questIndex++)
         {
-            var questIndex = firstLevel + offset;
-            var completed = questIndex < parisCompleted;
-            var current = questIndex == parisCompleted;
-            var unlocked = questIndex <= parisCompleted;
             var quest = ParisTreasureCatalog.Quests[questIndex];
             var stage = ParisTreasureCatalog.FirstStage + questIndex;
-            if (offset > 0)
-                _routeStops.Add(MakeRouteConnector(questIndex <= parisCompleted));
-            _routeStops.Add(MakeRouteStop(
-                ShortTitle(quest.Title),
+            AddLevelRow(
+                stage + 1,
+                `Paris · ${ShortTitle(quest.Title)}`,
+                `Découverte ${questIndex + 1} sur ${ParisTreasureCatalog.Count}`,
                 quest.Photo,
-                completed,
-                current,
-                unlocked,
-                async () =>
-                {
-                    if (unlocked)
-                        await Navigation.PushAsync(new ParisTreasurePage(stage));
-                }));
+                stage,
+                currentLevel);
         }
+    }
+
+    private void AddLevelRow(
+        int number,
+        string title,
+        string subtitle,
+        string image,
+        int stage,
+        int currentLevel)
+    {
+        var completed = stage < currentLevel || currentLevel >= StageCount;
+        var current = stage == currentLevel && currentLevel < StageCount;
+        var unlocked = stage <= currentLevel;
+        var status = completed ? "✓ Terminé" : current ? "▶ À jouer" : "🔒 Verrouillé";
+        var accent = completed
+            ? Color.FromArgb("#16A34A")
+            : current ? Color.FromArgb("#D97706") : Color.FromArgb("#94A3B8");
+
+        var numberBadge = new Border
+        {
+            WidthRequest = 44,
+            HeightRequest = 44,
+            BackgroundColor = accent,
+            StrokeThickness = 0,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 },
+            Content = new Label
+            {
+                Text = number.ToString(),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Colors.White,
+                HorizontalTextAlignment = TextAlignment.Center,
+                VerticalTextAlignment = TextAlignment.Center
+            }
+        };
+
+        var preview = new Image
+        {
+            Source = image,
+            WidthRequest = 52,
+            HeightRequest = 52,
+            Aspect = Aspect.AspectFill,
+            Opacity = unlocked ? 1 : .35
+        };
+
+        var details = new VerticalStackLayout
+        {
+            Spacing = 2,
+            VerticalOptions = LayoutOptions.Center,
+            Children =
+            {
+                new Label
+                {
+                    Text = title,
+                    FontSize = 16,
+                    FontAttributes = FontAttributes.Bold,
+                    TextColor = Color.FromArgb("#17324D")
+                },
+                new Label
+                {
+                    Text = subtitle,
+                    FontSize = 12,
+                    TextColor = Color.FromArgb("#64748B")
+                }
+            }
+        };
+        var rowGrid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 11
+        };
+        rowGrid.Add(numberBadge, 0, 0);
+        rowGrid.Add(details, 1, 0);
+        rowGrid.Add(new Label
+        {
+            Text = status,
+            FontSize = 12,
+            FontAttributes = FontAttributes.Bold,
+            TextColor = accent,
+            VerticalTextAlignment = TextAlignment.Center
+        }, 2, 0);
+        rowGrid.Add(preview, 3, 0);
+
+        var row = new Border
+        {
+            Padding = new Thickness(10, 8),
+            BackgroundColor = current
+                ? Color.FromArgb("#FFF7E6")
+                : completed ? Color.FromArgb("#F0FDF4") : Color.FromArgb("#F1F5F9"),
+            Stroke = accent,
+            StrokeThickness = current ? 3 : 1,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 16 },
+            Opacity = unlocked ? 1 : .72,
+            Content = rowGrid
+        };
+
+        if (unlocked)
+        {
+            var tap = new TapGestureRecognizer();
+            tap.Tapped += async (_, _) => await OpenLevelAsync(stage);
+            row.GestureRecognizers.Add(tap);
+        }
+        _levelList.Add(row);
+    }
+
+    private async Task OpenLevelAsync(int stage)
+    {
+        if (stage == 0)
+            await Navigation.PushAsync(new AdventureMissionHubPage());
+        else if (stage == 2)
+            await Navigation.PushAsync(new StationMissionHubPage());
+        else if (stage == 3)
+            await Navigation.PushAsync(new TrainMissionHubPage());
+        else if (stage == ParisTreasureCatalog.FirstStage - 1)
+            await Navigation.PushAsync(new ParisChapterPage());
+        else if (stage < ParisTreasureCatalog.FirstStage)
+            await Navigation.PushAsync(new AdventureScenePage(stage));
+        else
+            await Navigation.PushAsync(new ParisTreasurePage(stage));
     }
 
     private void AddPrologueStops()
