@@ -503,6 +503,8 @@ public sealed class AdventurePage : ContentPage
     {
         if (stage == 0)
             await Navigation.PushAsync(new AdventureMissionHubPage());
+        else if (stage == 1)
+            await Navigation.PushAsync(new EnRouteMissionPage());
         else if (stage == 2)
             await Navigation.PushAsync(new StationMissionHubPage());
         else if (stage == 3)
