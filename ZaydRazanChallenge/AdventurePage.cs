@@ -374,11 +374,16 @@ public sealed class AdventurePage : ContentPage
         {
             var quest = ParisTreasureCatalog.Quests[questIndex];
             var stage = ParisTreasureCatalog.FirstStage + questIndex;
+            var discovered = stage < currentLevel || currentLevel >= StageCount;
             AddLevelRow(
                 stage + 1,
-$"Paris · {ShortTitle(quest.Title)}",
-$"Découverte {questIndex + 1} sur {ParisTreasureCatalog.Count}",
-                quest.Photo,
+                discovered ? $"Paris · {ShortTitle(quest.Title)}" : "Paris · Mystère",
+                discovered
+                    ? $"Découverte {questIndex + 1} sur {ParisTreasureCatalog.Count}"
+                    : stage == currentLevel
+                        ? "Cherche le lieu dans la mission"
+                        : "Lieu à découvrir",
+                discovered ? quest.Photo : null,
                 stage,
                 currentLevel);
         }
@@ -388,7 +393,7 @@ $"Découverte {questIndex + 1} sur {ParisTreasureCatalog.Count}",
         int number,
         string title,
         string subtitle,
-        string image,
+        string? image,
         int stage,
         int currentLevel)
     {
@@ -421,6 +426,7 @@ $"Découverte {questIndex + 1} sur {ParisTreasureCatalog.Count}",
         var preview = new Image
         {
             Source = image,
+            IsVisible = image is not null,
             WidthRequest = 52,
             HeightRequest = 52,
             Aspect = Aspect.AspectFill,
