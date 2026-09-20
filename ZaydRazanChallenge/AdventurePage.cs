@@ -673,7 +673,7 @@ public sealed class AdventurePage : ContentPage
         _mapImage.Source = "paris_letter_scene.jpg";
         _stars.Text = $"⭐ {AdventureSave.Get("stars", 0)}";
         _step.Text = _stageIndex >= ParisTreasureCatalog.FirstStage
-            ? $"PARIJS · {Math.Min(ParisTreasureCatalog.Count, _stageIndex - 3)} / {ParisTreasureCatalog.Count}"
+            ? $"PARIJS · {Math.Min(ParisTreasureCatalog.Count, _stageIndex - ParisTreasureCatalog.FirstStage + 1)} / {ParisTreasureCatalog.Count}"
             : $"MISSIE {_stageIndex + 1} / {StageCount}";
         _progress.Progress = (double)(_stageIndex + 1) / StageCount;
         _place.Text = $"{stage.Emoji} {stage.Place}";
