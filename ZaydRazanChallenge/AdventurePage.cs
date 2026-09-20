@@ -328,16 +328,6 @@ public sealed class AdventurePage : ContentPage
     private static int CurrentSavedStage()
     {
         var stage = AdventureSave.Get("adventure_stage", 0);
-        // Older APKs routed completed home missions to a legacy ticket screen.
-        // Restore the full station chapter without erasing any saved answers.
-        if (stage == 1 &&
-            AdventureSave.Get("home_pack_zayd", false) &&
-            AdventureSave.Get("home_pack_razan", false) &&
-            AdventureSave.Get("home_documents", false))
-        {
-            stage = 2;
-            AdventureSave.Set("adventure_stage", stage);
-        }
         return Math.Clamp(stage, 0, StageCount);
     }
 
