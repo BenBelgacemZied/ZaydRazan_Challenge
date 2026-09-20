@@ -72,6 +72,13 @@
                                 CornerRadius="18"
                                 HeightRequest="58"
                                 Clicked="OnAdventureClicked" />
+                        <Button Text="↻  Réinitialiser l'application"
+                                FontSize="13"
+                                BackgroundColor="#64748B"
+                                TextColor="White"
+                                CornerRadius="14"
+                                HeightRequest="40"
+                                Clicked="OnResetClicked" />
                     </VerticalStackLayout>
                 </Border>
             </Grid>

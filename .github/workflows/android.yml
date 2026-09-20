@@ -2,7 +2,7 @@ name: ZR LingoTrip Android
 
 on:
   push:
-    branches: [main, "develop/**", "build/**"]
+    branches: [main, "develop/**", "build/**", "fix/**"]
   pull_request:
     branches: [main]
   workflow_dispatch:

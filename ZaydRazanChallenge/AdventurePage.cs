@@ -125,14 +125,45 @@ public sealed class AdventurePage : ContentPage
         HeightRequest = 9
     };
     private readonly VerticalStackLayout _answers = new() { Spacing = 9 };
-    private readonly AbsoluteLayout _mapLayer = new();
-    private readonly Image _mapImage = new() { Source = "adventure_map.jpg", Aspect = Aspect.AspectFill };
+    private readonly Image _mapImage = new() { Source = "paris_letter_scene.jpg", Aspect = Aspect.AspectFill };
+    private readonly VerticalStackLayout _levelList = new() { Spacing = 7 };
+    private readonly HorizontalStackLayout _chapterTabs = new() { Spacing = 8 };
+    private readonly HorizontalStackLayout _routeStops = new() { Spacing = 8 };
+    private readonly Label _routeTitle = new()
+    {
+        FontSize = 20,
+        FontAttributes = FontAttributes.Bold,
+        TextColor = Color.FromArgb("#17324D")
+    };
+    private readonly Label _routeProgressText = new()
+    {
+        FontSize = 14,
+        FontAttributes = FontAttributes.Bold,
+        TextColor = Color.FromArgb("#2563EB")
+    };
+    private readonly Label _routeStatus = new()
+    {
+        FontSize = 15,
+        FontAttributes = FontAttributes.Bold,
+        TextColor = Color.FromArgb("#17324D")
+    };
+    private readonly Label _routeLegend = new()
+    {
+        Text = "✅ Terminé    ▶ À jouer    🔒 Verrouillé",
+        FontSize = 12,
+        TextColor = Color.FromArgb("#64748B"),
+        HorizontalTextAlignment = TextAlignment.Center
+    };
+    private readonly ProgressBar _journeyProgress = new()
+    {
+        ProgressColor = Color.FromArgb("#F59E0B"),
+        BackgroundColor = Color.FromArgb("#DBEAFE"),
+        HeightRequest = 8
+    };
     private readonly Border _missionCard;
     private readonly ScrollView _scroll;
-    private Label? _heroes;
-    private readonly double _mapWidth;
-    private readonly double _mapHeight;
     private int _stageIndex;
+    private int _selectedChapter;
     private readonly int? _testStage;
     private bool _answered;
 
@@ -147,8 +178,8 @@ public sealed class AdventurePage : ContentPage
         _stageIndex = testStage ?? CurrentSavedStage();
 
         var display = DeviceDisplay.Current.MainDisplayInfo;
-        _mapWidth = Math.Min(430d, Math.Max(300d, display.Width / display.Density));
-        _mapHeight = _mapWidth * 1.5;
+        var logicalHeight = display.Height / display.Density;
+        var heroHeight = Math.Max(360d, logicalHeight * .55d);
 
         var listenButton = new Button
         {
@@ -220,25 +251,58 @@ public sealed class AdventurePage : ContentPage
         Grid.SetColumn(_energy, 1);
         Grid.SetColumn(_stars, 2);
 
-        var mapContainer = new Grid
+        var hero = new Grid
         {
-            WidthRequest = _mapWidth,
-            HeightRequest = _mapHeight,
-            HorizontalOptions = LayoutOptions.Center,
+            HeightRequest = heroHeight,
             Children =
             {
                 _mapImage,
-                _mapLayer,
                 hud
             }
         };
+
+        var journeyPanel = new Border
+        {
+            Margin = new Thickness(10, -18, 10, 14),
+            Padding = new Thickness(14, 16),
+            BackgroundColor = Color.FromArgb("#F8FBFF"),
+            Stroke = Color.FromArgb("#F59E0B"),
+            StrokeThickness = 2,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 24 },
+            Shadow = new Shadow
+            {
+                Brush = Colors.Black,
+                Opacity = .18f,
+                Radius = 10,
+                Offset = new Point(0, 4)
+            },
+            Content = new VerticalStackLayout
+            {
+                Spacing = 10,
+                Children =
+                {
+                    new Grid
+                    {
+                        ColumnDefinitions =
+                        {
+                            new ColumnDefinition(GridLength.Star),
+                            new ColumnDefinition(GridLength.Auto)
+                        },
+                        Children = { _routeTitle, _routeProgressText }
+                    },
+                    _journeyProgress,
+                    _levelList
+                }
+            }
+        };
+        Grid.SetColumn(_routeProgressText, 1);
 
         _scroll = new ScrollView
         {
             Content = new VerticalStackLayout
             {
                 Spacing = 0,
-                Children = { mapContainer, _missionCard }
+                Children = { hero, journeyPanel, _missionCard }
             }
         };
         Content = _scroll;
@@ -274,40 +338,206 @@ public sealed class AdventurePage : ContentPage
             stage = 2;
             AdventureSave.Set("adventure_stage", stage);
         }
-        return Math.Clamp(stage, 0, StageCount - 1);
+        return Math.Clamp(stage, 0, StageCount);
     }
 
     private void RenderMap()
     {
-        _mapLayer.Clear();
+        _chapterTabs.Clear();
+        _routeStops.Clear();
+        _levelList.Clear();
 
-        for (var i = 0; i < ParisTreasureCatalog.FirstStage + 1; i++)
+        var currentLevel = Math.Clamp(_stageIndex, 0, StageCount);
+        _journeyProgress.Progress = (double)currentLevel / StageCount;
+        _routeTitle.Text = "📚 Niveaux de l'aventure";
+        _routeProgressText.Text = $"{currentLevel}/{StageCount}";
+        _routeStatus.Text = currentLevel >= StageCount
+            ? "Aventure terminée 🎉"
+            : $"Niveau actuel : {currentLevel + 1} sur {StageCount}";
+
+        var prologue = new[]
+        {
+            ("Maison", "Préparer les valises", "mission_pack_zayd.jpg"),
+            ("En route", "Trouver le chemin", "adventure_map.jpg"),
+            ("Gare", "Billets et quai", "station_concourse.jpg"),
+            ("Train", "Monter dans le wagon", "scene_train_interior.jpg"),
+            ("Paris", "Arrivée à Paris", "paris_letter_scene.jpg")
+        };
+
+        for (var stage = 0; stage < prologue.Length; stage++)
+        {
+            var item = prologue[stage];
+            AddLevelRow(stage + 1, item.Item1, item.Item2, item.Item3, stage, currentLevel);
+        }
+
+        for (var questIndex = 0; questIndex < ParisTreasureCatalog.Count; questIndex++)
+        {
+            var quest = ParisTreasureCatalog.Quests[questIndex];
+            var stage = ParisTreasureCatalog.FirstStage + questIndex;
+            var discovered = stage < currentLevel || currentLevel >= StageCount;
+            AddLevelRow(
+                stage + 1,
+                discovered ? $"Paris · {ShortTitle(quest.Title)}" : "Paris · Mystère",
+                discovered
+                    ? $"Découverte {questIndex + 1} sur {ParisTreasureCatalog.Count}"
+                    : stage == currentLevel
+                        ? "Cherche le lieu dans la mission"
+                        : "Lieu à découvrir",
+                discovered ? quest.Photo : null,
+                stage,
+                currentLevel);
+        }
+    }
+
+    private void AddLevelRow(
+        int number,
+        string title,
+        string subtitle,
+        string? image,
+        int stage,
+        int currentLevel)
+    {
+        var completed = stage < currentLevel || currentLevel >= StageCount;
+        var current = stage == currentLevel && currentLevel < StageCount;
+        var unlocked = stage <= currentLevel;
+        var status = completed ? "✓ Terminé" : current ? "▶ À jouer" : "🔒 Verrouillé";
+        var accent = completed
+            ? Color.FromArgb("#16A34A")
+            : current ? Color.FromArgb("#D97706") : Color.FromArgb("#94A3B8");
+
+        var numberBadge = new Border
+        {
+            WidthRequest = 44,
+            HeightRequest = 44,
+            BackgroundColor = accent,
+            StrokeThickness = 0,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 },
+            Content = new Label
+            {
+                Text = number.ToString(),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Colors.White,
+                HorizontalTextAlignment = TextAlignment.Center,
+                VerticalTextAlignment = TextAlignment.Center
+            }
+        };
+
+        var preview = new Image
+        {
+            Source = image,
+            IsVisible = image is not null,
+            WidthRequest = 52,
+            HeightRequest = 52,
+            Aspect = Aspect.AspectFill,
+            Opacity = unlocked ? 1 : .35
+        };
+
+        var details = new VerticalStackLayout
+        {
+            Spacing = 2,
+            VerticalOptions = LayoutOptions.Center,
+            Children =
+            {
+                new Label
+                {
+                    Text = title,
+                    FontSize = 16,
+                    FontAttributes = FontAttributes.Bold,
+                    TextColor = Color.FromArgb("#17324D")
+                },
+                new Label
+                {
+                    Text = subtitle,
+                    FontSize = 12,
+                    TextColor = Color.FromArgb("#64748B")
+                }
+            }
+        };
+        var rowGrid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 11
+        };
+        rowGrid.Add(numberBadge, 0, 0);
+        rowGrid.Add(details, 1, 0);
+        rowGrid.Add(new Label
+        {
+            Text = status,
+            FontSize = 12,
+            FontAttributes = FontAttributes.Bold,
+            TextColor = accent,
+            VerticalTextAlignment = TextAlignment.Center
+        }, 2, 0);
+        rowGrid.Add(preview, 3, 0);
+
+        var row = new Border
+        {
+            Padding = new Thickness(10, 8),
+            BackgroundColor = current
+                ? Color.FromArgb("#FFF7E6")
+                : completed ? Color.FromArgb("#F0FDF4") : Color.FromArgb("#F1F5F9"),
+            Stroke = accent,
+            StrokeThickness = current ? 3 : 1,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 16 },
+            Opacity = unlocked ? 1 : .72,
+            Content = rowGrid
+        };
+
+        if (unlocked)
+        {
+            var tap = new TapGestureRecognizer();
+            tap.Tapped += async (_, _) => await OpenLevelAsync(stage);
+            row.GestureRecognizers.Add(tap);
+        }
+        _levelList.Add(row);
+    }
+
+    private async Task OpenLevelAsync(int stage)
+    {
+        if (stage == 0)
+            await Navigation.PushAsync(new AdventureMissionHubPage());
+        else if (stage == 2)
+            await Navigation.PushAsync(new StationMissionHubPage());
+        else if (stage == 3)
+            await Navigation.PushAsync(new TrainMissionHubPage());
+        else if (stage == ParisTreasureCatalog.FirstStage - 1)
+            await Navigation.PushAsync(new ParisChapterPage());
+        else if (stage < ParisTreasureCatalog.FirstStage)
+            await Navigation.PushAsync(new AdventureScenePage(stage));
+        else
+            await Navigation.PushAsync(new ParisTreasurePage(stage));
+    }
+
+    private void AddPrologueStops()
+    {
+        var prologue = new[]
+        {
+            ("Maison", "mission_pack_zayd.jpg"),
+            ("En route", "adventure_map.jpg"),
+            ("Gare", "station_concourse.jpg"),
+            ("Train", "scene_train_interior.jpg"),
+            ("Paris", "paris_letter_scene.jpg")
+        };
+
+        for (var i = 0; i < prologue.Length; i++)
         {
             var stageNumber = i;
-            var activeMarker = Math.Min(_stageIndex, ParisTreasureCatalog.FirstStage);
-            var unlocked = i <= activeMarker;
-            var completed = i < activeMarker;
-            var current = i == activeMarker;
-            var marker = new Button
-            {
-                Text = i == ParisTreasureCatalog.FirstStage ? "✉️" : (i + 1).ToString(),
-                FontSize = current ? 25 : 20,
-                FontAttributes = FontAttributes.Bold,
-                CornerRadius = 30,
-                WidthRequest = current ? 62 : 52,
-                HeightRequest = current ? 62 : 52,
-                Padding = 0,
-                BackgroundColor = completed
-                    ? Color.FromArgb("#22C55E")
-                    : current ? Color.FromArgb("#F59E0B") : Color.FromArgb("#94A3B8"),
-                TextColor = Colors.White,
-                BorderColor = Colors.White,
-                BorderWidth = 4,
-                IsEnabled = unlocked
-            };
-            marker.Clicked += async (_, _) =>
-            {
-                if (stageNumber == Math.Min(_stageIndex, ParisTreasureCatalog.FirstStage))
+            if (i > 0)
+                _routeStops.Add(MakeRouteConnector(true));
+            _routeStops.Add(MakeRouteStop(
+                prologue[i].Item1,
+                prologue[i].Item2,
+                true,
+                false,
+                true,
+                async () =>
                 {
                     if (stageNumber == 0)
                         await Navigation.PushAsync(new AdventureMissionHubPage());
@@ -315,39 +545,129 @@ public sealed class AdventurePage : ContentPage
                         await Navigation.PushAsync(new StationMissionHubPage());
                     else if (stageNumber == 3)
                         await Navigation.PushAsync(new TrainMissionHubPage());
-                    else if (stageNumber < 4)
+                    else if (stageNumber < ParisTreasureCatalog.FirstStage)
                         await Navigation.PushAsync(new AdventureScenePage(stageNumber));
                     else
                         await Navigation.PushAsync(new ParisChapterPage());
-                }
-                else if (stageNumber < _stageIndex)
-                    await DisplayAlert($"Etappe {stageNumber + 1} · {Stages[stageNumber].Place}",
-                        "Deze etappe is al voltooid ✓", "Verder");
-            };
-
-            var size = current ? 62d : 52d;
-            AbsoluteLayout.SetLayoutBounds(marker, new Rect(
-                Stages[i].MapX * _mapWidth - size / 2,
-                Stages[i].MapY * _mapHeight - size / 2,
-                size, size));
-            _mapLayer.Add(marker);
+                }));
         }
+    }
 
-        if (_stageIndex >= ParisTreasureCatalog.FirstStage) return;
-        var active = Stages[_stageIndex];
-        _heroes = new Label
+    private static Button MakeChapterChip(
+        string text,
+        bool selected,
+        bool completed,
+        bool enabled = true) => new()
         {
-            Text = "👦🏽👧🏽",
-            FontSize = 31,
-            HorizontalTextAlignment = TextAlignment.Center,
-            WidthRequest = 78,
-            HeightRequest = 46
+            Text = completed ? $"✓ {text}" : text,
+            FontSize = 13,
+            FontAttributes = FontAttributes.Bold,
+            HeightRequest = 38,
+            Padding = new Thickness(13, 0),
+            CornerRadius = 18,
+            TextColor = Colors.White,
+            BackgroundColor = completed
+                ? Color.FromArgb("#16A34A")
+                : selected ? Color.FromArgb("#D97706") : Color.FromArgb("#64748B"),
+            IsEnabled = enabled,
+            Opacity = enabled ? 1 : .45
         };
-        AbsoluteLayout.SetLayoutBounds(_heroes, new Rect(
-            active.MapX * _mapWidth - 39,
-            active.MapY * _mapHeight - 64,
-            78, 46));
-        _mapLayer.Add(_heroes);
+
+    private static View MakeRouteStop(
+        string title,
+        string image,
+        bool completed,
+        bool current,
+        bool unlocked,
+        Func<Task> open)
+    {
+        var picture = new Image
+        {
+            Source = image,
+            Aspect = Aspect.AspectFill,
+            WidthRequest = current ? 60 : 54,
+            HeightRequest = current ? 60 : 54,
+            Opacity = unlocked ? 1 : .38
+        };
+        var pictureFrame = new Border
+        {
+            Content = picture,
+            Padding = 0,
+            WidthRequest = current ? 66 : 60,
+            HeightRequest = current ? 66 : 60,
+            StrokeThickness = current ? 4 : 3,
+            Stroke = completed
+                ? Color.FromArgb("#16A34A")
+                : current ? Color.FromArgb("#F59E0B") : Color.FromArgb("#94A3B8"),
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 33 }
+        };
+        var badge = new Label
+        {
+            Text = completed ? "✓" : current ? "▶" : "🔒",
+            FontSize = 13,
+            FontAttributes = FontAttributes.Bold,
+            TextColor = Colors.White,
+            BackgroundColor = completed
+                ? Color.FromArgb("#16A34A")
+                : current ? Color.FromArgb("#D97706") : Color.FromArgb("#64748B"),
+            WidthRequest = 25,
+            HeightRequest = 25,
+            HorizontalTextAlignment = TextAlignment.Center,
+            VerticalTextAlignment = TextAlignment.Center,
+            HorizontalOptions = LayoutOptions.End,
+            VerticalOptions = LayoutOptions.End
+        };
+        var visual = new Grid { WidthRequest = 68, HeightRequest = 68 };
+        visual.Add(pictureFrame);
+        visual.Add(badge);
+        var stop = new VerticalStackLayout
+        {
+            WidthRequest = 70,
+            Spacing = 4,
+            HorizontalOptions = LayoutOptions.Center,
+            Children =
+            {
+                visual,
+                new Label
+                {
+                    Text = title,
+                    FontSize = 11,
+                    FontAttributes = current ? FontAttributes.Bold : FontAttributes.None,
+                    TextColor = unlocked ? Color.FromArgb("#17324D") : Color.FromArgb("#94A3B8"),
+                    HorizontalTextAlignment = TextAlignment.Center,
+                    LineBreakMode = LineBreakMode.TailTruncation,
+                    MaxLines = 2
+                }
+            }
+        };
+        if (unlocked)
+        {
+            var tap = new TapGestureRecognizer();
+            tap.Tapped += async (_, _) => await open();
+            stop.GestureRecognizers.Add(tap);
+        }
+        return stop;
+    }
+
+    private static View MakeRouteConnector(bool travelled) => new Label
+    {
+        Text = "•••",
+        FontSize = 16,
+        FontAttributes = FontAttributes.Bold,
+        TextColor = Color.FromArgb(travelled ? "#F59E0B" : "#CBD5E1"),
+        WidthRequest = 25,
+        HeightRequest = 68,
+        HorizontalTextAlignment = TextAlignment.Center,
+        VerticalTextAlignment = TextAlignment.Center
+    };
+
+    private static string ShortTitle(string title)
+    {
+        var clean = title.Replace("Le ", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("La ", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("Les ", "", StringComparison.OrdinalIgnoreCase)
+            .Trim();
+        return clean.Length <= 12 ? clean : $"{clean[..11]}…";
     }
 
     private void ShowStage()
@@ -356,11 +676,10 @@ public sealed class AdventurePage : ContentPage
         _missionCard.IsVisible = false;
         _missionCard.Opacity = 0;
         var stage = Stages[Math.Min(_stageIndex, ParisTreasureCatalog.FirstStage)];
-        _mapImage.Source = _stageIndex >= ParisTreasureCatalog.FirstStage
-            ? "paris_letter_scene.jpg" : "adventure_map.jpg";
+        _mapImage.Source = "paris_letter_scene.jpg";
         _stars.Text = $"⭐ {AdventureSave.Get("stars", 0)}";
         _step.Text = _stageIndex >= ParisTreasureCatalog.FirstStage
-            ? $"PARIJS · {Math.Min(ParisTreasureCatalog.Count, _stageIndex - 3)} / {ParisTreasureCatalog.Count}"
+            ? $"PARIJS · {Math.Min(ParisTreasureCatalog.Count, _stageIndex - ParisTreasureCatalog.FirstStage + 1)} / {ParisTreasureCatalog.Count}"
             : $"MISSIE {_stageIndex + 1} / {StageCount}";
         _progress.Progress = (double)(_stageIndex + 1) / StageCount;
         _place.Text = $"{stage.Emoji} {stage.Place}";
@@ -421,18 +740,6 @@ public sealed class AdventurePage : ContentPage
         }
 
         var nextStage = _stageIndex + 1;
-        if (nextStage < Stages.Length && _heroes is not null)
-        {
-            var current = Stages[_stageIndex];
-            var next = Stages[nextStage];
-            await _scroll.ScrollToAsync(0, 0, true);
-            await _heroes.TranslateTo(
-                (next.MapX - current.MapX) * _mapWidth,
-                (next.MapY - current.MapY) * _mapHeight,
-                900,
-                Easing.CubicInOut);
-            await Task.Delay(350);
-        }
 
         AdventureSave.Set("adventure_stage", Math.Min(nextStage, Stages.Length));
 
@@ -470,3 +777,4 @@ public sealed class AdventurePage : ContentPage
             new SpeechOptions { Locale = french });
     }
 }
+

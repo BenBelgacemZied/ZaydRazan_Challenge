@@ -24,6 +24,21 @@ public partial class MainPage : ContentPage
     private async void OnAdventureClicked(object sender, EventArgs e) =>
         await Navigation.PushAsync(new AdventurePage());
 
+    private async void OnResetClicked(object sender, EventArgs e)
+    {
+        var reset = await DisplayAlert(
+            "Réinitialiser l'application",
+            "Toutes les étoiles, la progression et les réponses enregistrées seront supprimées.",
+            "Réinitialiser",
+            "Annuler");
+        if (!reset) return;
+
+        AdventureSave.EndTest();
+        Preferences.Default.Clear();
+        await DisplayAlert("Application réinitialisée", "L'aventure recommence au niveau 1.", "OK");
+        OnAppearing();
+    }
+
     private async void OnMatchingClicked(object sender, EventArgs e) =>
         await Navigation.PushAsync(new WordGamesHubPage());
     private async void OnListeningClicked(object sender, EventArgs e) =>
