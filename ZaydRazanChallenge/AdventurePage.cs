@@ -338,7 +338,7 @@ public sealed class AdventurePage : ContentPage
             stage = 2;
             AdventureSave.Set("adventure_stage", stage);
         }
-        return Math.Clamp(stage, 0, StageCount - 1);
+        return Math.Clamp(stage, 0, StageCount);
     }
 
     private void RenderMap()
