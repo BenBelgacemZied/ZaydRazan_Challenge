@@ -480,7 +480,7 @@ public sealed class AdventurePage : ContentPage
             Content = rowGrid
         };
 
-        if (unlocked)
+        if (unlocked && !completed)
         {
             var tap = new TapGestureRecognizer();
             tap.Tapped += async (_, _) => await OpenLevelAsync(stage);
@@ -632,7 +632,7 @@ public sealed class AdventurePage : ContentPage
                 }
             }
         };
-        if (unlocked)
+        if (unlocked && !completed)
         {
             var tap = new TapGestureRecognizer();
             tap.Tapped += async (_, _) => await open();
