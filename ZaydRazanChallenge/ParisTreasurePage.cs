@@ -112,7 +112,7 @@ public sealed class ParisTreasurePage : ContentPage
                 Text = choice, FontSize = 14, FontAttributes = FontAttributes.Bold,
                 BackgroundColor = Color.FromArgb("#2051A3"), TextColor = Colors.White,
                 CornerRadius = 12, MinimumHeightRequest = 52, Padding = new Thickness(3, 2),
-                IsEnabled = false, AutomationId = "paris-answer-" + choice
+                IsVisible = false, IsEnabled = false, AutomationId = "paris-answer-" + choice
             };
             button.Clicked += async (_, _) => await AnswerAsync(choice, button);
             _choices.Add(button, index, 0);
@@ -125,7 +125,11 @@ public sealed class ParisTreasurePage : ContentPage
         if (_finished || !_missionStarted || _busy) return;
         _questionReady = true;
         foreach (var child in _choices.Children)
-            if (child is Button button) button.IsEnabled = true;
+            if (child is Button button)
+            {
+                button.IsVisible = true;
+                button.IsEnabled = true;
+            }
     }
 
     private async Task StartMissionAsync()
@@ -288,3 +292,4 @@ public sealed class ParisTreasurePage : ContentPage
         catch { }
     }
 }
+

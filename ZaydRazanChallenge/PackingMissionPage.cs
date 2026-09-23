@@ -57,6 +57,7 @@ public sealed class PackingMissionPage : ContentPage
             }}
         }}};
         BuildObjects();
+        _objects.IsVisible = false;
     }
 
     public static PackingMissionPage ForZayd() => new("Missie · Zayds koffer", "Zayd", "scene_home.jpg", "home_pack_zayd",
@@ -87,6 +88,7 @@ public sealed class PackingMissionPage : ContentPage
         base.OnAppearing();
         await Task.Delay(350);
         await SpeakDutchAsync($"Help {_hero}. Kies de spullen die nodig zijn voor de reis.");
+        _objects.IsVisible = true;
     }
 
     private void BuildObjects()
@@ -174,3 +176,4 @@ public sealed class PackingMissionPage : ContentPage
         catch { }
     }
 }
+

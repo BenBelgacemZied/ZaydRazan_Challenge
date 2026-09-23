@@ -99,6 +99,7 @@ public sealed class EnRouteMissionPage : ContentPage
         _answered = false;
         _feedback.Text = string.Empty;
         _answers.Children.Clear();
+        _answers.IsVisible = false;
 
         var question = Questions[_questionIndex];
         _progressLabel.Text = $"Question {_questionIndex + 1} sur {Questions.Length}";
@@ -125,6 +126,8 @@ public sealed class EnRouteMissionPage : ContentPage
         }
 
         await SpeakDutchAsync(question.Dutch);
+        // The child hears the complete Dutch question before seeing the French choices.
+        _answers.IsVisible = true;
         _loading = false;
     }
 
