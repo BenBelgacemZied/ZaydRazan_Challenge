@@ -107,16 +107,46 @@ public sealed class ParisTreasurePage : ContentPage
         foreach (var (answer, index) in clue.Choices.OrderBy(_ => Random.Shared.Next()).Select((value, index) => (value, index)))
         {
             var choice = answer;
+            var displayChoice = FormatFrenchChoice(choice, clue);
             var button = new Button
             {
-                Text = choice, FontSize = 14, FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Color.FromArgb("#2051A3"), TextColor = Colors.White,
-                CornerRadius = 12, MinimumHeightRequest = 52, Padding = new Thickness(3, 2),
-                IsVisible = false, IsEnabled = false, AutomationId = "paris-answer-" + choice
+                Text = displayChoice,
+                FontSize = 16,
+                FontAttributes = FontAttributes.Bold,
+                LineBreakMode = LineBreakMode.WordWrap,
+                HorizontalOptions = LayoutOptions.Fill,
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                BackgroundColor = Color.FromArgb("#2051A3"),
+                TextColor = Colors.White,
+                CornerRadius = 12,
+                MinimumHeightRequest = 58,
+                Padding = new Thickness(6, 4),
+                IsVisible = false,
+                IsEnabled = false,
+                AutomationId = "paris-answer-" + displayChoice
             };
             button.Clicked += async (_, _) => await AnswerAsync(choice, button);
             _choices.Add(button, index, 0);
         }
+    }
+
+    private static string FormatFrenchChoice(string choice, ParisClue clue)
+    {
+        var value = choice.Trim();
+        if (value is "le" or "la" or "un" or "une" or "les" or "des")
+        {
+            var prefix = value + " ";
+            var replacement = VocabularyCatalog.Items
+                .Select(item => item.French.Trim())
+                .FirstOrDefault(word =>
+                    word.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(word, clue.Word, StringComparison.OrdinalIgnoreCase));
+
+            return replacement ?? value + " mot";
+        }
+
+        return value;
     }
 
     private async Task ReadQuestionAsync()
