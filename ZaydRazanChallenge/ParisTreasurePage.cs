@@ -115,8 +115,6 @@ public sealed class ParisTreasurePage : ContentPage
                 FontAttributes = FontAttributes.Bold,
                 LineBreakMode = LineBreakMode.WordWrap,
                 HorizontalOptions = LayoutOptions.Fill,
-                HorizontalContentAlignment = HorizontalAlignment.Center,
-                VerticalContentAlignment = VerticalAlignment.Center,
                 BackgroundColor = Color.FromArgb("#2051A3"),
                 TextColor = Colors.White,
                 CornerRadius = 12,
