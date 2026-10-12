@@ -772,6 +772,51 @@ public sealed class AdventurePage : ContentPage
         await _scroll.ScrollToAsync(0, 0, true);
     }
 
+    private async Task PlaySuccessCelebrationAsync()
+    {
+        _celebrationOverlay.Children.Clear();
+        var balloon = new Label
+        {
+            Text = "🎈",
+            FontSize = 88,
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center,
+            Opacity = 0,
+            Scale = .55
+        };
+        var burst = new Label
+        {
+            Text = "💥✨  Bravo !  ✨💥",
+            FontSize = 28,
+            FontAttributes = FontAttributes.Bold,
+            TextColor = Color.FromArgb("#F59E0B"),
+            HorizontalTextAlignment = TextAlignment.Center,
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center,
+            Opacity = 0,
+            Scale = .7
+        };
+        _celebrationOverlay.Add(balloon);
+        _celebrationOverlay.Add(burst);
+        _celebrationOverlay.IsVisible = true;
+
+        await Task.WhenAll(
+            balloon.FadeTo(1, 120),
+            balloon.ScaleTo(1, 220));
+        await Task.Delay(180);
+        await Task.WhenAll(
+            balloon.ScaleTo(1.9, 320, Easing.CubicOut),
+            balloon.FadeTo(0, 320),
+            burst.FadeTo(1, 180),
+            burst.ScaleTo(1, 260, Easing.CubicOut));
+        await Task.Delay(220);
+        await Task.WhenAll(
+            burst.FadeTo(0, 260),
+            burst.ScaleTo(1.15, 260));
+        _celebrationOverlay.Children.Clear();
+        _celebrationOverlay.IsVisible = false;
+    }
+
     private async Task SpeakFrench()
     {
         var locales = await TextToSpeech.Default.GetLocalesAsync();
