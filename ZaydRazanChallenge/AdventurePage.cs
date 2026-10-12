@@ -162,6 +162,14 @@ public sealed class AdventurePage : ContentPage
     };
     private readonly Border _missionCard;
     private readonly ScrollView _scroll;
+    private readonly Grid _celebrationOverlay = new()
+    {
+        IsVisible = false,
+        InputTransparent = true,
+        HorizontalOptions = LayoutOptions.Fill,
+        VerticalOptions = LayoutOptions.Fill,
+        ZIndex = 100
+    };
     private int _stageIndex;
     private int _selectedChapter;
     private readonly int? _testStage;
@@ -305,7 +313,10 @@ public sealed class AdventurePage : ContentPage
                 Children = { hero, journeyPanel, _missionCard }
             }
         };
-        Content = _scroll;
+        var pageRoot = new Grid();
+        pageRoot.Add(_scroll);
+        pageRoot.Add(_celebrationOverlay);
+        Content = pageRoot;
         ShowStage();
     }
 
@@ -716,6 +727,8 @@ public sealed class AdventurePage : ContentPage
             ? Color.FromArgb("#16A34A")
             : Color.FromArgb("#DC2626");
         await (correct ? GameFeedback.SuccessAsync() : GameFeedback.FailureAsync());
+        if (correct)
+            await PlaySuccessCelebrationAsync();
         _feedback.TextColor = selected.BackgroundColor;
         _feedback.Text = correct
             ? "Bravo! +1 ⭐ De wolken verdwijnen..."
