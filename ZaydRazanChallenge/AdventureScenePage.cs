@@ -223,7 +223,9 @@ public sealed class AdventureScenePage : ContentPage
                 CornerRadius = 24,
                 Padding = new Thickness(7, 2),
                 MinimumWidthRequest = 52,
-                HeightRequest = 50
+                HeightRequest = 50,
+                IsVisible = false,
+                IsEnabled = false
             };
             button.Clicked += async (_, _) => await CheckChoice(selectedIndex, button);
             AbsoluteLayout.SetLayoutBounds(button, new Rect(
@@ -239,6 +241,12 @@ public sealed class AdventureScenePage : ContentPage
         var spokenInstruction = mission.Instruction.Split('·')[0].Trim();
         await TextToSpeech.Default.SpeakAsync(spokenInstruction,
             new SpeechOptions { Locale = await FindDutchLocale() });
+        foreach (var child in _playfield.Children)
+            if (child is Button button)
+            {
+                button.IsVisible = true;
+                button.IsEnabled = true;
+            }
     }
 
     private async Task CheckChoice(int choiceIndex, Button button)
@@ -346,3 +354,4 @@ public static class AnimationExtensions
         await view.TranslateTo(0, 0, 55);
     }
 }
+

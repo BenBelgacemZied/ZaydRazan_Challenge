@@ -162,6 +162,14 @@ public sealed class AdventurePage : ContentPage
     };
     private readonly Border _missionCard;
     private readonly ScrollView _scroll;
+    private readonly Grid _celebrationOverlay = new()
+    {
+        IsVisible = false,
+        InputTransparent = true,
+        HorizontalOptions = LayoutOptions.Fill,
+        VerticalOptions = LayoutOptions.Fill,
+        ZIndex = 100
+    };
     private int _stageIndex;
     private int _selectedChapter;
     private readonly int? _testStage;
@@ -305,7 +313,10 @@ public sealed class AdventurePage : ContentPage
                 Children = { hero, journeyPanel, _missionCard }
             }
         };
-        Content = _scroll;
+        var pageRoot = new Grid();
+        pageRoot.Add(_scroll);
+        pageRoot.Add(_celebrationOverlay);
+        Content = pageRoot;
         ShowStage();
     }
 
@@ -328,16 +339,6 @@ public sealed class AdventurePage : ContentPage
     private static int CurrentSavedStage()
     {
         var stage = AdventureSave.Get("adventure_stage", 0);
-        // Older APKs routed completed home missions to a legacy ticket screen.
-        // Restore the full station chapter without erasing any saved answers.
-        if (stage == 1 &&
-            AdventureSave.Get("home_pack_zayd", false) &&
-            AdventureSave.Get("home_pack_razan", false) &&
-            AdventureSave.Get("home_documents", false))
-        {
-            stage = 2;
-            AdventureSave.Set("adventure_stage", stage);
-        }
         return Math.Clamp(stage, 0, StageCount);
     }
 
@@ -386,6 +387,24 @@ public sealed class AdventurePage : ContentPage
                 discovered ? quest.Photo : null,
                 stage,
                 currentLevel);
+        }
+
+        if (currentLevel >= StageCount)
+        {
+            var brusselsButton = new Button
+            {
+                Text = "🇧🇪  Commencer l'aventure Bruxelles",
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
+                BackgroundColor = Color.FromArgb("#D62828"),
+                TextColor = Colors.White,
+                CornerRadius = 22,
+                MinimumHeightRequest = 58,
+                Margin = new Thickness(0, 12, 0, 8)
+            };
+            brusselsButton.Clicked += async (_, _) =>
+                await Navigation.PushAsync(new BrusselsAdventurePage());
+            _levelList.Add(brusselsButton);
         }
     }
 
@@ -490,7 +509,7 @@ public sealed class AdventurePage : ContentPage
             Content = rowGrid
         };
 
-        if (unlocked)
+        if (unlocked && !completed)
         {
             var tap = new TapGestureRecognizer();
             tap.Tapped += async (_, _) => await OpenLevelAsync(stage);
@@ -503,6 +522,8 @@ public sealed class AdventurePage : ContentPage
     {
         if (stage == 0)
             await Navigation.PushAsync(new AdventureMissionHubPage());
+        else if (stage == 1)
+            await Navigation.PushAsync(new EnRouteMissionPage());
         else if (stage == 2)
             await Navigation.PushAsync(new StationMissionHubPage());
         else if (stage == 3)
@@ -640,7 +661,7 @@ public sealed class AdventurePage : ContentPage
                 }
             }
         };
-        if (unlocked)
+        if (unlocked && !completed)
         {
             var tap = new TapGestureRecognizer();
             tap.Tapped += async (_, _) => await open();
@@ -724,6 +745,8 @@ public sealed class AdventurePage : ContentPage
             ? Color.FromArgb("#16A34A")
             : Color.FromArgb("#DC2626");
         await (correct ? GameFeedback.SuccessAsync() : GameFeedback.FailureAsync());
+        if (correct)
+            await PlaySuccessCelebrationAsync();
         _feedback.TextColor = selected.BackgroundColor;
         _feedback.Text = correct
             ? "Bravo! +1 ⭐ De wolken verdwijnen..."
@@ -765,6 +788,51 @@ public sealed class AdventurePage : ContentPage
         _stageIndex = nextStage;
         ShowStage();
         await _scroll.ScrollToAsync(0, 0, true);
+    }
+
+    private async Task PlaySuccessCelebrationAsync()
+    {
+        _celebrationOverlay.Children.Clear();
+        var balloon = new Label
+        {
+            Text = "🎈",
+            FontSize = 88,
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center,
+            Opacity = 0,
+            Scale = .55
+        };
+        var burst = new Label
+        {
+            Text = "💥✨  Bravo !  ✨💥",
+            FontSize = 28,
+            FontAttributes = FontAttributes.Bold,
+            TextColor = Color.FromArgb("#F59E0B"),
+            HorizontalTextAlignment = TextAlignment.Center,
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center,
+            Opacity = 0,
+            Scale = .7
+        };
+        _celebrationOverlay.Add(balloon);
+        _celebrationOverlay.Add(burst);
+        _celebrationOverlay.IsVisible = true;
+
+        await Task.WhenAll(
+            balloon.FadeTo(1, 120),
+            balloon.ScaleTo(1, 220));
+        await Task.Delay(180);
+        await Task.WhenAll(
+            balloon.ScaleTo(1.9, 320, Easing.CubicOut),
+            balloon.FadeTo(0, 320),
+            burst.FadeTo(1, 180),
+            burst.ScaleTo(1, 260, Easing.CubicOut));
+        await Task.Delay(220);
+        await Task.WhenAll(
+            burst.FadeTo(0, 260),
+            burst.ScaleTo(1.15, 260));
+        _celebrationOverlay.Children.Clear();
+        _celebrationOverlay.IsVisible = false;
     }
 
     private async Task SpeakFrench()
