@@ -97,7 +97,7 @@ public sealed class BrusselsAdventurePage : ContentPage
             Padding = new Thickness(14, 10),
             BackgroundColor = Color.FromArgb("#CC17324D"),
             StrokeThickness = 0,
-            StrokeShape = new RoundRectangle { CornerRadius = 22 },
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 },
             Content = new Grid
             {
                 ColumnDefinitions =
@@ -127,7 +127,7 @@ public sealed class BrusselsAdventurePage : ContentPage
             BackgroundColor = Color.FromArgb("#F8FFFFFF"),
             Stroke = Color.FromArgb("#F59E0B"),
             StrokeThickness = 2,
-            StrokeShape = new RoundRectangle { CornerRadius = 24 },
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 24 },
             VerticalOptions = LayoutOptions.End,
             Content = new VerticalStackLayout
             {
