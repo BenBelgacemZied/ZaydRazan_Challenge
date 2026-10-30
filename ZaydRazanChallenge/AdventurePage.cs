@@ -387,6 +387,24 @@ public sealed class AdventurePage : ContentPage
                 stage,
                 currentLevel);
         }
+
+        if (currentLevel >= StageCount)
+        {
+            var brusselsButton = new Button
+            {
+                Text = "🇧🇪  Commencer l'aventure Bruxelles",
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
+                BackgroundColor = Color.FromArgb("#D62828"),
+                TextColor = Colors.White,
+                CornerRadius = 22,
+                MinimumHeightRequest = 58,
+                Margin = new Thickness(0, 12, 0, 8)
+            };
+            brusselsButton.Clicked += async (_, _) =>
+                await Navigation.PushAsync(new BrusselsAdventurePage());
+            _levelList.Add(brusselsButton);
+        }
     }
 
     private void AddLevelRow(
