@@ -27,15 +27,9 @@ public sealed class BrusselsMissionPage : ContentPage
         BackgroundColor = Color.FromArgb("#EAF8FF");
         GameUi.AddHomeButton(this);
 
-        _hero.Background = new LinearGradientBrush(
-            new GradientStopCollection
-            {
-                new GradientStop(Color.FromArgb(Palette[missionIndex]), 0),
-                new GradientStop(Color.FromArgb("#17324D"), 1)
-            },
-            new Point(0, 0),
-            new Point(1, 1));
         _hero.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+        _hero.Children.Add(new Image { Source = "brussels_hero.svg", Aspect = Aspect.AspectFill });
+        _hero.Children.Add(new BoxView { Color = Color.FromArgb("#9917324D") });
         _hero.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         _hero.Children.Add(new Label
         {
