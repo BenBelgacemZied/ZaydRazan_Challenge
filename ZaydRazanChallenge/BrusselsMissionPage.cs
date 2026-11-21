@@ -29,8 +29,8 @@ public sealed class BrusselsMissionPage : ContentPage
 
         _hero.RowDefinitions.Add(new RowDefinition(GridLength.Star));
         _hero.Children.Add(new Image { Source = "brussels_hero.svg", Aspect = Aspect.AspectFill });
-        _hero.Children.Add(new BoxView { Color = Color.FromArgb("#9917324D") });
         _hero.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        _hero.Add(new BoxView { Color = Color.FromArgb("#9917324D") }, 0, 1);
         _hero.Children.Add(new Label
         {
             Text = _mission.Icon,
@@ -47,7 +47,6 @@ public sealed class BrusselsMissionPage : ContentPage
             HorizontalTextAlignment = TextAlignment.Center,
             Margin = new Thickness(15, 0, 15, 18)
         });
-        Microsoft.Maui.Controls.Grid.SetRow(_hero.Children[1], 1);
 
         _counter.Text = $"Bruxelles · mission {_missionIndex + 1}/{BrusselsCatalog.Missions.Count}";
 
