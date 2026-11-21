@@ -72,6 +72,14 @@
                                 CornerRadius="18"
                                 HeightRequest="58"
                                 Clicked="OnAdventureClicked" />
+                        <Button Text="🇧🇪  Bruxelles"
+                                FontSize="17"
+                                FontAttributes="Bold"
+                                BackgroundColor="#D62828"
+                                TextColor="White"
+                                CornerRadius="18"
+                                HeightRequest="54"
+                                Clicked="OnBrusselsClicked" />
                         <Button Text="↻  Réinitialiser l'application"
                                 FontSize="13"
                                 BackgroundColor="#64748B"

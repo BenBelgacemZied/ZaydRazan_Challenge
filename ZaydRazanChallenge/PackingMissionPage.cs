@@ -1,5 +1,3 @@
-using Microsoft.Maui.Layouts;
-
 namespace ZaydRazanChallenge;
 
 public sealed class PackingMissionPage : ContentPage
@@ -12,7 +10,7 @@ public sealed class PackingMissionPage : ContentPage
     private readonly Label _instruction = new() { FontSize = 20, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.White };
     private readonly Label _counter = new() { FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Colors.White };
     private readonly Label _suitcase = new() { FontSize = 31, HorizontalTextAlignment = TextAlignment.Center, Text = "" };
-    private readonly FlexLayout _objects = new() { Wrap = FlexWrap.Wrap, JustifyContent = FlexJustify.Center, AlignItems = FlexAlignItems.Center };
+    private readonly VerticalStackLayout _objects = new() { Spacing = 10 };
     private bool _busy;
 
     private PackingMissionPage(string title, string hero, string image, string preferenceKey, Item[] items)
@@ -59,6 +57,7 @@ public sealed class PackingMissionPage : ContentPage
             }}
         }}};
         BuildObjects();
+        _objects.IsVisible = false;
     }
 
     public static PackingMissionPage ForZayd() => new("Missie · Zayds koffer", "Zayd", "scene_home.jpg", "home_pack_zayd",
@@ -89,6 +88,7 @@ public sealed class PackingMissionPage : ContentPage
         base.OnAppearing();
         await Task.Delay(350);
         await SpeakDutchAsync($"Help {_hero}. Kies de spullen die nodig zijn voor de reis.");
+        _objects.IsVisible = true;
     }
 
     private void BuildObjects()
@@ -99,8 +99,10 @@ public sealed class PackingMissionPage : ContentPage
             var button = new Button
             {
                 Text = $"{item.Emoji}  {item.French}", FontSize = 17, CornerRadius = 17,
-                BackgroundColor = Colors.White, TextColor = Color.FromArgb("#172554"), Margin = 5,
-                Padding = new Thickness(13, 8), FontAttributes = FontAttributes.Bold
+                BackgroundColor = Colors.White, TextColor = Color.FromArgb("#172554"), Margin = new Thickness(0, 2),
+                Padding = new Thickness(14, 10), FontAttributes = FontAttributes.Bold,
+                HorizontalOptions = LayoutOptions.Fill, MinimumHeightRequest = 56,
+                LineBreakMode = LineBreakMode.WordWrap
             };
             button.Clicked += async (_, _) => await SelectItem(item, button);
             _objects.Add(button);
@@ -174,3 +176,4 @@ public sealed class PackingMissionPage : ContentPage
         catch { }
     }
 }
+

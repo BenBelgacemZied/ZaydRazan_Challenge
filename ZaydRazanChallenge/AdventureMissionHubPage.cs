@@ -150,11 +150,8 @@ public sealed class AdventureMissionHubPage : ContentPage
             if (nextIndex < 0)
             {
                 AdventureSave.Set("adventure_stage",
-                    Math.Max(2, AdventureSave.Get("adventure_stage", 0)));
-                _speech.Text = "☀️ Goed gedaan! Op naar het station.";
-                // Replace the hub in the navigation stack so Back returns to the map.
-                if (!AdventureSave.IsTestMode)
-                    Navigation.InsertPageBefore(new StationMissionHubPage(), this);
+                    Math.Max(1, AdventureSave.Get("adventure_stage", 0)));
+                _speech.Text = "☀️ Goed gedaan! De volgende halte is En route.";
                 await Navigation.PopAsync();
                 return;
             }

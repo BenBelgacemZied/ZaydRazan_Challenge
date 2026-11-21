@@ -119,11 +119,12 @@ public sealed class TrainMissionHubPage : ContentPage
         }
         Render();
         if (_introPlayed) return;
-        _introPlayed = true; await Task.Delay(400); await SpeakCurrentInstruction();
+        _introPlayed = true; await Task.Delay(400); await SpeakCurrentInstruction(); RevealChoices();
     }
 
     private void Render()
     {
+        _choices.IsVisible = false;
         foreach (var marker in _markers) _playground.Remove(marker);
         _markers.Clear();
         var completed = Objects.Count(x => AdventureSave.Get(x.Key, false));
@@ -204,7 +205,23 @@ public sealed class TrainMissionHubPage : ContentPage
             return;
         }
         Render();
-        if (index + 1 < Objects.Length) await SpeakCurrentInstruction();
+        if (index + 1 < Objects.Length)
+        {
+            await SpeakCurrentInstruction();
+            RevealChoices();
+        }
+    }
+
+    private void RevealChoices()
+    {
+        if (Objects.Count(x => AdventureSave.Get(x.Key, false)) >= Objects.Length) return;
+        _choices.IsVisible = true;
+        foreach (var child in _choices.Children)
+            if (child is Button button)
+            {
+                button.IsVisible = true;
+                button.IsEnabled = true;
+            }
     }
 
     private async Task SpeakCurrentInstruction()
@@ -215,3 +232,4 @@ public sealed class TrainMissionHubPage : ContentPage
     private static async Task SpeakDutchAsync(string text) { try { var locales = await TextToSpeech.Default.GetLocalesAsync(); var locale = locales.FirstOrDefault(x => x.Language.StartsWith("nl", StringComparison.OrdinalIgnoreCase)); await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Locale = locale }); } catch { } }
     private static async Task SpeakFrenchAsync(string text) { try { var locales = await TextToSpeech.Default.GetLocalesAsync(); var locale = locales.FirstOrDefault(x => x.Language.StartsWith("fr", StringComparison.OrdinalIgnoreCase)); await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Locale = locale }); } catch { } }
 }
+

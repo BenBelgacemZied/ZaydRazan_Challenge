@@ -32,7 +32,7 @@ public sealed class StationMiniMissionPage : ContentPage
 
         foreach (var choice in _mission.Choices.OrderBy(_ => Random.Shared.Next()))
         {
-            var button = new Button { Text = choice, FontSize = 17, FontAttributes = FontAttributes.Bold, BackgroundColor = Color.FromArgb("#2563EB"), TextColor = Colors.White, CornerRadius = 17, HeightRequest = 55 };
+            var button = new Button { Text = choice, FontSize = 17, FontAttributes = FontAttributes.Bold, BackgroundColor = Color.FromArgb("#2563EB"), TextColor = Colors.White, CornerRadius = 17, HeightRequest = 55, IsVisible = false, IsEnabled = false };
             button.Clicked += async (_, _) => await Check(choice, button);
             _choices.Add(button);
         }
@@ -61,6 +61,12 @@ public sealed class StationMiniMissionPage : ContentPage
         base.OnAppearing();
         await Task.Delay(300);
         await SpeakDutch(_mission.Story + " " + _mission.Instruction);
+        foreach (var child in _choices.Children)
+            if (child is Button button)
+            {
+                button.IsVisible = true;
+                button.IsEnabled = true;
+            }
     }
 
     private async Task Check(string answer, Button selected)
@@ -106,3 +112,4 @@ public sealed class StationMiniMissionPage : ContentPage
         catch { }
     }
 }
+
