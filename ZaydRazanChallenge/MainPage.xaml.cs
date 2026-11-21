@@ -25,7 +25,7 @@ public partial class MainPage : ContentPage
         await Navigation.PushAsync(new AdventurePage());
 
     private async void OnBrusselsClicked(object sender, EventArgs e) =>
-        await Navigation.PushAsync(new BrusselsAdventurePage());
+        await Navigation.PushAsync(new BrusselsChapterPage());
 
     private async void OnResetClicked(object sender, EventArgs e)
     {
