@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="540" viewBox="0 0 900 540">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#69C7E8"/>
+    <stop offset="1" stop-color="#EAF8FF"/>
+  </linearGradient>
+  <linearGradient id="street" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#D62828"/>
+    <stop offset="1" stop-color="#17324D"/>
+  </linearGradient>
+</defs>
+<rect width="900" height="540" fill="url(#sky)"/>
+<circle cx="760" cy="92" r="48" fill="#FFF2B2" opacity=".9"/>
+<path d="M0 390 Q220 330 430 385 T900 350 V540 H0Z" fill="url(#street)"/>
+<path d="M0 420 Q220 360 430 415 T900 380" fill="none" stroke="#F4B942" stroke-width="8" opacity=".75"/>
+<g fill="#F7CFA3" stroke="#17324D" stroke-width="4">
+  <path d="M0 250 L70 220 L135 250 V420 H0Z"/>
+  <path d="M125 235 L190 190 L260 235 V420 H125Z"/>
+  <path d="M255 260 L320 215 L390 260 V420 H255Z"/>
+  <path d="M690 260 L755 210 L820 260 V420 H690Z"/>
+  <path d="M805 235 L865 185 L930 235 V420 H805Z"/>
+</g>
+<g fill="#D62828" stroke="#17324D" stroke-width="4">
+  <path d="M35 250 L70 205 L105 250Z"/>
+  <path d="M150 235 L190 175 L230 235Z"/>
+  <path d="M280 260 L320 200 L360 260Z"/>
+  <path d="M715 260 L755 195 L795 260Z"/>
+  <path d="M830 235 L865 165 L900 235Z"/>
+</g>
+<g fill="#F4B942" stroke="#17324D" stroke-width="5">
+  <circle cx="505" cy="185" r="38"/>
+  <circle cx="590" cy="185" r="38"/>
+  <circle cx="548" cy="110" r="38"/>
+  <circle cx="548" cy="260" r="38"/>
+  <circle cx="470" cy="260" r="38"/>
+  <circle cx="626" cy="260" r="38"/>
+  <circle cx="505" cy="335" r="38"/>
+  <circle cx="590" cy="335" r="38"/>
+  <circle cx="548" cy="410" r="38"/>
+</g>
+<g stroke="#17324D" stroke-width="7" fill="none">
+  <path d="M505 185 L548 110 L590 185 L626 260 L590 335 L548 410 L505 335 L470 260Z"/>
+  <path d="M548 110 V410 M470 260 H626"/>
+</g>
+<rect x="52" y="304" width="34" height="62" rx="12" fill="#0077B6" stroke="#17324D" stroke-width="4"/>
+<path d="M40 304 Q69 270 98 304" fill="#D62828" stroke="#17324D" stroke-width="4"/>
+<rect x="748" y="307" width="34" height="59" rx="12" fill="#0077B6" stroke="#17324D" stroke-width="4"/>
+<path d="M736 307 Q765 273 794 307" fill="#D62828" stroke="#17324D" stroke-width="4"/>
+</svg>
