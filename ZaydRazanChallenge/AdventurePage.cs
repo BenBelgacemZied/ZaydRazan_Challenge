@@ -403,7 +403,7 @@ public sealed class AdventurePage : ContentPage
                 Margin = new Thickness(0, 12, 0, 8)
             };
             brusselsButton.Clicked += async (_, _) =>
-                await Navigation.PushAsync(new BrusselsAdventurePage());
+                await Navigation.PushAsync(new BrusselsChapterPage());
             _levelList.Add(brusselsButton);
         }
     }
