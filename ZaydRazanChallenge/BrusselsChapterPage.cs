@@ -31,22 +31,24 @@ public sealed class BrusselsChapterPage : ContentPage
             Stroke = Color.FromArgb("#D62828"),
             StrokeThickness = 2,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 26 },
-            Background = new LinearGradientBrush(
-                new GradientStopCollection
-                {
-                    new GradientStop(Color.FromArgb("#D62828"), 0),
-                    new GradientStop(Color.FromArgb("#17324D"), 1)
-                },
-                new Point(0, 0),
-                new Point(1, 1)),
-            Content = new VerticalStackLayout
+            Content = new Grid
             {
-                Spacing = 7,
                 Children =
                 {
-                    new Label { Text = "🇧🇪  BRUXELLES", FontSize = 30, FontAttributes = FontAttributes.Bold, TextColor = Colors.White },
-                    new Label { Text = "Une nouvelle ville, une nouvelle histoire !", FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = Colors.White },
-                    new Label { Text = "Arrivée, monuments, puzzle et jeux de mots.", FontSize = 15, TextColor = Color.FromArgb("#E6F7FF") }
+                    new Image { Source = "brussels_hero.svg", Aspect = Aspect.AspectFill },
+                    new BoxView { Color = Color.FromArgb("#9917324D") },
+                    new VerticalStackLayout
+                    {
+                        Spacing = 7,
+                        Padding = new Thickness(18, 20),
+                        VerticalOptions = LayoutOptions.Center,
+                        Children =
+                        {
+                            new Label { Text = "🇧🇪  BRUXELLES", FontSize = 30, FontAttributes = FontAttributes.Bold, TextColor = Colors.White },
+                            new Label { Text = "Une nouvelle ville, une nouvelle histoire !", FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = Colors.White },
+                            new Label { Text = "Arrivée, monuments, puzzle et jeux de mots.", FontSize = 15, TextColor = Color.FromArgb("#E6F7FF") }
+                        }
+                    }
                 }
             }
         };
@@ -61,6 +63,7 @@ public sealed class BrusselsChapterPage : ContentPage
             BackgroundColor = Colors.White,
             Content = new Grid
             {
+                ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) },
                 RowDefinitions = { new RowDefinition(GridLength.Auto), new RowDefinition(GridLength.Auto) },
                 Children =
                 {
