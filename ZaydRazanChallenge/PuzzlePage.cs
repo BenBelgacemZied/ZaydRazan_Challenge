@@ -264,6 +264,7 @@ public sealed class PuzzlePage : ContentPage
                 Stroke = _selectedPosition == position
                     ? Color.FromArgb("#F59E0B")
                     : Colors.White,
+                AutomationId = $"puzzle-tile-{position}",
                 Content = tileViewport
             };
             var tap = new TapGestureRecognizer();
