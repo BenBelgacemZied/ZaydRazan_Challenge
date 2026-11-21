@@ -4,7 +4,7 @@ public sealed class BrusselsPuzzlePage : ContentPage
 {
     private static readonly string[] Solution = ["🚉", "💧", "🧇", "🌍", "⚛️", "🏛️", "🚗", "🌳", "⭐"];
     private readonly string[] _tiles = Solution.OrderBy(_ => Random.Shared.Next()).ToArray();
-    private readonly Grid _grid = new() { RowSpacing = 7, ColumnSpacing = 7 };
+    private readonly Grid _grid = new() { RowSpacing = 7, ColumnSpacing = 7, HeightRequest = 360 };
     private readonly Label _message = new() { FontSize = 17, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#17324D") };
     private int _selected = -1;
     private bool _solved;
