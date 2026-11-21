@@ -406,7 +406,7 @@ public static class PuzzleCatalog
                 "L’Atomium",
                 "l’Atomium",
                 "⚛️",
-                "L’Atomium est un monument de Bruxelles construit pour l’Exposition universelle de 1958. Il représente un cristal de fer agrandi et se compose de neuf sphères reliées entre elles.",
+                "Het Atomium is een bekend monument in Brussel. Het werd gebouwd voor de Wereldtentoonstelling van 1958. Het gebouw lijkt op een ijzerkristal en heeft negen bollen.",
                 "brussels_hero.svg"))
             .Append(new PuzzleDefinition(
             "versailles",
