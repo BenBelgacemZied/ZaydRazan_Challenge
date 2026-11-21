@@ -40,8 +40,7 @@ public sealed class BrusselsMissionPage : ContentPage
         });
         _hero.Children.Add(new Label
         {
-            Text = $"{_mission.Title}
-{_mission.Subtitle}",
+            Text = $"{_mission.Title}\\n{_mission.Subtitle}",
             FontSize = 24,
             FontAttributes = FontAttributes.Bold,
             TextColor = Colors.White,
