@@ -4,7 +4,6 @@ public sealed class BrusselsMissionPage : ContentPage
 {
     private readonly int _missionIndex;
     private readonly BrusselsMission _mission;
-    private readonly Grid _hero = new();
     private readonly VerticalStackLayout _answers = new() { Spacing = 8 };
     private readonly Label _question = new() { FontSize = 19, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#17324D") };
     private readonly Label _feedback = new() { FontSize = 15, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center };
@@ -13,6 +12,7 @@ public sealed class BrusselsMissionPage : ContentPage
     private int _questionIndex;
     private bool _busy;
     private bool _ready;
+    private bool _questionSpoken;
 
     private static readonly string[] Palette = ["#D62828", "#0077B6", "#F4B942", "#7C3AED", "#15803D", "#EA580C"];
 
@@ -27,28 +27,42 @@ public sealed class BrusselsMissionPage : ContentPage
         BackgroundColor = Color.FromArgb("#EAF8FF");
         GameUi.AddHomeButton(this);
 
-        _hero.RowDefinitions.Add(new RowDefinition(GridLength.Star));
-        _hero.Children.Add(new Image { Source = "brussels_hero.svg", Aspect = Aspect.AspectFill });
-        _hero.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-        _hero.Add(new BoxView { Color = Color.FromArgb("#9917324D") }, 0, 1);
-        _hero.Children.Add(new Label
-        {
-            Text = _mission.Icon,
-            FontSize = 88,
-            HorizontalOptions = LayoutOptions.Center,
-            VerticalOptions = LayoutOptions.Center
-        });
-        _hero.Children.Add(new Label
-        {
-            Text = $"{_mission.Title}\\n{_mission.Subtitle}",
-            FontSize = 24,
-            FontAttributes = FontAttributes.Bold,
-            TextColor = Colors.White,
-            HorizontalTextAlignment = TextAlignment.Center,
-            Margin = new Thickness(15, 0, 15, 18)
-        });
-
         _counter.Text = $"Bruxelles · mission {_missionIndex + 1}/{BrusselsCatalog.Missions.Count}";
+
+        var hero = new Border
+        {
+            HeightRequest = 235,
+            Stroke = Color.FromArgb("#D62828"),
+            StrokeThickness = 2,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 24 },
+            Content = new Grid
+            {
+                Children =
+                {
+                    new Image { Source = "brussels_hero.svg", Aspect = Aspect.AspectFill },
+                    new BoxView { Color = Color.FromArgb("#9917324D"), InputTransparent = true },
+                    new VerticalStackLayout
+                    {
+                        Spacing = 5,
+                        VerticalOptions = LayoutOptions.Center,
+                        HorizontalOptions = LayoutOptions.Center,
+                        Children =
+                        {
+                            new Label { Text = _mission.Icon, FontSize = 64, HorizontalTextAlignment = TextAlignment.Center },
+                            new Label
+                            {
+                                Text = $"{_mission.Title}\n{_mission.Subtitle}",
+                                FontSize = 23,
+                                FontAttributes = FontAttributes.Bold,
+                                TextColor = Colors.White,
+                                HorizontalTextAlignment = TextAlignment.Center,
+                                Margin = new Thickness(15, 0, 15, 12)
+                            }
+                        }
+                    }
+                }
+            }
+        };
 
         var panel = new Border
         {
@@ -64,16 +78,15 @@ public sealed class BrusselsMissionPage : ContentPage
             }
         };
         _listen.Clicked += async (_, _) => await SpeakCurrentAsync();
-        _hero.MinimumHeightRequest = 250;
-
-        var root = new Grid
+        Content = new ScrollView
         {
-            RowDefinitions = { new RowDefinition(GridLength.Star), new RowDefinition(GridLength.Auto) },
-            Padding = new Thickness(10, 10, 10, 10)
+            Content = new VerticalStackLayout
+            {
+                Padding = new Thickness(12),
+                Spacing = 12,
+                Children = { hero, panel }
+            }
         };
-        root.Add(_hero, 0, 0);
-        root.Add(panel, 0, 1);
-        Content = root;
 
         RenderQuestion();
     }
@@ -81,7 +94,11 @@ public sealed class BrusselsMissionPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await SpeakQuestionAsync();
+        if (!_questionSpoken)
+        {
+            _questionSpoken = true;
+            await SpeakQuestionAsync();
+        }
     }
 
     private void RenderQuestion()

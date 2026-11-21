@@ -84,7 +84,20 @@ public sealed class BrusselsChapterPage : ContentPage
             Margin = new Thickness(12, 4, 12, 8)
         };
         var puzzle = MakeButton("🧩 Puzzle Bruxelles", "#0077B6");
-        puzzle.Clicked += async (_, _) => await Navigation.PushAsync(new BrusselsPuzzlePage());
+        puzzle.Clicked += async (_, _) =>
+        {
+            if (_opening) return;
+            _opening = true;
+            try
+            {
+                await Navigation.PushAsync(new PuzzlePage(
+                    PuzzleCatalog.GetByKey("brussels_atomium"), "Bruxelles"));
+            }
+            finally
+            {
+                _opening = false;
+            }
+        };
         var words = MakeButton("🔤 Jeux de mots", "#7C3AED");
         words.Clicked += async (_, _) => await Navigation.PushAsync(new BrusselsWordGamePage());
         miniGames.Add(puzzle);
@@ -150,7 +163,17 @@ public sealed class BrusselsChapterPage : ContentPage
             {
                 if (_opening) return;
                 _opening = true;
-                try { await Navigation.PushAsync(new BrusselsMissionPage(index)); }
+                try
+                {
+                    await Navigation.PushAsync(new BrusselsMissionPage(index));
+                }
+                catch
+                {
+                    await DisplayAlert(
+                        "Étape indisponible",
+                        "Cette étape n’a pas pu s’ouvrir. Reviens au chapitre Bruxelles et réessaie.",
+                        "OK");
+                }
                 finally { _opening = false; }
             };
             _route.Add(button);
