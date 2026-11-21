@@ -47,7 +47,7 @@ public sealed class BrusselsMissionPage : ContentPage
             HorizontalTextAlignment = TextAlignment.Center,
             Margin = new Thickness(15, 0, 15, 18)
         });
-        Grid.SetRow(_hero.Children[1], 1);
+        Microsoft.Maui.Controls.Grid.SetRow(_hero.Children[1], 1);
 
         _counter.Text = $"Bruxelles · mission {_missionIndex + 1}/{BrusselsCatalog.Missions.Count}";
 
