@@ -1,3 +1,5 @@
+using ZaydRazanChallenge.Features.Shared;
+
 namespace ZaydRazanChallenge.Features.Adventure.Pages;
 
 public sealed class StationMiniMissionPage : ContentPage
@@ -94,7 +96,7 @@ public sealed class StationMiniMissionPage : ContentPage
         await GameFeedback.SuccessAsync();
         await SpeakDutch("Goed gedaan! " + _mission.Success);
         await Task.Delay(650);
-        await DisplayAlert("⭐ Missie voltooid!", _mission.Success, "Verder");
+        await SuccessCelebration.ShowAsync(this, "🎉 Goed gedaan!", _mission.Success, "🎫", "Tik op je beloning!");
         if (_index == Missions.Length - 1)
             _gameProgress.Set("adventure_stage", 3);
 
