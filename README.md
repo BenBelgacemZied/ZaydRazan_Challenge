@@ -15,8 +15,11 @@ La solution est séparée en projets avec des dépendances orientées vers le c�
 - `ZaydRazanChallenge` : interface MAUI, pages organisées par fonctionnalité, navigation et composition des dépendances dans `MauiProgram`.
 
 Les pages reçoivent leurs dépendances par constructeur. Les ressources visuelles restent dans le projet MAUI,
-classées sous `Resources/Images/Adventure`, `Paris`, `Puzzles` et `Shared` ; leur nom logique est aplati
-au packaging pour garder les références d'images existantes.
+classées par portée : `Resources/Images/Shared` pour les ressources communes et
+`Resources/Images/Paris/Adventure` et `Resources/Images/Paris/Puzzles` pour les ressources propres à Paris.
+Les puzzles sont eux-mêmes séparés entre `Covers` et `Tiles`. Les nouvelles destinations pourront suivre
+la même structure sous leur propre dossier. Le nom logique des images est aplati au packaging pour garder
+les références d'images existantes.
 
 La structure de la paire linguistique est générique (`source` → `cible`), mais le seul contenu fourni pour
 l'instant est néerlandais → français. Une autre langue de départ demandera son jeu de contenus Paris traduit.
