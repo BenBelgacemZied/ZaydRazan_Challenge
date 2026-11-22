@@ -55,7 +55,7 @@ public sealed class WordGamePage : ContentPage
                 }
             }
         };
-        Grid.SetColumn(_gameProgress, 1);
+        Grid.SetColumn(_progress, 1);
         StartGame();
     }
 
