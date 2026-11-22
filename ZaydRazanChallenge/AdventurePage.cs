@@ -329,7 +329,7 @@ public sealed class AdventurePage : ContentPage
         }
     }
 
-    private static int CurrentSavedStage()
+    private int CurrentSavedStage()
     {
         var stage = AdventureSave.Get("adventure_stage", 0);
         // Older APKs routed completed home missions to a legacy ticket screen.
