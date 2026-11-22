@@ -6,6 +6,7 @@ public sealed class PuzzlePage : ContentPage
     private readonly int _gridSize;
     private readonly int _maxMoves;
     private readonly string? _chapterName;
+    private readonly IReadOnlyList<PuzzleDefinition>? _chapterPuzzles;
     private readonly Grid _puzzleGrid = new()
     {
         RowSpacing = 1,
@@ -31,10 +32,14 @@ public sealed class PuzzlePage : ContentPage
     private int? _selectedPosition;
     private bool _completed;
 
-    public PuzzlePage(PuzzleDefinition puzzle, string? chapterName = null)
+    public PuzzlePage(
+        PuzzleDefinition puzzle,
+        string? chapterName = null,
+        IReadOnlyList<PuzzleDefinition>? chapterPuzzles = null)
     {
         _puzzle = puzzle;
         _chapterName = chapterName;
+        _chapterPuzzles = chapterPuzzles;
         _gridSize = Random.Shared.Next(3, 7);
         _maxMoves = Random.Shared.Next(7, 21);
         _tiles = Enumerable.Range(0, _gridSize * _gridSize).ToList();
@@ -56,13 +61,13 @@ public sealed class PuzzlePage : ContentPage
 
         var newChallengeButton = new Button
         {
-            Text = chapterName is null ? "🎲 Andere willekeurige puzzel" : "🎲 Autre puzzle",
+            Text = chapterName is null ? "🎲 Andere willekeurige puzzel" : $"🎲 Autre puzzle {chapterName}",
             BackgroundColor = Color.FromArgb("#0891B2"),
             TextColor = Colors.White,
             FontAttributes = FontAttributes.Bold
         };
         newChallengeButton.Clicked += async (_, _) =>
-            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
+            await Navigation.PushAsync(new PuzzlePage(GetNextPuzzle(), _chapterName, _chapterPuzzles));
 
         var preview = new Image
         {
@@ -334,7 +339,7 @@ public sealed class PuzzlePage : ContentPage
         if (retry)
             Shuffle();
         else
-            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
+            await Navigation.PushAsync(new PuzzlePage(GetNextPuzzle(), _chapterName, _chapterPuzzles));
     }
 
     private async Task CompletePuzzle()
@@ -360,7 +365,18 @@ public sealed class PuzzlePage : ContentPage
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
 
         await Navigation.PushAsync(
-            new PuzzleDiscoveryPage(_puzzle, _moves, _maxMoves, reward));
+            new PuzzleDiscoveryPage(_puzzle, _moves, _maxMoves, reward, _chapterName, _chapterPuzzles));
+    }
+
+    private PuzzleDefinition GetNextPuzzle()
+    {
+        if (_chapterPuzzles is not { Count: > 0 })
+            return PuzzleCatalog.GetRandom(_puzzle.Key);
+
+        var alternatives = _chapterPuzzles.Where(item => item.Key != _puzzle.Key).ToArray();
+        return alternatives.Length == 0
+            ? _chapterPuzzles[0]
+            : alternatives[Random.Shared.Next(alternatives.Length)];
     }
 
     private bool IsSolved() =>
@@ -400,21 +416,12 @@ public static class PuzzleCatalog
                 quest.Story,
                 quest.Photo));
 
-        return adventure
-            .Append(new PuzzleDefinition(
-                "brussels_atomium",
-                "L’Atomium",
-                "l’Atomium",
-                "⚛️",
-                "Het Atomium is een bekend monument in Brussel. Het werd gebouwd voor de Wereldtentoonstelling van 1958. Het gebouw lijkt op een ijzerkristal en heeft negen bollen.",
-                "brussels_hero.svg"))
-            .Append(new PuzzleDefinition(
+        return adventure.Append(new PuzzleDefinition(
             "versailles",
             "het paleis van Versailles",
             "Le château de Versailles",
             "👑",
-            "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen."))
-            .ToArray();
+            "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen.")).ToArray();
     }
 
     private static string KeyFor(string photo) =>

@@ -9,8 +9,8 @@
     <Nullable>enable</Nullable>
     <ApplicationTitle>ZR LingoTrip</ApplicationTitle>
     <ApplicationId>com.zrlingotrip.app</ApplicationId>
-    <ApplicationDisplayVersion>2.41</ApplicationDisplayVersion>
-    <ApplicationVersion>52</ApplicationVersion>
+    <ApplicationDisplayVersion>2.42</ApplicationDisplayVersion>
+    <ApplicationVersion>53</ApplicationVersion>
     <SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion>
     <AndroidPackageFormats>aab;apk</AndroidPackageFormats>
   </PropertyGroup>
@@ -31,6 +31,7 @@
     <MauiImage Include="Resources/Images/paris_ticket_choice.jpg" />
     <MauiImage Include="Resources/Images/paris_*.jpg" Exclude="Resources/Images/paris_letter_scene.jpg;Resources/Images/paris_map_choice.jpg;Resources/Images/paris_ticket_choice.jpg" />
     <MauiImage Include="Resources/Images/*_puzzle.jpg" />
+    <MauiImage Include="Resources/Images/brussels_*.svg" />
     <MauiImage Include="Resources/Images/Puzzle/*" />
   </ItemGroup>
 </Project>
