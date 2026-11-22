@@ -5,6 +5,7 @@ public sealed class PuzzlePage : ContentPage
     private readonly PuzzleDefinition _puzzle;
     private readonly int _gridSize;
     private readonly int _maxMoves;
+    private readonly string? _chapterName;
     private readonly Grid _puzzleGrid = new()
     {
         RowSpacing = 1,
@@ -30,9 +31,10 @@ public sealed class PuzzlePage : ContentPage
     private int? _selectedPosition;
     private bool _completed;
 
-    public PuzzlePage(PuzzleDefinition puzzle)
+    public PuzzlePage(PuzzleDefinition puzzle, string? chapterName = null)
     {
         _puzzle = puzzle;
+        _chapterName = chapterName;
         _gridSize = Random.Shared.Next(3, 7);
         _maxMoves = Random.Shared.Next(7, 21);
         _tiles = Enumerable.Range(0, _gridSize * _gridSize).ToList();
@@ -40,7 +42,7 @@ public sealed class PuzzlePage : ContentPage
         var display = DeviceDisplay.Current.MainDisplayInfo;
         _boardSize = Math.Min(390d, Math.Max(280d, display.Width / display.Density - 44d));
 
-        Title = "Verrassingspuzzel";
+        Title = chapterName is null ? "Verrassingspuzzel" : $"Puzzle · {chapterName}";
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
 
@@ -54,7 +56,7 @@ public sealed class PuzzlePage : ContentPage
 
         var newChallengeButton = new Button
         {
-            Text = "🎲 Andere willekeurige puzzel",
+            Text = chapterName is null ? "🎲 Andere willekeurige puzzel" : "🎲 Autre puzzle",
             BackgroundColor = Color.FromArgb("#0891B2"),
             TextColor = Colors.White,
             FontAttributes = FontAttributes.Bold
@@ -112,14 +114,16 @@ public sealed class PuzzlePage : ContentPage
                 {
                     new Label
                     {
-                        Text = "🎲 Défi culturel surprise",
+                        Text = chapterName is null ? "🎲 Défi culturel surprise" : $"🧩 Puzzle de {_chapterName}",
                         FontSize = 25,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
                     new Label
                     {
-                        Text = $"Image, grille et limite choisies au hasard · maximum {_maxMoves} déplacements",
+                        Text = chapterName is null
+                            ? $"Image, grille et limite choisies au hasard · maximum {_maxMoves} déplacements"
+                            : $"Recompose l’image du monument en échangeant les cases · {_maxMoves} déplacements maximum",
                         FontSize = 15,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
@@ -260,6 +264,7 @@ public sealed class PuzzlePage : ContentPage
                 Stroke = _selectedPosition == position
                     ? Color.FromArgb("#F59E0B")
                     : Colors.White,
+                AutomationId = $"puzzle-tile-{position}",
                 Content = tileViewport
             };
             var tap = new TapGestureRecognizer();
@@ -395,12 +400,21 @@ public static class PuzzleCatalog
                 quest.Story,
                 quest.Photo));
 
-        return adventure.Append(new PuzzleDefinition(
+        return adventure
+            .Append(new PuzzleDefinition(
+                "brussels_atomium",
+                "L’Atomium",
+                "l’Atomium",
+                "⚛️",
+                "Het Atomium is een bekend monument in Brussel. Het werd gebouwd voor de Wereldtentoonstelling van 1958. Het gebouw lijkt op een ijzerkristal en heeft negen bollen.",
+                "brussels_hero.svg"))
+            .Append(new PuzzleDefinition(
             "versailles",
             "het paleis van Versailles",
             "Le château de Versailles",
             "👑",
-            "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen.")).ToArray();
+            "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen."))
+            .ToArray();
     }
 
     private static string KeyFor(string photo) =>
@@ -414,4 +428,8 @@ public static class PuzzleCatalog
         var choices = Items.Where(x => x.Key != excludedKey).ToArray();
         return choices[Random.Shared.Next(choices.Length)];
     }
+
+    public static PuzzleDefinition GetByKey(string key) =>
+        Items.FirstOrDefault(item => item.Key == key)
+        ?? throw new KeyNotFoundException($"Puzzle '{key}' not found.");
 }
