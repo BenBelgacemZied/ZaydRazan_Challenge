@@ -1,8 +1,14 @@
 namespace ZaydRazanChallenge;
 
-internal sealed record VocabularyWord(string Dutch, string French, string Category);
+public sealed record VocabularyWord(string Dutch, string French, string Category);
 
-internal static class VocabularyCatalog
+public interface IVocabularyCatalog
+{
+    IReadOnlyList<VocabularyWord> Items { get; }
+    VocabularyWord[] RandomWords(int count, Func<VocabularyWord, bool>? filter = null);
+}
+
+internal sealed class VocabularyCatalog : IVocabularyCatalog
 {
     private static readonly VocabularyWord[] JourneyWords =
     [
@@ -38,16 +44,21 @@ internal static class VocabularyCatalog
         new("de tafel", "la table", "De trein")
     ];
 
-    public static IReadOnlyList<VocabularyWord> Items { get; } = JourneyWords
-        .Concat(ParisTreasureCatalog.Quests.SelectMany(quest => quest.Clues)
-            .Select(clue => new VocabularyWord(clue.Highlight, clue.Word, "Parijs")))
-        .GroupBy(word => word.French.Trim().ToLowerInvariant())
-        .Select(group => group.First())
-        .OrderBy(word => word.Category)
-        .ThenBy(word => word.Dutch)
-        .ToArray();
+    public IReadOnlyList<VocabularyWord> Items { get; }
 
-    public static VocabularyWord[] RandomWords(int count, Func<VocabularyWord, bool>? filter = null)
+    public VocabularyCatalog(IDestinationContent destination)
+    {
+        Items = JourneyWords
+            .Concat(destination.Quests.SelectMany(quest => quest.Clues)
+                .Select(clue => new VocabularyWord(clue.Highlight, clue.Word, destination.Profile.DisplayName)))
+            .GroupBy(word => word.French.Trim().ToLowerInvariant())
+            .Select(group => group.First())
+            .OrderBy(word => word.Category)
+            .ThenBy(word => word.Dutch)
+            .ToArray();
+    }
+
+    public VocabularyWord[] RandomWords(int count, Func<VocabularyWord, bool>? filter = null)
     {
         var source = filter is null ? Items : Items.Where(filter);
         return source.OrderBy(_ => Random.Shared.Next()).Take(count).ToArray();

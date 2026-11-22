@@ -71,7 +71,9 @@ public sealed class AdventurePage : ContentPage
             ["la baguette", "la carte", "le billet"], "#FEF3C7", .55, .11)
     ];
 
-    public static int StageCount => ParisTreasureCatalog.FirstStage + ParisTreasureCatalog.Count;
+    private readonly IDestinationContent _destination;
+    private readonly IGamePageFactory _pages;
+    private int StageCount => _destination.FirstStage + _destination.Count;
 
     private readonly Label _stars = new()
     {
@@ -167,10 +169,12 @@ public sealed class AdventurePage : ContentPage
     private readonly int? _testStage;
     private bool _answered;
 
-    public AdventurePage(int? testStage = null)
+    public AdventurePage(IDestinationContent destination, IGamePageFactory pages, int? testStage = null)
     {
+        _destination = destination;
+        _pages = pages;
         _testStage = testStage;
-        if (testStage is int stage && (stage < ParisTreasureCatalog.FirstStage || stage >= StageCount))
+        if (testStage is int stage && (stage < _destination.FirstStage || stage >= StageCount))
             throw new ArgumentOutOfRangeException(nameof(testStage));
         Title = "Avontuur naar Parijs";
         BackgroundColor = Color.FromArgb("#E0F2FE");
@@ -314,7 +318,7 @@ public sealed class AdventurePage : ContentPage
         base.OnAppearing();
         if (_testStage.HasValue)
         {
-            Dispatcher.Dispatch(async () => await Navigation.PushAsync(new ParisTreasurePage(_testStage.Value)));
+            Dispatcher.Dispatch(async () => await Navigation.PushAsync(_pages.CreateParisTreasurePage(_testStage.Value)));
             return;
         }
         var savedStage = CurrentSavedStage();
@@ -370,16 +374,16 @@ public sealed class AdventurePage : ContentPage
             AddLevelRow(stage + 1, item.Item1, item.Item2, item.Item3, stage, currentLevel);
         }
 
-        for (var questIndex = 0; questIndex < ParisTreasureCatalog.Count; questIndex++)
+        for (var questIndex = 0; questIndex < _destination.Count; questIndex++)
         {
-            var quest = ParisTreasureCatalog.Quests[questIndex];
-            var stage = ParisTreasureCatalog.FirstStage + questIndex;
+            var quest = _destination.Quests[questIndex];
+            var stage = _destination.FirstStage + questIndex;
             var discovered = stage < currentLevel || currentLevel >= StageCount;
             AddLevelRow(
                 stage + 1,
                 discovered ? $"Paris · {ShortTitle(quest.Title)}" : "Paris · Mystère",
                 discovered
-                    ? $"Découverte {questIndex + 1} sur {ParisTreasureCatalog.Count}"
+                    ? $"Découverte {questIndex + 1} sur {_destination.Count}"
                     : stage == currentLevel
                         ? "Cherche le lieu dans la mission"
                         : "Lieu à découvrir",
@@ -507,12 +511,12 @@ public sealed class AdventurePage : ContentPage
             await Navigation.PushAsync(new StationMissionHubPage());
         else if (stage == 3)
             await Navigation.PushAsync(new TrainMissionHubPage());
-        else if (stage == ParisTreasureCatalog.FirstStage - 1)
-            await Navigation.PushAsync(new ParisChapterPage());
-        else if (stage < ParisTreasureCatalog.FirstStage)
+        else if (stage == _destination.FirstStage - 1)
+            await Navigation.PushAsync(_pages.CreateParisChapterPage());
+        else if (stage < _destination.FirstStage)
             await Navigation.PushAsync(new AdventureScenePage(stage));
         else
-            await Navigation.PushAsync(new ParisTreasurePage(stage));
+            await Navigation.PushAsync(_pages.CreateParisTreasurePage(stage));
     }
 
     private void AddPrologueStops()
@@ -545,10 +549,10 @@ public sealed class AdventurePage : ContentPage
                         await Navigation.PushAsync(new StationMissionHubPage());
                     else if (stageNumber == 3)
                         await Navigation.PushAsync(new TrainMissionHubPage());
-                    else if (stageNumber < ParisTreasureCatalog.FirstStage)
+                    else if (stageNumber < _destination.FirstStage)
                         await Navigation.PushAsync(new AdventureScenePage(stageNumber));
                     else
-                        await Navigation.PushAsync(new ParisChapterPage());
+                        await Navigation.PushAsync(_pages.CreateParisChapterPage());
                 }));
         }
     }
@@ -675,11 +679,11 @@ public sealed class AdventurePage : ContentPage
         _answered = false;
         _missionCard.IsVisible = false;
         _missionCard.Opacity = 0;
-        var stage = Stages[Math.Min(_stageIndex, ParisTreasureCatalog.FirstStage)];
+        var stage = Stages[Math.Min(_stageIndex, _destination.FirstStage)];
         _mapImage.Source = "paris_letter_scene.jpg";
         _stars.Text = $"⭐ {AdventureSave.Get("stars", 0)}";
-        _step.Text = _stageIndex >= ParisTreasureCatalog.FirstStage
-            ? $"PARIJS · {Math.Min(ParisTreasureCatalog.Count, _stageIndex - ParisTreasureCatalog.FirstStage + 1)} / {ParisTreasureCatalog.Count}"
+        _step.Text = _stageIndex >= _destination.FirstStage
+            ? $"PARIJS · {Math.Min(_destination.Count, _stageIndex - _destination.FirstStage + 1)} / {_destination.Count}"
             : $"MISSIE {_stageIndex + 1} / {StageCount}";
         _progress.Progress = (double)(_stageIndex + 1) / StageCount;
         _place.Text = $"{stage.Emoji} {stage.Place}";

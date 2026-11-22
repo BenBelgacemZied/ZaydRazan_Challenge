@@ -23,7 +23,8 @@ public sealed class ParisTreasurePage : ContentPage
     ];
 
     private readonly int _stage;
-    private readonly ParisQuest _quest;
+    private readonly IDestinationContent _destination;
+    private readonly DestinationQuest _quest;
     private readonly Grid _root = new();
     private readonly AbsoluteLayout _scene = new();
     private readonly Label _status = new() { FontSize = 16, FontAttributes = FontAttributes.Bold, TextColor = Colors.White };
@@ -41,13 +42,14 @@ public sealed class ParisTreasurePage : ContentPage
     private bool _questionReady;
     private bool _finished;
 
-    public ParisTreasurePage(int stage)
+    public ParisTreasurePage(int stage, IDestinationContent destination)
     {
-        if (stage < ParisTreasureCatalog.FirstStage || stage >= ParisTreasureCatalog.FirstStage + ParisTreasureCatalog.Count)
+        _destination = destination;
+        if (stage < _destination.FirstStage || stage >= _destination.FirstStage + _destination.Count)
             throw new ArgumentOutOfRangeException(nameof(stage));
         _stage = stage;
-        var questIndex = stage - ParisTreasureCatalog.FirstStage;
-        _quest = ParisTreasureCatalog.Quests[questIndex];
+        var questIndex = stage - _destination.FirstStage;
+        _quest = _destination.Quests[questIndex];
         _moment = AdventureMoments[questIndex % AdventureMoments.Length];
         Title = "Schattenjacht in Parijs";
         BackgroundColor = Color.FromArgb("#17324D");
@@ -187,7 +189,7 @@ public sealed class ParisTreasurePage : ContentPage
         _question.Text = "Welke foto past bij alle aanwijzingen?";
         _feedback.Text = "Kies een van de drie foto's.";
         _choices.Children.Clear();
-        var photos = ParisTreasureCatalog.PhotosFor(_stage - ParisTreasureCatalog.FirstStage);
+        var photos = _destination.PhotosFor(_stage - _destination.FirstStage);
         for (var i = 0; i < photos.Length; i++)
         {
             var index = i;
@@ -207,7 +209,7 @@ public sealed class ParisTreasurePage : ContentPage
     {
         if (_busy || _finished) return;
         _busy = true;
-        if (index != (_stage - ParisTreasureCatalog.FirstStage) % 3)
+        if (index != (_stage - _destination.FirstStage) % 3)
         {
             AdventureSave.Set("stars", Math.Max(0, AdventureSave.Get("stars", 0) - 1));
             await GameFeedback.FailureAsync();

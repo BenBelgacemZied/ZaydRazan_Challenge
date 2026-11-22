@@ -1,16 +1,15 @@
-namespace ZaydRazanChallenge;
+namespace ZaydRazanChallenge.Destinations.Paris;
 
-internal sealed record ParisClue(string DutchSentence, string Highlight, string Word, string[] Choices);
-internal sealed record ParisQuest(string Title, string Target, string Photo, string Story, ParisClue[] Clues);
-
-internal static class ParisTreasureCatalog
+internal sealed class ParisDestinationContent : IDestinationContent
 {
-    public const int FirstStage = 5;
-    public static int Count => Quests.Length;
-    private static ParisClue C(string sentence, string highlight, string word, string other1, string other2) =>
+    public DestinationProfile Profile { get; } = new("paris", "Parijs", new("nl", "fr"));
+    public int FirstStage => 5;
+    public int Count => Quests.Count;
+
+    private static DestinationClue C(string sentence, string highlight, string word, string other1, string other2) =>
         new(sentence, highlight, word, [word, other1, other2]);
 
-    public static readonly ParisQuest[] Quests =
+    public IReadOnlyList<DestinationQuest> Quests { get; } =
     [
         new("De stadskaart", "la carte", "paris_map_choice.jpg", "Op de kaart vinden Zayd en Razan de weg door Parijs. Samen kiezen ze een nieuwe halte.",
             [
@@ -195,7 +194,7 @@ internal static class ParisTreasureCatalog
     ];
 
     // Spread the correct answer across left, middle and right without showing the name early.
-    public static string[] PhotosFor(int index)
+    public string[] PhotosFor(int index)
     {
         var first = Quests[(index + 7) % Count].Photo;
         var second = Quests[(index + 13) % Count].Photo;

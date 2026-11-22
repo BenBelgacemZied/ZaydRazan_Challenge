@@ -3,6 +3,8 @@ namespace ZaydRazanChallenge;
 public sealed class PuzzlePage : ContentPage
 {
     private readonly PuzzleDefinition _puzzle;
+    private readonly IPuzzleCatalog _puzzles;
+    private readonly IGamePageFactory _pages;
     private readonly int _gridSize;
     private readonly int _maxMoves;
     private readonly Grid _puzzleGrid = new()
@@ -30,9 +32,11 @@ public sealed class PuzzlePage : ContentPage
     private int? _selectedPosition;
     private bool _completed;
 
-    public PuzzlePage(PuzzleDefinition puzzle)
+    public PuzzlePage(PuzzleDefinition puzzle, IPuzzleCatalog puzzles, IGamePageFactory pages)
     {
         _puzzle = puzzle;
+        _puzzles = puzzles;
+        _pages = pages;
         _gridSize = Random.Shared.Next(3, 7);
         _maxMoves = Random.Shared.Next(7, 21);
         _tiles = Enumerable.Range(0, _gridSize * _gridSize).ToList();
@@ -60,7 +64,7 @@ public sealed class PuzzlePage : ContentPage
             FontAttributes = FontAttributes.Bold
         };
         newChallengeButton.Clicked += async (_, _) =>
-            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
+            await Navigation.PushAsync(_pages.CreatePuzzlePage(_puzzles.GetRandom(_puzzle.Key)));
 
         var preview = new Image
         {
@@ -329,7 +333,7 @@ public sealed class PuzzlePage : ContentPage
         if (retry)
             Shuffle();
         else
-            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
+            await Navigation.PushAsync(_pages.CreatePuzzlePage(_puzzles.GetRandom(_puzzle.Key)));
     }
 
     private async Task CompletePuzzle()
@@ -355,7 +359,7 @@ public sealed class PuzzlePage : ContentPage
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
 
         await Navigation.PushAsync(
-            new PuzzleDiscoveryPage(_puzzle, _moves, _maxMoves, reward));
+            _pages.CreatePuzzleDiscoveryPage(_puzzle, _moves, _maxMoves, reward));
     }
 
     private bool IsSolved() =>
@@ -373,7 +377,13 @@ public sealed record PuzzleDefinition(
     public string ImageSource => Image ?? $"{Key}_puzzle.jpg";
 }
 
-public static class PuzzleCatalog
+public interface IPuzzleCatalog
+{
+    IReadOnlyList<PuzzleDefinition> Items { get; }
+    PuzzleDefinition GetRandom(string? excludedKey = null);
+}
+
+internal sealed class PuzzleCatalog : IPuzzleCatalog
 {
     private static readonly string[] AdventureEmojis =
     [
@@ -382,11 +392,18 @@ public static class PuzzleCatalog
         "🎨", "🌉", "🖌️", "🚇", "🚤", "🍪", "🧢", "🥞", "🛠️", "🔬"
     ];
 
-    public static IReadOnlyList<PuzzleDefinition> Items { get; } = BuildItems();
+    private readonly IDestinationContent _destination;
+    public IReadOnlyList<PuzzleDefinition> Items { get; }
 
-    private static IReadOnlyList<PuzzleDefinition> BuildItems()
+    public PuzzleCatalog(IDestinationContent destination)
     {
-        var adventure = ParisTreasureCatalog.Quests.Select((quest, index) =>
+        _destination = destination;
+        Items = BuildItems();
+    }
+
+    private IReadOnlyList<PuzzleDefinition> BuildItems()
+    {
+        var adventure = _destination.Quests.Select((quest, index) =>
             new PuzzleDefinition(
                 KeyFor(quest.Photo),
                 quest.Title,
@@ -409,7 +426,7 @@ public static class PuzzleCatalog
             .Replace("_choice", "", StringComparison.Ordinal)
             .Replace("_puzzle", "", StringComparison.Ordinal);
 
-    public static PuzzleDefinition GetRandom(string? excludedKey = null)
+    public PuzzleDefinition GetRandom(string? excludedKey = null)
     {
         var choices = Items.Where(x => x.Key != excludedKey).ToArray();
         return choices[Random.Shared.Next(choices.Length)];

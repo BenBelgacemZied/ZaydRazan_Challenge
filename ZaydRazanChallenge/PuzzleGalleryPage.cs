@@ -2,6 +2,8 @@ namespace ZaydRazanChallenge;
 
 public sealed class PuzzleGalleryPage : ContentPage
 {
+    private readonly IPuzzleCatalog _puzzles;
+    private readonly IGamePageFactory _pages;
     private readonly Label _progress = new()
     {
         FontSize = 17,
@@ -9,8 +11,10 @@ public sealed class PuzzleGalleryPage : ContentPage
         HorizontalTextAlignment = TextAlignment.Center
     };
 
-    public PuzzleGalleryPage()
+    public PuzzleGalleryPage(IPuzzleCatalog puzzles, IGamePageFactory pages)
     {
+        _puzzles = puzzles;
+        _pages = pages;
         Title = "Frankrijk-puzzels";
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
@@ -25,7 +29,7 @@ public sealed class PuzzleGalleryPage : ContentPage
             HeightRequest = 62
         };
         startButton.Clicked += async (_, _) =>
-            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom()));
+            await Navigation.PushAsync(_pages.CreatePuzzlePage(_puzzles.GetRandom()));
 
         Content = new ScrollView
         {
@@ -98,9 +102,9 @@ public sealed class PuzzleGalleryPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        var discovered = PuzzleCatalog.Items.Count(p =>
+        var discovered = _puzzles.Items.Count(p =>
             Preferences.Default.Get($"puzzle_completed_{p.Key}", false));
         _progress.Text =
-            $"⭐ {Preferences.Default.Get("stars", 0)}   •   {discovered}/{PuzzleCatalog.Items.Count} ontdekkingen";
+            $"⭐ {Preferences.Default.Get("stars", 0)}   •   {discovered}/{_puzzles.Items.Count} ontdekkingen";
     }
 }

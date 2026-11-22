@@ -2,10 +2,14 @@ namespace ZaydRazanChallenge;
 
 public sealed class AdventureTestMenuPage : ContentPage
 {
+    private readonly IDestinationContent _destination;
+    private readonly IGamePageFactory _pages;
     private bool _opening;
 
-    public AdventureTestMenuPage()
+    public AdventureTestMenuPage(IDestinationContent destination, IGamePageFactory pages)
     {
+        _destination = destination;
+        _pages = pages;
         Title = "Testmodus";
         BackgroundColor = Color.FromArgb("#EFF6FF");
         GameUi.AddHomeButton(this);
@@ -50,11 +54,11 @@ public sealed class AdventureTestMenuPage : ContentPage
             AddOption(items, train[i], () => new TrainMissionHubPage(index));
         }
 
-        for (var i = 0; i < ParisTreasureCatalog.Count; i++)
+        for (var i = 0; i < _destination.Count; i++)
         {
-            if (i % 10 == 0) AddSection(items, $"☁️ Parijs · ontdekking {i + 1}–{Math.Min(i + 10, ParisTreasureCatalog.Count)}");
-            var stage = i + ParisTreasureCatalog.FirstStage;
-            AddOption(items, $"{i + 1:00} · {ParisTreasureCatalog.Quests[i].Title}", () => new ParisTreasurePage(stage));
+            if (i % 10 == 0) AddSection(items, $"☁️ {_destination.Profile.DisplayName} · ontdekking {i + 1}–{Math.Min(i + 10, _destination.Count)}");
+            var stage = i + _destination.FirstStage;
+            AddOption(items, $"{i + 1:00} · {_destination.Quests[i].Title}", () => _pages.CreateParisTreasurePage(stage));
         }
 
         Content = new ScrollView { Content = items };

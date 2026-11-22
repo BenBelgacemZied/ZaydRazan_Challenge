@@ -2,7 +2,15 @@ namespace ZaydRazanChallenge;
 
 public partial class MainPage : ContentPage
 {
-    public MainPage() => InitializeComponent();
+    private readonly IDestinationContent _destination;
+    private readonly IGamePageFactory _pages;
+
+    public MainPage(IDestinationContent destination, IGamePageFactory pages)
+    {
+        InitializeComponent();
+        _destination = destination;
+        _pages = pages;
+    }
 
     protected override void OnAppearing()
     {
@@ -10,7 +18,7 @@ public partial class MainPage : ContentPage
         AdventureSave.EndTest();
         StarsLabel.Text = $"⭐ {Preferences.Default.Get("stars", 0)}";
         var stage = Preferences.Default.Get("adventure_stage", 0);
-        var total = AdventurePage.StageCount;
+        var total = _destination.FirstStage + _destination.Count;
         AdventureProgressBar.Progress = Math.Min(1d, (double)stage / total);
         AdventureProgressLabel.Text = stage == 0
             ? "Begin thuis en ontgrendel elke etappe naar Parijs."
@@ -22,7 +30,7 @@ public partial class MainPage : ContentPage
     }
 
     private async void OnAdventureClicked(object sender, EventArgs e) =>
-        await Navigation.PushAsync(new AdventurePage());
+        await Navigation.PushAsync(_pages.CreateAdventurePage());
 
     private async void OnResetClicked(object sender, EventArgs e)
     {
@@ -40,11 +48,11 @@ public partial class MainPage : ContentPage
     }
 
     private async void OnMatchingClicked(object sender, EventArgs e) =>
-        await Navigation.PushAsync(new WordGamesHubPage());
+        await Navigation.PushAsync(_pages.CreateWordGamesHubPage());
     private async void OnListeningClicked(object sender, EventArgs e) =>
-        await Navigation.PushAsync(new WordGamePage(WordGameMode.Listening));
+        await Navigation.PushAsync(_pages.CreateWordGamePage(WordGameMode.Listening));
     private async void OnMonumentsClicked(object sender, EventArgs e) =>
         await Navigation.PushAsync(new GamePage(GameMode.Monuments));
     private async void OnPuzzleClicked(object sender, EventArgs e) =>
-        await Navigation.PushAsync(new PuzzleGalleryPage());
+        await Navigation.PushAsync(_pages.CreatePuzzleGalleryPage());
 }

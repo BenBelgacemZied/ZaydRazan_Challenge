@@ -3,10 +3,14 @@ namespace ZaydRazanChallenge;
 public sealed class PuzzleDiscoveryPage : ContentPage
 {
     private readonly PuzzleDefinition _puzzle;
+    private readonly IPuzzleCatalog _puzzles;
+    private readonly IGamePageFactory _pages;
 
-    public PuzzleDiscoveryPage(PuzzleDefinition puzzle, int moves, int maxMoves, int reward)
+    public PuzzleDiscoveryPage(PuzzleDefinition puzzle, int moves, int maxMoves, int reward, IPuzzleCatalog puzzles, IGamePageFactory pages)
     {
         _puzzle = puzzle;
+        _puzzles = puzzles;
+        _pages = pages;
         Title = "Ontdekking";
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
@@ -31,7 +35,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
             TextColor = Colors.White
         };
         next.Clicked += async (_, _) =>
-            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
+            await Navigation.PushAsync(_pages.CreatePuzzlePage(_puzzles.GetRandom(_puzzle.Key)));
 
         var home = new Button
         {

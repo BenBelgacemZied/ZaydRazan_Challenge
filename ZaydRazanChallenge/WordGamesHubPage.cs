@@ -2,8 +2,11 @@ namespace ZaydRazanChallenge;
 
 public sealed class WordGamesHubPage : ContentPage
 {
-    public WordGamesHubPage()
+    private readonly IGamePageFactory _pages;
+
+    public WordGamesHubPage(IVocabularyCatalog vocabulary, IGamePageFactory pages)
     {
+        _pages = pages;
         Title = "Woordenatelier";
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
@@ -23,7 +26,7 @@ public sealed class WordGamesHubPage : ContentPage
                 Children =
                 {
                     new Label { Text = "🎒 Le carnet des mots", FontSize = 28, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#17324D") },
-                    new Label { Text = $"Oefen {VocabularyCatalog.Items.Count} woorden uit de hele reis met vier verschillende spellen.", FontSize = 17, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#475569") },
+                    new Label { Text = $"Oefen {vocabulary.Items.Count} woorden uit de hele reis met vier verschillende spellen.", FontSize = 17, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#475569") },
                     games
                 }
             }
@@ -43,7 +46,7 @@ public sealed class WordGamesHubPage : ContentPage
             HeightRequest = 88,
             Padding = new Thickness(14, 8)
         };
-        button.Clicked += async (_, _) => await Navigation.PushAsync(new WordGamePage(mode));
+        button.Clicked += async (_, _) => await Navigation.PushAsync(_pages.CreateWordGamePage(mode));
         layout.Add(button);
     }
 }

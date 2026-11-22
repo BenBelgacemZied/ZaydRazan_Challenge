@@ -15,10 +15,14 @@ public sealed class ParisChapterPage : ContentPage
     ];
 
     private readonly VerticalStackLayout _levels = new() { Spacing = 8, Padding = new Thickness(14, 12, 14, 24) };
+    private readonly IDestinationContent _destination;
+    private readonly IGamePageFactory _pages;
     private bool _opening;
 
-    public ParisChapterPage()
+    public ParisChapterPage(IDestinationContent destination, IGamePageFactory pages)
     {
+        _destination = destination;
+        _pages = pages;
         Title = "Parijs · 30 ontdekkingen";
         BackgroundColor = Color.FromArgb("#17324D");
         GameUi.AddHomeButton(this);
@@ -49,11 +53,11 @@ public sealed class ParisChapterPage : ContentPage
     private void RenderLevels()
     {
         _levels.Children.Clear();
-        var saved = AdventureSave.Get("adventure_stage", ParisTreasureCatalog.FirstStage);
-        var completed = Math.Clamp(saved - ParisTreasureCatalog.FirstStage, 0, ParisTreasureCatalog.Count);
+        var saved = AdventureSave.Get("adventure_stage", _destination.FirstStage);
+        var completed = Math.Clamp(saved - _destination.FirstStage, 0, _destination.Count);
         _levels.Add(new Label
         {
-            Text = completed == ParisTreasureCatalog.Count
+            Text = completed == _destination.Count
                 ? "🏆 Je hebt alle 30 schatten ontdekt!"
                 : $"{completed}/30 ontdekt · reis naar de volgende etappe",
             TextColor = Colors.White, FontSize = 18, FontAttributes = FontAttributes.Bold,
@@ -99,12 +103,12 @@ public sealed class ParisChapterPage : ContentPage
             for (var offset = 0; offset < 5; offset++)
             {
                 var index = firstLevel + offset;
-                var stage = index + ParisTreasureCatalog.FirstStage;
+                var stage = index + _destination.FirstStage;
                 var unlocked = index <= completed;
                 var discovered = index < completed;
                 var button = new Button
                 {
-                    Text = discovered ? $"✓  ETAPPE {index + 1:00}  ·  {ParisTreasureCatalog.Quests[index].Title}" : unlocked ? $"▶  ETAPPE {index + 1:00}  ·  Vertrek" : $"🔒  ETAPPE {index + 1:00}",
+                    Text = discovered ? $"✓  ETAPPE {index + 1:00}  ·  {_destination.Quests[index].Title}" : unlocked ? $"▶  ETAPPE {index + 1:00}  ·  Vertrek" : $"🔒  ETAPPE {index + 1:00}",
                     HorizontalOptions = LayoutOptions.Fill,
                     FontSize = 14, FontAttributes = FontAttributes.Bold,
                     HeightRequest = 50, CornerRadius = 13,
@@ -117,7 +121,7 @@ public sealed class ParisChapterPage : ContentPage
                 {
                     if (_opening) return;
                     _opening = true;
-                    try { await Navigation.PushAsync(new ParisTreasurePage(stage)); }
+                    try { await Navigation.PushAsync(_pages.CreateParisTreasurePage(stage)); }
                     finally { _opening = false; }
                 };
                 chapterLayout.Add(button);

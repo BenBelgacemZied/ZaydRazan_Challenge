@@ -7,6 +7,7 @@ public enum WordGameMode { Connect, ThreeChoices, BuildWord, Listening }
 public sealed class WordGamePage : ContentPage
 {
     private readonly WordGameMode _mode;
+    private readonly IVocabularyCatalog _vocabulary;
     private readonly Label _progress = new() { FontSize = 15, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#2563EB") };
     private readonly Label _question = new() { FontSize = 24, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#17324D") };
     private readonly Label _feedback = new() { FontSize = 17, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center };
@@ -17,9 +18,10 @@ public sealed class WordGamePage : ContentPage
     private int _matched;
     private bool _busy;
 
-    public WordGamePage(WordGameMode mode)
+    public WordGamePage(WordGameMode mode, IVocabularyCatalog vocabulary)
     {
         _mode = mode;
+        _vocabulary = vocabulary;
         Title = mode switch
         {
             WordGameMode.Connect => "Woorden verbinden",
@@ -63,7 +65,7 @@ public sealed class WordGamePage : ContentPage
         else
         {
             var count = _mode == WordGameMode.BuildWord ? 6 : 10;
-            _roundWords = VocabularyCatalog.RandomWords(count, _mode == WordGameMode.BuildWord ? IsSpellable : null);
+            _roundWords = _vocabulary.RandomWords(count, _mode == WordGameMode.BuildWord ? IsSpellable : null);
             ShowSingleWordRound();
         }
     }
@@ -73,7 +75,7 @@ public sealed class WordGamePage : ContentPage
         _gameArea.Clear();
         _feedback.Text = "";
         _matched = 0;
-        _roundWords = VocabularyCatalog.RandomWords(5);
+        _roundWords = _vocabulary.RandomWords(5);
         _progress.Text = "0/5";
         _question.Text = "Verbind de juiste woorden";
 
@@ -165,7 +167,7 @@ public sealed class WordGamePage : ContentPage
             _ = SpeakFrenchAsync(word.French);
         }
 
-        var answers = VocabularyCatalog.Items
+        var answers = _vocabulary.Items
             .Where(item => item.French != word.French)
             .OrderBy(_ => Random.Shared.Next()).Take(2).Append(word)
             .OrderBy(_ => Random.Shared.Next()).ToArray();
