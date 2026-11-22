@@ -1,4 +1,5 @@
 using Microsoft.Maui.Layouts;
+using ZaydRazanChallenge.Features.Shared;
 
 namespace ZaydRazanChallenge.Features.Adventure.Pages;
 
@@ -145,7 +146,7 @@ public sealed class PackingMissionPage : ContentPage
             var stars = _gameProgress.Get("stars", 0) + 1;
             _gameProgress.Set("stars", stars);
             await SpeakDutchAsync($"Goed gedaan! De koffer van {_hero} is klaar.");
-            await DisplayAlert("⭐ Missie voltooid!", $"De koffer van {_hero} is klaar.", "Verder");
+            await SuccessCelebration.ShowAsync(this, "🎉 Goed gedaan!", $"De koffer van {_hero} is klaar.", "🧳", "Tik op de koffer!");
             await Navigation.PopAsync();
         }
         _busy = false;
