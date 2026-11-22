@@ -1,5 +1,7 @@
 using Microsoft.Maui.Layouts;
 
+using ZaydRazanChallenge.Features.Shared;
+
 namespace ZaydRazanChallenge.Features.WordGames.Pages;
 
 public sealed class WordGamePage : ContentPage
@@ -364,7 +366,7 @@ public sealed class WordGamePage : ContentPage
     {
         if (_busy && _mode != WordGameMode.Connect) return;
         _gameProgress.Set("stars", _gameProgress.Get("stars", 0) + _score);
-        await DisplayAlert("⭐ Woordspel voltooid", $"Je hebt {_score} van {_roundWords.Length} woorden gevonden en {_score} sterren verdiend!", "Verder");
+        await SuccessCelebration.ShowAsync(this, "🎉 Woordspel klaar!", $"Je vond {_score} van de {_roundWords.Length} woorden.", "🔤", "Tik op de letters!");
         await Navigation.PopAsync();
     }
 
