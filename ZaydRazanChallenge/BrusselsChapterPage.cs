@@ -90,8 +90,13 @@ public sealed class BrusselsChapterPage : ContentPage
             _opening = true;
             try
             {
+                var brusselsPuzzles = BrusselsPuzzleCatalog.Items;
                 await Navigation.PushAsync(new PuzzlePage(
-                    PuzzleCatalog.GetByKey("brussels_atomium"), "Bruxelles"));
+                    brusselsPuzzles[0], "Bruxelles", brusselsPuzzles));
+            }
+            catch (Exception exception)
+            {
+                await DisplayAlert("Puzzle indisponible", exception.Message, "OK");
             }
             finally
             {
@@ -167,11 +172,11 @@ public sealed class BrusselsChapterPage : ContentPage
                 {
                     await Navigation.PushAsync(new BrusselsMissionPage(index));
                 }
-                catch
+                catch (Exception exception)
                 {
                     await DisplayAlert(
                         "Étape indisponible",
-                        "Cette étape n’a pas pu s’ouvrir. Reviens au chapitre Bruxelles et réessaie.",
+                        $"Cette étape n’a pas pu s’ouvrir.\nDétail : {exception.Message}",
                         "OK");
                 }
                 finally { _opening = false; }

@@ -3,10 +3,20 @@ namespace ZaydRazanChallenge;
 public sealed class PuzzleDiscoveryPage : ContentPage
 {
     private readonly PuzzleDefinition _puzzle;
+    private readonly string? _chapterName;
+    private readonly IReadOnlyList<PuzzleDefinition>? _chapterPuzzles;
 
-    public PuzzleDiscoveryPage(PuzzleDefinition puzzle, int moves, int maxMoves, int reward)
+    public PuzzleDiscoveryPage(
+        PuzzleDefinition puzzle,
+        int moves,
+        int maxMoves,
+        int reward,
+        string? chapterName = null,
+        IReadOnlyList<PuzzleDefinition>? chapterPuzzles = null)
     {
         _puzzle = puzzle;
+        _chapterName = chapterName;
+        _chapterPuzzles = chapterPuzzles;
         Title = "Ontdekking";
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
@@ -24,14 +34,14 @@ public sealed class PuzzleDiscoveryPage : ContentPage
 
         var next = new Button
         {
-            Text = "🎲 Nieuwe verrassingspuzzel",
+            Text = chapterName is null ? "🎲 Nieuwe verrassingspuzzel" : $"🎲 Autre puzzle {chapterName}",
             FontSize = 17,
             FontAttributes = FontAttributes.Bold,
             BackgroundColor = Color.FromArgb("#E11D48"),
             TextColor = Colors.White
         };
         next.Clicked += async (_, _) =>
-            await Navigation.PushAsync(new PuzzlePage(PuzzleCatalog.GetRandom(_puzzle.Key)));
+            await Navigation.PushAsync(new PuzzlePage(GetNextPuzzle(), _chapterName, _chapterPuzzles));
 
         var home = new Button
         {
@@ -136,5 +146,16 @@ public sealed class PuzzleDiscoveryPage : ContentPage
             new SpeechOptions { Locale = french });
         await TextToSpeech.Default.SpeakAsync(_puzzle.Description,
             new SpeechOptions { Locale = dutch ?? french });
+    }
+
+    private PuzzleDefinition GetNextPuzzle()
+    {
+        if (_chapterPuzzles is not { Count: > 0 })
+            return PuzzleCatalog.GetRandom(_puzzle.Key);
+
+        var alternatives = _chapterPuzzles.Where(item => item.Key != _puzzle.Key).ToArray();
+        return alternatives.Length == 0
+            ? _chapterPuzzles[0]
+            : alternatives[Random.Shared.Next(alternatives.Length)];
     }
 }
