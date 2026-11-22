@@ -1,3 +1,14 @@
-global using ZaydRazanChallenge.Core.Content;
-global using ZaydRazanChallenge.Destinations.Paris;
+global using ZRLingoTrip.Application;
+global using ZRLingoTrip.Application.Content;
+global using ZRLingoTrip.Application.Games;
+global using ZRLingoTrip.Content.Paris;
+global using ZRLingoTrip.Domain.Content;
+global using ZRLingoTrip.Domain.Games;
+global using ZaydRazanChallenge.Features.Adventure.Pages;
+global using ZaydRazanChallenge.Features.Home.Pages;
+global using ZaydRazanChallenge.Features.Paris.Pages;
+global using ZaydRazanChallenge.Features.Puzzles.Pages;
+global using ZaydRazanChallenge.Features.Shared;
+global using ZaydRazanChallenge.Features.WordGames.Pages;
+global using ZaydRazanChallenge.Infrastructure.Maui;
 global using ZaydRazanChallenge.Infrastructure.Navigation;

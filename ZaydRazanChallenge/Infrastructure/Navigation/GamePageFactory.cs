@@ -1,7 +1,6 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace ZaydRazanChallenge.Infrastructure.Navigation;
 
+/// <summary>Creates presentation pages while forwarding their constructor-injected dependencies.</summary>
 public interface IGamePageFactory
 {
     MainPage CreateHomePage();
@@ -17,23 +16,25 @@ public interface IGamePageFactory
 }
 
 /// <summary>
-/// Resolves constructor-injected pages and supplies runtime route arguments.
-/// This keeps MAUI container access at the presentation composition boundary.
+/// Presentation factory for pages with runtime route arguments. Dependencies are injected once here;
+/// this type does not resolve services from the container.
 /// </summary>
-internal sealed class GamePageFactory(IServiceProvider services) : IGamePageFactory
+internal sealed class GamePageFactory(
+    IDestinationContent destination,
+    IPuzzleCatalog puzzles,
+    IVocabularyCatalog vocabulary,
+    IGameProgressStore progress,
+    ISpeechService speech) : IGamePageFactory
 {
-    public MainPage CreateHomePage() => services.GetRequiredService<MainPage>();
-    public AdventurePage CreateAdventurePage() => services.GetRequiredService<AdventurePage>();
-    public AdventureTestMenuPage CreateAdventureTestMenuPage() => services.GetRequiredService<AdventureTestMenuPage>();
-    public ParisChapterPage CreateParisChapterPage() => services.GetRequiredService<ParisChapterPage>();
-    public ParisTreasurePage CreateParisTreasurePage(int stage) =>
-        ActivatorUtilities.CreateInstance<ParisTreasurePage>(services, stage);
-    public PuzzleGalleryPage CreatePuzzleGalleryPage() => services.GetRequiredService<PuzzleGalleryPage>();
-    public PuzzlePage CreatePuzzlePage(PuzzleDefinition puzzle) =>
-        ActivatorUtilities.CreateInstance<PuzzlePage>(services, puzzle);
+    public MainPage CreateHomePage() => new(destination, this, progress, speech);
+    public AdventurePage CreateAdventurePage() => new(destination, this, progress, speech);
+    public AdventureTestMenuPage CreateAdventureTestMenuPage() => new(destination, this, progress, speech);
+    public ParisChapterPage CreateParisChapterPage() => new(destination, this, progress);
+    public ParisTreasurePage CreateParisTreasurePage(int stage) => new(stage, destination, progress, speech);
+    public PuzzleGalleryPage CreatePuzzleGalleryPage() => new(puzzles, this, progress);
+    public PuzzlePage CreatePuzzlePage(PuzzleDefinition puzzle) => new(puzzle, puzzles, this, progress);
     public PuzzleDiscoveryPage CreatePuzzleDiscoveryPage(PuzzleDefinition puzzle, int moves, int maxMoves, int reward) =>
-        ActivatorUtilities.CreateInstance<PuzzleDiscoveryPage>(services, puzzle, moves, maxMoves, reward);
-    public WordGamesHubPage CreateWordGamesHubPage() => services.GetRequiredService<WordGamesHubPage>();
-    public WordGamePage CreateWordGamePage(WordGameMode mode) =>
-        ActivatorUtilities.CreateInstance<WordGamePage>(services, mode);
+        new(puzzle, moves, maxMoves, reward, puzzles, this, progress, speech, destination);
+    public WordGamesHubPage CreateWordGamesHubPage() => new(vocabulary, this);
+    public WordGamePage CreateWordGamePage(WordGameMode mode) => new(mode, vocabulary, progress, speech, destination);
 }
