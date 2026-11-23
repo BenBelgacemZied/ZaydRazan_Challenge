@@ -1,6 +1,6 @@
 namespace ZaydRazanChallenge.Features.Shared;
 
-/// <summary>Shows a reusable celebration with stars and colorful confetti falling from above.</summary>
+/// <summary>Shows falling stars and confetti over the current page, with a single continue button.</summary>
 public static class SuccessCelebration
 {
     private static readonly Color[] ConfettiColors =
@@ -15,8 +15,7 @@ public static class SuccessCelebration
         var close = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var overlay = new Grid
         {
-            BackgroundColor = Color.FromArgb("#990B1830"),
-            Padding = 22,
+            BackgroundColor = Color.FromArgb("#220B1830"),
             Opacity = 0
         };
 
@@ -27,11 +26,17 @@ public static class SuccessCelebration
             FontAttributes = FontAttributes.Bold,
             BackgroundColor = Color.FromArgb("#0891B2"),
             TextColor = Colors.White,
-            CornerRadius = 22
+            CornerRadius = 22,
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.End,
+            Margin = new Thickness(0, 0, 0, 28),
+            Padding = new Thickness(32, 13),
+            ZIndex = 1
         };
+        SemanticProperties.SetDescription(continueButton, $"{title}. {message} {rewardEmoji}");
         continueButton.Clicked += (_, _) => close.TrySetResult();
 
-        // Lightweight paper pieces sit behind the card and fall from the top edge.
+        // Lightweight paper pieces fall across the existing screen from its top edge.
         var confetti = new List<View>();
         for (var i = 0; i < 28; i++)
         {
@@ -68,28 +73,7 @@ public static class SuccessCelebration
             overlay.Children.Add(piece);
         }
 
-        var card = new Border
-        {
-            Padding = new Thickness(22, 26),
-            BackgroundColor = Color.FromArgb("#FFFFF8E7"),
-            Stroke = Color.FromArgb("#FFFCD34D"),
-            StrokeThickness = 3,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 30 },
-            VerticalOptions = LayoutOptions.Center,
-            Content = new VerticalStackLayout
-            {
-                Spacing = 14,
-                Children =
-                {
-                    new Label { Text = "🎉  ✨  🎉", FontSize = 27, HorizontalTextAlignment = TextAlignment.Center },
-                    new Label { Text = title, FontSize = 25, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#17324D"), HorizontalTextAlignment = TextAlignment.Center },
-                    new Label { Text = message, FontSize = 18, TextColor = Color.FromArgb("#475569"), HorizontalTextAlignment = TextAlignment.Center },
-                    new Label { Text = rewardEmoji, FontSize = 54, HorizontalTextAlignment = TextAlignment.Center },
-                    continueButton
-                }
-            }
-        };
-        overlay.Children.Add(card);
+        overlay.Children.Add(continueButton);
 
         var original = page.Content;
         var host = new Grid();
@@ -103,7 +87,8 @@ public static class SuccessCelebration
 
         await overlay.FadeTo(1, 220, Easing.CubicOut);
         var confettiTask = AnimateConfettiAsync(overlay, confetti);
-        await Task.WhenAll(confettiTask, close.Task);
+        await Task.WhenAny(confettiTask, close.Task);
+        await close.Task;
 
         await overlay.FadeTo(0, 160, Easing.CubicIn);
         page.Content = original;
