@@ -146,7 +146,7 @@ public sealed class PackingMissionPage : ContentPage
             var stars = _gameProgress.Get("stars", 0) + 1;
             _gameProgress.Set("stars", stars);
             await SpeakDutchAsync($"Goed gedaan! De koffer van {_hero} is klaar.");
-            await SuccessCelebration.ShowAsync(this, "🎉 Goed gedaan!", $"De koffer van {_hero} is klaar.", "🧳", "Tik op de koffer!");
+            await SuccessCelebration.ShowAsync(this, "🎉 Goed gedaan!", $"De koffer van {_hero} is klaar.", "🧳");
             await Navigation.PopAsync();
         }
         _busy = false;
