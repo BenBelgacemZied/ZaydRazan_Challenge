@@ -1,6 +1,6 @@
 namespace ZaydRazanChallenge.Features.Shared;
 
-/// <summary>Shows falling stars and confetti over the current page, with a single continue button.</summary>
+/// <summary>Shows falling stars and confetti over the current page, then returns when the celebration ends.</summary>
 public static class SuccessCelebration
 {
     private static readonly Color[] ConfettiColors =
@@ -9,32 +9,13 @@ public static class SuccessCelebration
         Color.FromArgb("#3B82F6"), Color.FromArgb("#A855F7"), Color.FromArgb("#06B6D4")
     ];
 
-    public static async Task ShowAsync(ContentPage page, string title, string message,
-        string rewardEmoji, string continueText = "Verder")
+    public static async Task ShowAsync(ContentPage page)
     {
-        var close = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var overlay = new Grid
         {
             BackgroundColor = Color.FromArgb("#220B1830"),
             Opacity = 0
         };
-
-        var continueButton = new Button
-        {
-            Text = continueText,
-            FontSize = 19,
-            FontAttributes = FontAttributes.Bold,
-            BackgroundColor = Color.FromArgb("#0891B2"),
-            TextColor = Colors.White,
-            CornerRadius = 22,
-            HorizontalOptions = LayoutOptions.Center,
-            VerticalOptions = LayoutOptions.Center,
-            Margin = 0,
-            Padding = new Thickness(32, 13),
-            ZIndex = 1
-        };
-        SemanticProperties.SetDescription(continueButton, $"{title}. {message} {rewardEmoji}");
-        continueButton.Clicked += (_, _) => close.TrySetResult();
 
         // Lightweight paper pieces fall across the existing screen from its top edge.
         var confetti = new List<View>();
@@ -73,7 +54,6 @@ public static class SuccessCelebration
             overlay.Children.Add(piece);
         }
 
-        overlay.Children.Add(continueButton);
 
         var original = page.Content;
         var host = new Grid();
@@ -87,8 +67,7 @@ public static class SuccessCelebration
 
         await overlay.FadeTo(1, 220, Easing.CubicOut);
         var confettiTask = AnimateConfettiAsync(overlay, confetti);
-        await Task.WhenAny(confettiTask, close.Task);
-        await close.Task;
+        await confettiTask;
 
         await overlay.FadeTo(0, 160, Easing.CubicIn);
         page.Content = original;

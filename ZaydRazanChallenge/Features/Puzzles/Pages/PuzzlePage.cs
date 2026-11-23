@@ -362,7 +362,7 @@ public sealed class PuzzlePage : ContentPage
         await _puzzleGrid.ScaleTo(1.04, 180, Easing.CubicOut);
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
 
-        await SuccessCelebration.ShowAsync(this, "🎉 Puzzel compleet!", $"Je hebt {_puzzle.TargetName} ontdekt en {reward} ster(ren) verdiend.", "🧩");
+        await SuccessCelebration.ShowAsync(this);
 
         await Navigation.PushAsync(
             _pages.CreatePuzzleDiscoveryPage(_puzzle, _moves, _maxMoves, reward));

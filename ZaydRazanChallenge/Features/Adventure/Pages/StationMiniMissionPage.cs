@@ -96,7 +96,7 @@ public sealed class StationMiniMissionPage : ContentPage
         await GameFeedback.SuccessAsync();
         await SpeakDutch("Goed gedaan! " + _mission.Success);
         await Task.Delay(650);
-        await SuccessCelebration.ShowAsync(this, "🎉 Goed gedaan!", _mission.Success, "🎫");
+        await SuccessCelebration.ShowAsync(this);
         if (_index == Missions.Length - 1)
             _gameProgress.Set("adventure_stage", 3);
 
