@@ -159,8 +159,7 @@ public sealed class AdventureMissionHubPage : ContentPage
                     Math.Max(2, _gameProgress.Get("adventure_stage", 0)));
                 _speech.Text = "☀️ Goed gedaan! Op naar het station.";
                 // Replace the hub in the navigation stack so Back returns to the map.
-                if (!_gameProgress.IsTestMode)
-                    Navigation.InsertPageBefore(new StationMissionHubPage(_gameProgress, _speechService, _destination), this);
+                Navigation.InsertPageBefore(new StationMissionHubPage(_gameProgress, _speechService, _destination), this);
                 await Navigation.PopAsync();
                 return;
             }
