@@ -366,7 +366,7 @@ public sealed class WordGamePage : ContentPage
     {
         if (_busy && _mode != WordGameMode.Connect) return;
         _gameProgress.Set("stars", _gameProgress.Get("stars", 0) + _score);
-        await SuccessCelebration.ShowAsync(this, "🎉 Woordspel klaar!", $"Je vond {_score} van de {_roundWords.Length} woorden.", "🔤", "Tik op de letters!");
+        await SuccessCelebration.ShowAsync(this, "🎉 Woordspel klaar!", $"Je vond {_score} van de {_roundWords.Length} woorden.", "🔤");
         await Navigation.PopAsync();
     }
 
