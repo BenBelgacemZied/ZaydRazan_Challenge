@@ -121,6 +121,8 @@ public sealed class AdventureMissionHubPage : ContentPage
         Content = playground;
     }
 
+    private bool _initialLaunchHandled;
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -134,12 +136,19 @@ public sealed class AdventureMissionHubPage : ContentPage
             {
                 _speech.Text = "↩️ Je kunt verder spelen wanneer je wilt.";
                 _resume.IsVisible = true;
-                return;
             }
+
+            // The mission page explicitly advances after its pop transition completes.
+            // Do not start another navigation from inside this appearance callback.
+            return;
         }
 
+        if (_initialLaunchHandled) return;
+        _initialLaunchHandled = true;
         await OpenNextMissionAsync();
     }
+
+    public Task ContinueAfterMissionAsync() => OpenNextMissionAsync();
 
     private async Task OpenNextMissionAsync()
     {

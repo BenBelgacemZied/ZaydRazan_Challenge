@@ -148,16 +148,22 @@ public sealed class PackingMissionPage : ContentPage
             await SpeakDutchAsync($"Goed gedaan! De koffer van {_hero} is klaar.");
             await SuccessCelebration.ShowAsync(this);
 
-            // In normal play, returning to the hub starts the next packing mission.
-            // In test mode, a standalone mission returns to the test menu instead of
-            // creating a fresh hub that would restart the adventure from the first mission.
             var stack = Navigation.NavigationStack;
-            if (stack.Count > 1 && stack[^2] is AdventureMissionHubPage)
+            if (stack.Count > 1 && stack[^2] is AdventureMissionHubPage hub)
+            {
+                // Finish the pop transition before asking the hub to open the next page.
                 await Navigation.PopAsync();
+                await hub.ContinueAfterMissionAsync();
+            }
             else if (_gameProgress.IsTestMode && stack.Count > 1)
+            {
+                // A standalone test returns to the test menu, never to a new adventure hub.
                 await Navigation.PopAsync();
+            }
             else
+            {
                 await Navigation.PushAsync(new AdventureMissionHubPage(_gameProgress, _speechService, _destination));
+            }
         }
         _busy = false;
     }
