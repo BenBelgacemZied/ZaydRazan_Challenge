@@ -147,7 +147,14 @@ public sealed class PackingMissionPage : ContentPage
             _gameProgress.Set("stars", stars);
             await SpeakDutchAsync($"Goed gedaan! De koffer van {_hero} is klaar.");
             await SuccessCelebration.ShowAsync(this, "🎉 Goed gedaan!", $"De koffer van {_hero} is klaar.", "🧳");
-            await Navigation.PopAsync();
+
+            // Returning to the house hub starts the next packing mission. If this page
+            // was opened directly (for example from the test menu), create that hub first.
+            var stack = Navigation.NavigationStack;
+            if (stack.Count > 1 && stack[^2] is AdventureMissionHubPage)
+                await Navigation.PopAsync();
+            else
+                await Navigation.PushAsync(new AdventureMissionHubPage(_gameProgress, _speechService, _destination));
         }
         _busy = false;
     }
