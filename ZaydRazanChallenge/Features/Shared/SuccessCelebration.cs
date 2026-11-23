@@ -28,8 +28,8 @@ public static class SuccessCelebration
             TextColor = Colors.White,
             CornerRadius = 22,
             HorizontalOptions = LayoutOptions.Center,
-            VerticalOptions = LayoutOptions.End,
-            Margin = new Thickness(0, 0, 0, 28),
+            VerticalOptions = LayoutOptions.Center,
+            Margin = 0,
             Padding = new Thickness(32, 13),
             ZIndex = 1
         };
