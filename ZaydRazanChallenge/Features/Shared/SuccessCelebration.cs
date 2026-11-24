@@ -70,6 +70,11 @@ public static class SuccessCelebration
         await confettiTask;
 
         await overlay.FadeTo(0, 160, Easing.CubicIn);
+
+        // Detach the original content from the temporary host before assigning it
+        // back to the ContentPage; MAUI elements cannot have two parents.
+        if (original is not null)
+            host.Children.Remove(original);
         page.Content = original;
     }
 
