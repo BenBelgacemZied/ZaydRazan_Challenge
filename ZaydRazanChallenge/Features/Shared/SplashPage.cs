@@ -6,10 +6,9 @@ public sealed class SplashPage : ContentPage
     private readonly ILearningLanguageSettings _languageSettings;
     private readonly Border _brandBadge;
     private readonly VerticalStackLayout _languagePanel;
-    private readonly VerticalStackLayout _welcomePanel;
+    private readonly Grid _welcomePanel;
     private readonly Image _characters;
     private readonly Label _slogan;
-    private readonly Label _loadingMessage;
     private readonly ProgressBar _progress;
     private bool _languageChosen;
     private bool _navigationStarted;
@@ -91,59 +90,16 @@ public sealed class SplashPage : ContentPage
             Children = { languageTitle, dutchButton, englishButton }
         };
 
-        _slogan = new Label
-        {
-            FontSize = 27,
-            FontAttributes = FontAttributes.Bold,
-            TextColor = Colors.White,
-            HorizontalTextAlignment = TextAlignment.Center,
-            LineBreakMode = LineBreakMode.WordWrap
-        };
-
-        _characters = new Image
-        {
-            Source = "welcome_globe.png",
-            Aspect = Aspect.AspectFill,
-            HeightRequest = 340,
-            HorizontalOptions = LayoutOptions.Fill
-        };
-
-        _loadingMessage = new Label
-        {
-            FontSize = 16,
-            FontAttributes = FontAttributes.Bold,
-            TextColor = Color.FromArgb("#D7EEF8"),
-            HorizontalTextAlignment = TextAlignment.Center
-        };
-
-        _progress = new ProgressBar
-        {
-            Progress = 0,
-            ProgressColor = Color.FromArgb("#FBBF24"),
-            BackgroundColor = Color.FromArgb("#38556B"),
-            HeightRequest = 10,
-            Margin = new Thickness(18, 0)
-        };
-
-        _welcomePanel = new VerticalStackLayout
-        {
-            IsVisible = false,
-            Opacity = 0,
-            Spacing = 12,
-            HorizontalOptions = LayoutOptions.Fill,
-            Children = { _slogan, _characters, _loadingMessage, _progress }
-        };
-
-        var content = new VerticalStackLayout
+        var languageContent = new VerticalStackLayout
         {
             Spacing = 12,
             Padding = new Thickness(26, 32),
             HorizontalOptions = LayoutOptions.Fill,
             VerticalOptions = LayoutOptions.Center,
-            Children = { brandRow, brandSubtitle, _languagePanel, _welcomePanel }
+            Children = { brandRow, brandSubtitle, _languagePanel }
         };
 
-        var background = new Grid
+        var languageScreen = new Grid
         {
             Children =
             {
@@ -171,11 +127,69 @@ public sealed class SplashPage : ContentPage
                     TranslationY = 100,
                     Opacity = .35
                 },
-                content
+                languageContent
             }
         };
 
-        Content = background;
+        _slogan = new Label
+        {
+            FontSize = 29,
+            FontAttributes = FontAttributes.Bold,
+            TextColor = Colors.White,
+            HorizontalTextAlignment = TextAlignment.Center,
+            VerticalTextAlignment = TextAlignment.Center,
+            LineBreakMode = LineBreakMode.WordWrap,
+            Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 3), Radius = 5, Opacity = .75 }
+        };
+
+        var titlePanel = new Border
+        {
+            BackgroundColor = Color.FromArgb("#B3102A43"),
+            Stroke = Colors.Transparent,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 20 },
+            Padding = new Thickness(16, 12),
+            HorizontalOptions = LayoutOptions.Fill,
+            Content = _slogan
+        };
+
+        _characters = new Image
+        {
+            Source = "welcome_globe.png",
+            Aspect = Aspect.AspectFill,
+            HorizontalOptions = LayoutOptions.Fill,
+            VerticalOptions = LayoutOptions.Fill
+        };
+
+        _progress = new ProgressBar
+        {
+            Progress = 0,
+            ProgressColor = Color.FromArgb("#FBBF24"),
+            BackgroundColor = Color.FromArgb("#38556B"),
+            HeightRequest = 12,
+            Margin = new Thickness(12, 0)
+        };
+
+        _welcomePanel = new Grid
+        {
+            IsVisible = false,
+            Opacity = 0,
+            RowDefinitions =
+            {
+                new RowDefinition { Height = GridLength.Auto },
+                new RowDefinition { Height = GridLength.Star },
+                new RowDefinition { Height = GridLength.Auto }
+            },
+            Padding = new Thickness(22, 28, 22, 28),
+            Children = { _characters, titlePanel, _progress }
+        };
+        Grid.SetRowSpan(_characters, 3);
+        Grid.SetRow(titlePanel, 0);
+        Grid.SetRow(_progress, 2);
+
+        var root = new Grid();
+        root.Children.Add(languageScreen);
+        root.Children.Add(_welcomePanel);
+        Content = root;
     }
 
     protected override void OnAppearing()
@@ -216,15 +230,10 @@ public sealed class SplashPage : ContentPage
         _languageSettings.SourceLanguageCode = languageCode;
         var english = languageCode == "en";
 
-        _languagePanel.IsVisible = false;
         _slogan.Text = english ? "Travel with Zayd & Razan" : "Op reis met Zayd en Razan";
-        _loadingMessage.Text = english ? "Getting the adventure ready…" : "We maken de reis klaar…";
         _welcomePanel.IsVisible = true;
-
         await _welcomePanel.FadeTo(1, 450, Easing.CubicOut);
-        await _characters.ScaleTo(1.04, 700, Easing.CubicOut);
-        await _characters.ScaleTo(1, 350, Easing.CubicInOut);
-        await _progress.ProgressTo(1, 1700, Easing.CubicInOut);
+        await _progress.ProgressTo(1, 1900, Easing.CubicInOut);
         await Task.Delay(250);
 
         if (_navigationStarted) return;
