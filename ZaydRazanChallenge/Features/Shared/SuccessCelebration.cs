@@ -9,7 +9,7 @@ public static class SuccessCelebration
         Color.FromArgb("#3B82F6"), Color.FromArgb("#A855F7"), Color.FromArgb("#06B6D4")
     ];
 
-    public static async Task ShowAsync(ContentPage page)
+    public static async Task ShowAsync(ContentPage page, Func<Task>? speak = null)
     {
         var overlay = new Grid
         {
@@ -65,17 +65,23 @@ public static class SuccessCelebration
         host.Children.Add(overlay);
         page.Content = host;
 
-        await overlay.FadeTo(1, 220, Easing.CubicOut);
-        var confettiTask = AnimateConfettiAsync(overlay, confetti);
-        await confettiTask;
-
-        await overlay.FadeTo(0, 160, Easing.CubicIn);
-
-        // Detach the original content from the temporary host before assigning it
-        // back to the ContentPage; MAUI elements cannot have two parents.
-        if (original is not null)
-            host.Children.Remove(original);
-        page.Content = original;
+        try
+        {
+            // Start speech, confetti, and the overlay reveal together.
+            var speechTask = speak?.Invoke() ?? Task.CompletedTask;
+            await Task.WhenAll(
+                overlay.FadeTo(1, 220, Easing.CubicOut),
+                AnimateConfettiAsync(overlay, confetti),
+                speechTask);
+            await overlay.FadeTo(0, 160, Easing.CubicIn);
+        }
+        finally
+        {
+            // Detach the original content before assigning it back to the ContentPage.
+            if (original is not null)
+                host.Children.Remove(original);
+            page.Content = original;
+        }
     }
 
     private static async Task AnimateConfettiAsync(Grid overlay, IReadOnlyList<View> pieces)

@@ -5,6 +5,8 @@ namespace ZaydRazanChallenge.Features.Puzzles.Pages;
 public sealed class PuzzlePage : ContentPage
 {
     private readonly IGameProgressStore _gameProgress;
+    private readonly ISpeechService _speechService;
+    private readonly IDestinationContent _destination;
     private readonly PuzzleDefinition _puzzle;
     private readonly IPuzzleCatalog _puzzles;
     private readonly IGamePageFactory _pages;
@@ -35,9 +37,12 @@ public sealed class PuzzlePage : ContentPage
     private int? _selectedPosition;
     private bool _completed;
 
-    public PuzzlePage(PuzzleDefinition puzzle, IPuzzleCatalog puzzles, IGamePageFactory pages, IGameProgressStore progress)
+    public PuzzlePage(PuzzleDefinition puzzle, IPuzzleCatalog puzzles, IGamePageFactory pages,
+        IGameProgressStore progress, ISpeechService speechService, IDestinationContent destination)
     {
         _gameProgress = progress;
+        _speechService = speechService;
+        _destination = destination;
         _puzzle = puzzle;
         _puzzles = puzzles;
         _pages = pages;
@@ -362,7 +367,11 @@ public sealed class PuzzlePage : ContentPage
         await _puzzleGrid.ScaleTo(1.04, 180, Easing.CubicOut);
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
 
-        await SuccessCelebration.ShowAsync(this);
+        await SuccessCelebration.ShowAsync(
+            this,
+            () => _speechService.SpeakAsync(
+                $"Goed gedaan! Je hebt {_puzzle.TargetName} ontdekt.",
+                _destination.LanguagePair.SourceLanguage.Value));
 
         await Navigation.PushAsync(
             _pages.CreatePuzzleDiscoveryPage(_puzzle, _moves, _maxMoves, reward));

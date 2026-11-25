@@ -1,3 +1,4 @@
+using ZaydRazanChallenge.Features.Shared;
 using Microsoft.Maui.Layouts;
 
 namespace ZaydRazanChallenge.Features.Paris.Pages;
@@ -226,7 +227,6 @@ public sealed class ParisTreasurePage : ContentPage
         foreach (var child in _choices.Children)
             if (child is ImageButton choice) choice.IsEnabled = false;
         await GameFeedback.SuccessAsync();
-        await SpeakFrenchAsync(_quest.TargetName);
         var completionKey = $"paris_complete_{_stage}";
         if (!_gameProgress.Get(completionKey, false))
         {
@@ -235,10 +235,10 @@ public sealed class ParisTreasurePage : ContentPage
         }
         if (!_gameProgress.IsTestMode)
             _gameProgress.Set("adventure_stage", Math.Max(_stage + 1, _gameProgress.Get("adventure_stage", 0)));
-        ShowDiscovery();
+        await ShowDiscoveryAsync();
     }
 
-    private void ShowDiscovery()
+    private async Task ShowDiscoveryAsync()
     {
         _root.Children.Clear();
         var discovered = new Grid { RowDefinitions = { new RowDefinition(GridLength.Star), new RowDefinition(GridLength.Auto) }, BackgroundColor = Color.FromArgb("#17324D") };
@@ -255,7 +255,10 @@ public sealed class ParisTreasurePage : ContentPage
         story.Children.Add(next);
         discovered.Add(story, 0, 1);
         _root.Add(discovered);
-        _ = TellStoryAsync();
+        await SuccessCelebration.ShowAsync(
+            this,
+            () => SpeakDutchAsync($"Goed gedaan! Jullie hebben {_quest.TargetName} gevonden."));
+        await TellStoryAsync();
     }
 
     private async Task TellStoryAsync()

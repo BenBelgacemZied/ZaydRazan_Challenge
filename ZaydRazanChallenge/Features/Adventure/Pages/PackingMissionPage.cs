@@ -145,8 +145,9 @@ public sealed class PackingMissionPage : ContentPage
             _gameProgress.Set(_preferenceKey, true);
             var stars = _gameProgress.Get("stars", 0) + 1;
             _gameProgress.Set("stars", stars);
-            await SpeakDutchAsync($"Goed gedaan! De koffer van {_hero} is klaar.");
-            await SuccessCelebration.ShowAsync(this);
+            await SuccessCelebration.ShowAsync(
+                this,
+                () => SpeakDutchAsync($"Goed gedaan! De koffer van {_hero} is klaar."));
 
             var stack = Navigation.NavigationStack;
             if (stack.Count > 1 && stack[^2] is AdventureMissionHubPage hub)

@@ -366,7 +366,11 @@ public sealed class WordGamePage : ContentPage
     {
         if (_busy && _mode != WordGameMode.Connect) return;
         _gameProgress.Set("stars", _gameProgress.Get("stars", 0) + _score);
-        await SuccessCelebration.ShowAsync(this);
+        await SuccessCelebration.ShowAsync(
+            this,
+            () => _speechService.SpeakAsync(
+                $"Goed gedaan! Je vond {_score} woorden.",
+                _destination.LanguagePair.SourceLanguage.Value));
         await Navigation.PopAsync();
     }
 

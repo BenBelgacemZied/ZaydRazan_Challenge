@@ -1,3 +1,4 @@
+using ZaydRazanChallenge.Features.Shared;
 using Microsoft.Maui.Layouts;
 
 namespace ZaydRazanChallenge.Features.Adventure.Pages;
@@ -141,8 +142,9 @@ public sealed class StationMissionHubPage : ContentPage
             _gameProgress.Set("adventure_stage",
                 Math.Max(3, _gameProgress.Get("adventure_stage", 0)));
             _instruction.Text = "☀️ Goed gedaan! Ga verder naar de trein.";
-            await SpeakDutchAsync("Het station is voltooid. Ga verder naar de trein.");
-            await Task.Delay(350);
+            await SuccessCelebration.ShowAsync(
+                this,
+                () => SpeakDutchAsync("Goed gedaan! Het station is voltooid. Ga verder naar de trein."));
             await Navigation.PopAsync();
             return;
         }

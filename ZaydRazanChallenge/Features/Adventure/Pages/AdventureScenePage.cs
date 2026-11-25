@@ -1,3 +1,4 @@
+using ZaydRazanChallenge.Features.Shared;
 namespace ZaydRazanChallenge.Features.Adventure.Pages;
 
 public sealed class AdventureScenePage : ContentPage
@@ -304,9 +305,11 @@ public sealed class AdventureScenePage : ContentPage
             var currentProgress = _gameProgress.Get("adventure_stage", 0);
             _gameProgress.Set("adventure_stage",
                 Math.Max(currentProgress, _sceneIndex + 1));
-            await DisplayAlert("🌤️ Zone ontdekt!",
-                "Goed gedaan! Zayd en Razan hebben deze scène voltooid. De volgende etappe is nu open.",
-                "Verder");
+            await SuccessCelebration.ShowAsync(
+                this,
+                () => _speechService.SpeakAsync(
+                    "Goed gedaan! Zayd en Razan hebben deze scène voltooid. De volgende etappe is nu open.",
+                    _destination.LanguagePair.SourceLanguage.Value));
             await Navigation.PopAsync();
             return;
         }

@@ -1,3 +1,4 @@
+using ZaydRazanChallenge.Features.Shared;
 using Microsoft.Maui.Layouts;
 
 namespace ZaydRazanChallenge.Features.Adventure.Pages;
@@ -203,14 +204,24 @@ public sealed class TrainMissionHubPage : ContentPage
         await selected.ScaleTo(1, 160, Easing.CubicIn);
         await Task.Delay(550);
         _discovery.IsVisible = false;
-        _busy = false;
-        if (_testEndAt.HasValue && _gameProgress.IsTestMode)
+
+        var completed = Objects.Count(x => _gameProgress.Get(x.Key, false));
+        if ((_testEndAt.HasValue && _gameProgress.IsTestMode) || completed >= Objects.Length)
         {
+            if (completed >= Objects.Length)
+                _gameProgress.Set("adventure_stage", Math.Max(4, _gameProgress.Get("adventure_stage", 0)));
+
+            await SuccessCelebration.ShowAsync(
+                this,
+                () => SpeakDutchAsync("Goed gedaan! Parijs komt dichterbij."));
+            _busy = false;
             await Navigation.PopAsync();
             return;
         }
+
+        _busy = false;
         Render();
-        if (index + 1 < Objects.Length) await SpeakCurrentInstruction();
+        await SpeakCurrentInstruction();
     }
 
     private async Task SpeakCurrentInstruction()

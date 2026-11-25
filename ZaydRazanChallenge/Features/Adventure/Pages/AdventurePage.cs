@@ -1,3 +1,4 @@
+using ZaydRazanChallenge.Features.Shared;
 namespace ZaydRazanChallenge.Features.Adventure.Pages;
 
 public sealed class AdventurePage : ContentPage
@@ -742,7 +743,11 @@ public sealed class AdventurePage : ContentPage
 
         if (_testStage.HasValue && _gameProgress.IsTestMode)
         {
-            await DisplayAlert("Testmodus", "Vraag getest. Kies een andere scène in het testmenu.", "Verder");
+            await SuccessCelebration.ShowAsync(
+                this,
+                () => _speechService.SpeakAsync(
+                    "Goed gedaan! Deze scène is voltooid.",
+                    _destination.LanguagePair.SourceLanguage.Value));
             await Navigation.PopAsync();
             return;
         }
@@ -753,20 +758,13 @@ public sealed class AdventurePage : ContentPage
 
         if (nextStage >= Stages.Length)
         {
-            var replay = await DisplayAlert(
-                "🏆 Parijs ontdekt!",
-                $"Zayd en Razan hebben hun reis helemaal zelf voltooid met {stars} sterren.",
-                "Opnieuw spelen",
-                "Naar start");
-            if (replay)
-            {
-                _gameProgress.Set("adventure_stage", 0);
-                _stageIndex = 0;
-                ShowStage();
-                await _scroll.ScrollToAsync(0, 0, true);
-            }
-            else
-                await Navigation.PopAsync();
+            _feedback.Text = $"🏆 Parijs ontdekt! ⭐ {stars}";
+            await SuccessCelebration.ShowAsync(
+                this,
+                () => _speechService.SpeakAsync(
+                    $"Goed gedaan! Parijs is ontdekt met {stars} sterren.",
+                    _destination.LanguagePair.SourceLanguage.Value));
+            await Navigation.PopAsync();
             return;
         }
 

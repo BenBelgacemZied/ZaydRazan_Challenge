@@ -94,9 +94,9 @@ public sealed class StationMiniMissionPage : ContentPage
         _feedback.Text = $"⭐ {_mission.Success}";
         _feedback.TextColor = Color.FromArgb("#16A34A");
         await GameFeedback.SuccessAsync();
-        await SpeakDutch("Goed gedaan! " + _mission.Success);
-        await Task.Delay(650);
-        await SuccessCelebration.ShowAsync(this);
+        await SuccessCelebration.ShowAsync(
+            this,
+            () => SpeakDutch("Goed gedaan! " + _mission.Success));
         if (_index == Missions.Length - 1)
             _gameProgress.Set("adventure_stage", 3);
 
