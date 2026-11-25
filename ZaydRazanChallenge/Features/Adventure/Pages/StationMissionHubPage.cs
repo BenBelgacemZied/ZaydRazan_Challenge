@@ -27,7 +27,7 @@ public sealed class StationMissionHubPage : ContentPage
 
     private readonly Label _instruction = new()
     {
-        Text = IsEnglish ? "The mission is starting..." : "De missie begint...",
+        Text = "De missie begint...",
         FontSize = 18,
         FontAttributes = FontAttributes.Bold,
         TextColor = Color.FromArgb("#17324D"),
@@ -39,6 +39,7 @@ public sealed class StationMissionHubPage : ContentPage
     public StationMissionHubPage(IGameProgressStore progress, ISpeechService speech, IDestinationContent destination)
     {
         _destination = destination;
+        _instruction.Text = IsEnglish ? "The mission is starting..." : "De missie begint...";
         _speechService = speech;
         _gameProgress = progress;
         Title = IsEnglish ? "The station" : "Het station";
