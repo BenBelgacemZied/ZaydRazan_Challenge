@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ZRLingoTrip.Domain/ZRLingoTrip.Domain.csproj" />
+  <Project Path="ZRLingoTrip.Application/ZRLingoTrip.Application.csproj" />
+  <Project Path="ZRLingoTrip.Content.Paris/ZRLingoTrip.Content.Paris.csproj" />
+  <Project Path="ZRLingoTrip.Infrastructure.Maui/ZRLingoTrip.Infrastructure.Maui.csproj" />
+  <Project Path="ZaydRazanChallenge/ZaydRazanChallenge.csproj" />
+</Solution>

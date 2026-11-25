@@ -1,7 +1,28 @@
 # ZR LingoTrip
 
-**ZR LingoTrip** est une application Android éducative pour les enfants de 8 à 12 ans. Elle permet
-d'apprendre le français et le néerlandais en voyageant avec Zayd et Razan.
+**ZR LingoTrip** est une application Android éducative pour les enfants de 8 à 12 ans. Chaque
+destination fixe la langue apprise. À Paris, la langue cible reste le français ; la langue de départ
+de l'enfant forme l'autre moitié de la paire (actuellement néerlandais → français).
+
+## Architecture
+
+La solution est séparée en projets avec des dépendances orientées vers le cœur :
+
+- `ZRLingoTrip.Domain` : modèles de destination, paire linguistique, puzzles et vocabulaire ; aucune dépendance MAUI.
+- `ZRLingoTrip.Application` : contrats et comportements partagés, dont les catalogues et les ports de progression et de synthèse vocale.
+- `ZRLingoTrip.Content.Paris` : contenu de Paris pour la paire néerlandais → français.
+- `ZRLingoTrip.Infrastructure.Maui` : adaptateurs MAUI pour la persistance locale et la synthèse vocale.
+- `ZaydRazanChallenge` : interface MAUI, pages organisées par fonctionnalité, navigation et composition des dépendances dans `MauiProgram`.
+
+Les pages reçoivent leurs dépendances par constructeur. Les ressources visuelles restent dans le projet MAUI,
+classées par portée : `Resources/Images/Shared` pour les ressources communes et
+`Resources/Images/Paris/Adventure` et `Resources/Images/Paris/Puzzles` pour les ressources propres à Paris.
+Les puzzles sont eux-mêmes séparés entre `Covers` et `Tiles`. Les nouvelles destinations pourront suivre
+la même structure sous leur propre dossier. Le nom logique des images est aplati au packaging pour garder
+les références d'images existantes.
+
+La structure de la paire linguistique est générique (`source` → `cible`), mais le seul contenu fourni pour
+l'instant est néerlandais → français. Une autre langue de départ demandera son jeu de contenus Paris traduit.
 
 ## Première destination : Paris
 
@@ -13,11 +34,11 @@ d'apprendre le français et le néerlandais en voyageant avec Zayd et Razan.
 
 ## Démarrage
 
-Prérequis : .NET 9 SDK, workload MAUI Android et Android SDK.
+Prérequis : .NET 10 SDK, workload MAUI Android et Android SDK.
 
 ```bash
 dotnet workload install maui-android
-dotnet build ZaydRazanChallenge/ZaydRazanChallenge.csproj
+dotnet build ZRLingoTrip.slnx
 ```
 
 Ouvrez ensuite le projet dans Visual Studio 2022 et sélectionnez un émulateur
