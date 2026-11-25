@@ -13,6 +13,25 @@ public sealed class ParisDestinationContent : IDestinationContent
         "🎨", "🌉", "🖌️", "🚇", "🚤", "🍪", "🧢", "🥞", "🛠️", "🔬"
     ];
 
+    private static readonly VocabularyWord[] EnglishJourneyWords =
+    [
+        new("hello", "bonjour", "Greetings"), new("thank you", "merci", "Greetings"),
+        new("goodbye", "au revoir", "Greetings"), new("a bag", "un sac", "Travel"),
+        new("a backpack", "un sac à dos", "Travel"), new("a suitcase", "une valise", "Travel"),
+        new("a T-shirt", "un tee-shirt", "Clothing"), new("trousers", "un pantalon", "Clothing"),
+        new("blue trousers", "un pantalon bleu", "Clothing"), new("a pink T-shirt", "un tee-shirt rose", "Clothing"),
+        new("a hat", "un chapeau", "Clothing"), new("socks", "des chaussettes", "Clothing"),
+        new("a book", "un livre", "Packing"), new("a toothbrush", "une brosse à dents", "Packing"),
+        new("a water bottle", "une gourde", "Packing"), new("a camera", "un appareil photo", "Packing"),
+        new("the passports", "les passeports", "Documents"), new("the tickets", "les billets", "Documents"),
+        new("the map of Paris", "le plan de Paris", "Documents"), new("the travel journal", "le carnet de voyage", "Documents"),
+        new("to pay", "payer", "At the station"), new("to travel", "voyager", "At the station"),
+        new("the station", "la gare", "At the station"), new("the platform", "le quai", "At the station"),
+        new("the train", "le train", "On the train"), new("the door", "la porte", "On the train"),
+        new("the seat", "le siège", "On the train"), new("the luggage rack", "le porte-bagages", "On the train"),
+        new("the window", "la fenêtre", "On the train"), new("the table", "la table", "On the train")
+    ];
+
     private static readonly VocabularyWord[] JourneyWords =
     [
         new("goedendag", "bonjour", "Begroetingen"),
@@ -47,8 +66,12 @@ public sealed class ParisDestinationContent : IDestinationContent
         new("de tafel", "la table", "De trein")
     ];
 
-    public DestinationProfile Profile { get; } = new("paris", "Parijs", new("fr"));
-    public LearningLanguagePair LanguagePair { get; } = new(new("nl"), new("fr"));
+    private readonly ILearningLanguageSettings _languageSettings;
+
+    public ParisDestinationContent(ILearningLanguageSettings languageSettings) => _languageSettings = languageSettings;
+
+    public DestinationProfile Profile => new("paris", _languageSettings.SourceLanguageCode == "en" ? "Paris" : "Parijs", new("fr"));
+    public LearningLanguagePair LanguagePair => new(new(_languageSettings.SourceLanguageCode), Profile.TargetLanguage);
     public int FirstStage => 5;
     public int Count => Quests.Count;
 
@@ -245,9 +268,10 @@ public sealed class ParisDestinationContent : IDestinationContent
             "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen."))
         .ToArray();
 
-    public IReadOnlyList<VocabularyWord> VocabularyWords => JourneyWords
-        .Concat(Quests.SelectMany(quest => quest.Clues)
-            .Select(clue => new VocabularyWord(clue.HighlightedSourceText, clue.TargetWord, Profile.DisplayName)))
+    public IReadOnlyList<VocabularyWord> VocabularyWords => (_languageSettings.SourceLanguageCode == "en"
+        ? EnglishJourneyWords
+        : JourneyWords.Concat(Quests.SelectMany(quest => quest.Clues)
+            .Select(clue => new VocabularyWord(clue.HighlightedSourceText, clue.TargetWord, Profile.DisplayName))))
         .GroupBy(word => word.TargetText.Trim().ToLowerInvariant())
         .Select(group => group.First())
         .OrderBy(word => word.Category)

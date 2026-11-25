@@ -16,6 +16,7 @@ public sealed class WordGamePage : ContentPage
     private readonly Label _feedback = new() { FontSize = 17, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center };
     private readonly VerticalStackLayout _gameArea = new() { Spacing = 10 };
     private VocabularyWord[] _roundWords = [];
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
     private int _index;
     private int _score;
     private int _matched;
@@ -28,13 +29,21 @@ public sealed class WordGamePage : ContentPage
         _mode = mode;
         _vocabulary = vocabulary;
         _destination = destination;
-        Title = mode switch
-        {
-            WordGameMode.Connect => "Woorden verbinden",
-            WordGameMode.ThreeChoices => "Drie keuzes",
-            WordGameMode.BuildWord => "Bouw het woord",
-            _ => "Luisteruitdaging"
-        };
+        Title = IsEnglish
+            ? mode switch
+            {
+                WordGameMode.Connect => "Match the words",
+                WordGameMode.ThreeChoices => "Three choices",
+                WordGameMode.BuildWord => "Build the word",
+                _ => "Listening challenge"
+            }
+            : mode switch
+            {
+                WordGameMode.Connect => "Woorden verbinden",
+                WordGameMode.ThreeChoices => "Drie keuzes",
+                WordGameMode.BuildWord => "Bouw het woord",
+                _ => "Luisteruitdaging"
+            };
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
 
@@ -83,7 +92,7 @@ public sealed class WordGamePage : ContentPage
         _matched = 0;
         _roundWords = _vocabulary.RandomWords(5);
         _progress.Text = "0/5";
-        _question.Text = "Verbind de juiste woorden";
+        _question.Text = IsEnglish ? "Match the correct words" : "Verbind de juiste woorden";
 
         var left = _roundWords.OrderBy(_ => Random.Shared.Next()).ToArray();
         var right = _roundWords.OrderBy(_ => Random.Shared.Next()).ToArray();
@@ -105,7 +114,7 @@ public sealed class WordGamePage : ContentPage
                 selectedWord = dutchWord;
                 selectedButton = leftButton;
                 leftButton.BackgroundColor = Color.FromArgb("#F59E0B");
-                _feedback.Text = "Kies nu het Franse woord.";
+                _feedback.Text = IsEnglish ? "Now choose the French word." : "Kies nu het Franse woord.";
                 _feedback.TextColor = Color.FromArgb("#475569");
             };
             grid.Add(leftButton, 0, row);
@@ -123,7 +132,7 @@ public sealed class WordGamePage : ContentPage
                     _matched++;
                     _score++;
                     _progress.Text = $"{_matched}/5";
-                    _feedback.Text = $"Goed zo! {selectedWord.SourceText} = {selectedWord.TargetText}";
+                    _feedback.Text = IsEnglish ? $"Well done! {selectedWord.SourceText} = {selectedWord.TargetText}" : $"Goed zo! {selectedWord.SourceText} = {selectedWord.TargetText}";
                     _feedback.TextColor = Color.FromArgb("#15803D");
                     await GameFeedback.SuccessAsync();
                     await SpeakFrenchAsync(selectedWord.TargetText);
@@ -134,7 +143,7 @@ public sealed class WordGamePage : ContentPage
                 else
                 {
                     rightButton.BackgroundColor = Color.FromArgb("#DC2626");
-                    _feedback.Text = "Die woorden horen niet bij elkaar. Probeer opnieuw.";
+                    _feedback.Text = IsEnglish ? "Those words do not match. Try again." : "Die woorden horen niet bij elkaar. Probeer opnieuw.";
                     _feedback.TextColor = Color.FromArgb("#DC2626");
                     await GameFeedback.FailureAsync();
                     await Task.Delay(450);
@@ -163,11 +172,11 @@ public sealed class WordGamePage : ContentPage
         }
 
         _question.Text = _mode == WordGameMode.Listening
-            ? "Luister en kies de betekenis"
-            : $"Hoe zeg je ‘{word.SourceText}’ in het Frans?";
+            ? (IsEnglish ? "Listen and choose the meaning" : "Luister en kies de betekenis")
+            : (IsEnglish ? $"How do you say ‘{word.SourceText}’ in French?" : $"Hoe zeg je ‘{word.SourceText}’ in het Frans?");
         if (_mode == WordGameMode.Listening)
         {
-            var listen = MakeButton("🔊  Luister naar het Franse woord", "#7C3AED");
+            var listen = MakeButton(IsEnglish ? "🔊  Listen to the French word" : "🔊  Luister naar het Franse woord", "#7C3AED");
             listen.Clicked += async (_, _) => await SpeakFrenchAsync(word.TargetText);
             _gameArea.Add(listen);
             _ = SpeakFrenchAsync(word.TargetText);
@@ -196,7 +205,7 @@ public sealed class WordGamePage : ContentPage
         var slotBorders = new Dictionary<int, Border>();
         var tileValues = new Dictionary<Button, char>();
         var hintsUsed = 0;
-        _question.Text = $"Bouw het Franse woord voor ‘{word.SourceText}’";
+        _question.Text = IsEnglish ? $"Build the French word for ‘{word.SourceText}’" : $"Bouw het Franse woord voor ‘{word.SourceText}’";
         var answerSlots = new FlexLayout { Wrap = FlexWrap.Wrap, JustifyContent = FlexJustify.Center, AlignItems = FlexAlignItems.Center };
         var letters = new FlexLayout { Wrap = FlexWrap.Wrap, JustifyContent = FlexJustify.Center, AlignItems = FlexAlignItems.Center };
         var letterButtons = new List<Button>();
@@ -256,7 +265,7 @@ public sealed class WordGamePage : ContentPage
             if (correct)
             {
                 _score++;
-                _feedback.Text = $"Goed zo! {word.SourceText} = {word.TargetText}";
+                _feedback.Text = IsEnglish ? $"Well done! {word.SourceText} = {word.TargetText}" : $"Goed zo! {word.SourceText} = {word.TargetText}";
                 _feedback.TextColor = Color.FromArgb("#15803D");
                 await GameFeedback.SuccessAsync();
                 await SpeakFrenchAsync(word.TargetText);
@@ -267,7 +276,7 @@ public sealed class WordGamePage : ContentPage
             }
 
             foreach (var position in letterPositions) slotBorders[position].Stroke = Color.FromArgb("#DC2626");
-            _feedback.Text = "De volgorde klopt nog niet. Probeer opnieuw.";
+            _feedback.Text = IsEnglish ? "The order is not right yet. Try again." : "De volgorde klopt nog niet. Probeer opnieuw.";
             _feedback.TextColor = Color.FromArgb("#DC2626");
             await GameFeedback.FailureAsync();
             await Task.Delay(600);
@@ -300,7 +309,7 @@ public sealed class WordGamePage : ContentPage
             var position = letterPositions.FirstOrDefault(index => slotValues[index] != target[index], -1);
             if (position < 0) return;
             hintsUsed++;
-            help.Text = $"💡  Hulp {3 - hintsUsed}/3";
+            help.Text = IsEnglish ? $"💡  Hint {3 - hintsUsed}/3" : $"💡  Hulp {3 - hintsUsed}/3";
             help.IsEnabled = hintsUsed < 3;
 
             var correctLetter = target[position];
@@ -321,7 +330,7 @@ public sealed class WordGamePage : ContentPage
             }
             UpdateSlots();
             slotBorders[position].BackgroundColor = Color.FromArgb("#FEF3C7");
-            _feedback.Text = $"Hulp gebruikt: de letter {correctLetter.ToString().ToUpperInvariant()} staat op haar plaats.";
+            _feedback.Text = IsEnglish ? $"Hint used: the letter {correctLetter.ToString().ToUpperInvariant()} is in the right place." : $"Hulp gebruikt: de letter {correctLetter.ToString().ToUpperInvariant()} staat op haar plaats.";
             _feedback.TextColor = Color.FromArgb("#92400E");
             await SpeakFrenchAsync(correctLetter.ToString());
             await CheckCompletedAsync();
@@ -330,7 +339,7 @@ public sealed class WordGamePage : ContentPage
         var reset = MakeButton("↶  Opnieuw", "#64748B");
         reset.Clicked += (_, _) => ResetLetters();
         _gameArea.Add(answerSlots);
-        _gameArea.Add(new Label { Text = "De spaties en leestekens staan al op hun plaats.", FontSize = 13, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#64748B") });
+        _gameArea.Add(new Label { Text = IsEnglish ? "Spaces and punctuation are already in place." : "De spaties en leestekens staan al op hun plaats.", FontSize = 13, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#64748B") });
         _gameArea.Add(letters);
         _gameArea.Add(help);
         _gameArea.Add(reset);
@@ -345,14 +354,14 @@ public sealed class WordGamePage : ContentPage
         if (correct)
         {
             _score++;
-            _feedback.Text = $"Goed zo! {word.SourceText} = {word.TargetText}";
+            _feedback.Text = IsEnglish ? $"Well done! {word.SourceText} = {word.TargetText}" : $"Goed zo! {word.SourceText} = {word.TargetText}";
             _feedback.TextColor = Color.FromArgb("#15803D");
             await GameFeedback.SuccessAsync();
             await SpeakFrenchAsync(word.TargetText);
         }
         else
         {
-            _feedback.Text = $"Het juiste antwoord is {word.TargetText}.";
+            _feedback.Text = IsEnglish ? $"The correct answer is {word.TargetText}." : $"Het juiste antwoord is {word.TargetText}.";
             _feedback.TextColor = Color.FromArgb("#DC2626");
             await GameFeedback.FailureAsync();
             await SpeakFrenchAsync(word.TargetText);

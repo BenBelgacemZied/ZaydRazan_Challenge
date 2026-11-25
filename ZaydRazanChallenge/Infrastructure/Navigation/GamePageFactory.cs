@@ -24,9 +24,10 @@ internal sealed class GamePageFactory(
     IPuzzleCatalog puzzles,
     IVocabularyCatalog vocabulary,
     IGameProgressStore progress,
-    ISpeechService speech) : IGamePageFactory
+    ISpeechService speech,
+    ILearningLanguageSettings languageSettings) : IGamePageFactory
 {
-    public MainPage CreateHomePage() => new(destination, this, progress, speech);
+    public MainPage CreateHomePage() => new(destination, this, progress, speech, languageSettings);
     public AdventurePage CreateAdventurePage() => new(destination, this, progress, speech);
     public AdventureTestMenuPage CreateAdventureTestMenuPage() => new(destination, this, progress, speech);
     public ParisChapterPage CreateParisChapterPage() => new(destination, this, progress);
@@ -35,6 +36,6 @@ internal sealed class GamePageFactory(
     public PuzzlePage CreatePuzzlePage(PuzzleDefinition puzzle) => new(puzzle, puzzles, this, progress, speech, destination);
     public PuzzleDiscoveryPage CreatePuzzleDiscoveryPage(PuzzleDefinition puzzle, int moves, int maxMoves, int reward) =>
         new(puzzle, moves, maxMoves, reward, puzzles, this, progress, speech, destination);
-    public WordGamesHubPage CreateWordGamesHubPage() => new(vocabulary, this);
+    public WordGamesHubPage CreateWordGamesHubPage() => new(vocabulary, this, destination);
     public WordGamePage CreateWordGamePage(WordGameMode mode) => new(mode, vocabulary, progress, speech, destination);
 }

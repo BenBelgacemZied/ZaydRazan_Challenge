@@ -110,6 +110,7 @@ public sealed class AdventureScenePage : ContentPage
     private readonly double _width;
     private readonly double _height;
     private int _missionIndex;
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
     private bool _checking;
 
     public AdventureScenePage(int sceneIndex, IGameProgressStore progress, ISpeechService speech, IDestinationContent destination)
@@ -119,7 +120,7 @@ public sealed class AdventureScenePage : ContentPage
         _gameProgress = progress;
         _sceneIndex = Math.Clamp(sceneIndex, 0, Scenes.Length - 1);
         _scene = Scenes[_sceneIndex];
-        Title = _scene.Title;
+        Title = LocalizeInstruction(_scene.Title);
         BackgroundColor = Color.FromArgb("#DFF4FF");
         GameUi.AddHomeButton(this);
 
@@ -207,7 +208,7 @@ public sealed class AdventureScenePage : ContentPage
     {
         _checking = false;
         var mission = _scene.Missions[_missionIndex];
-        _instruction.Text = mission.Instruction;
+        _instruction.Text = LocalizeInstruction(mission.Instruction);
         _counter.Text = $"{_missionIndex + 1}/{_scene.Missions.Length}";
 
         for (var i = _playfield.Children.Count - 1; i >= 0; i--)
@@ -243,8 +244,38 @@ public sealed class AdventureScenePage : ContentPage
 
         _counter.Text =
             $"{_missionIndex + 1}/{_scene.Missions.Length}   ⚡ 10   ⭐ {_gameProgress.Get("stars", 0)}";
-        var spokenInstruction = mission.Instruction.Split('·')[0].Trim();
+        var spokenInstruction = LocalizeInstruction(mission.Instruction.Split('·')[0].Trim());
         await _speechService.SpeakAsync(spokenInstruction, _destination.LanguagePair.SourceLanguage.Value);
+    }
+
+    private string LocalizeInstruction(string text)
+    {
+        if (!IsEnglish) return text;
+
+        var parts = text.Split('·', 2);
+        var sourceText = parts[0].Trim();
+        var translated = sourceText switch
+        {
+            "🏠 De reis voorbereiden" => "🏠 Prepare for the trip",
+            "🎫 Tickets kopen" => "🎫 Buy tickets",
+            "🚉 Het perron vinden" => "🚉 Find the platform",
+            "🚄 In de trein stappen" => "🚄 Board the train",
+            "Zoek de rugzak" => "Find the backpack",
+            "Zoek een kledingstuk" => "Find an item of clothing",
+            "Zoek het treinkaartje" => "Find the train ticket",
+            "Wat zeggen Zayd en Razan aan het loket?" => "What do Zayd and Razan say at the ticket counter?",
+            "Kies de juiste bestemming." => "Choose the right destination.",
+            "Hoe bedank je de medewerker aan het loket?" => "How do you thank the ticket clerk?",
+            "Op het ticket staat perron 3. Zoek het!" => "The ticket says platform 3. Find it!",
+            "Waar kijk je naar de vertrektijden?" => "Where do you check the departure times?",
+            "Welk Frans woord betekent « perron »?" => "Which French word means “platform”?",
+            "Op het ticket staat wagon 7. Zoek hem!" => "The ticket says carriage 7. Find it!",
+            "Zoek de deur van de trein." => "Find the train door.",
+            "Wat zeggen ze wanneer ze instappen?" => "What do they say when they board?",
+            _ => sourceText
+        };
+
+        return parts.Length > 1 ? $"{translated} · {parts[1].Trim()}" : translated;
     }
 
     private async Task CheckChoice(int choiceIndex, Button button)

@@ -39,5 +39,10 @@ public sealed class MauiGameProgressStore : IGameProgressStore
     public void BeginTest() => _testValues = new Dictionary<string, object>();
     public void ResetTest() { if (IsTestMode) _testValues = new Dictionary<string, object>(); }
     public void EndTest() => _testValues = null;
-    public void Clear() => Preferences.Default.Clear();
+    public void Clear()
+    {
+        var sourceLanguage = Preferences.Default.Get(MauiLearningLanguageSettings.PreferenceKey, "nl");
+        Preferences.Default.Clear();
+        Preferences.Default.Set(MauiLearningLanguageSettings.PreferenceKey, sourceLanguage);
+    }
 }

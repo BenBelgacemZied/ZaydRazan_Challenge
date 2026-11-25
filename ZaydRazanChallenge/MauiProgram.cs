@@ -11,6 +11,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder.UseMauiApp<App>();
 
+        builder.Services.AddSingleton<ILearningLanguageSettings, MauiLearningLanguageSettings>();
         builder.Services.AddSingleton<IDestinationContent, ParisDestinationContent>();
         builder.Services.AddSingleton<IPuzzleCatalog, PuzzleCatalog>();
         builder.Services.AddSingleton<IVocabularyCatalog, VocabularyCatalog>();

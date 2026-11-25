@@ -6,9 +6,11 @@ namespace ZRLingoTrip.Application.Games;
 /// <summary>Shared vocabulary selection behavior over the active destination's language pair content.</summary>
 public sealed class VocabularyCatalog : IVocabularyCatalog
 {
-    public IReadOnlyList<VocabularyWord> Items { get; }
+    private readonly IDestinationContent _destination;
 
-    public VocabularyCatalog(IDestinationContent destination) => Items = destination.VocabularyWords;
+    public IReadOnlyList<VocabularyWord> Items => _destination.VocabularyWords;
+
+    public VocabularyCatalog(IDestinationContent destination) => _destination = destination;
 
     public VocabularyWord[] RandomWords(int count, Func<VocabularyWord, bool>? filter = null)
     {

@@ -19,10 +19,20 @@ public sealed class StationMiniMissionPage : ContentPage
         new("station_find_wagon", "Vind de wagon", "Razan zoekt het nummer op de wagon.", "Kies wagon zeven.", "scene_platform.jpg", "Wagon 7", ["Wagon 2", "Wagon 7", "Wagon 10"], "Jullie zitten in de juiste wagon!")
     ];
 
+    private static readonly Mission[] EnglishMissions =
+    [
+        new("station_find_counter", "Find the ticket counter", "Zayd and Razan are looking for the ticket counter.", "Which French phrase means “the tickets”?", "station_concourse.jpg", "Les billets", ["Les billets", "Le café", "Les bagages"], "You found the ticket counter!"),
+        new("station_ask_tickets", "Ask for tickets", "Razan is at the ticket counter.", "What should Razan say in French?", "station_ticket_counter.jpg", "Deux billets pour Paris, s'il vous plaît.", ["Où est le café ?", "Deux billets pour Paris, s'il vous plaît.", "Au revoir Paris !"], "The two tickets are ready!"),
+        new("station_pay", "Pay for the tickets", "Zayd sees the payment terminal.", "Which French word means “to pay”?", "station_ticket_counter.jpg", "payer", ["voyager", "payer", "manger"], "The payment is complete!"),
+        new("station_find_platform", "Find the platform", "The train to Paris leaves from platform three.", "Choose the right platform.", "station_concourse.jpg", "Quai 3", ["Quai 1", "Quai 3", "Quai 8"], "You found platform three!"),
+        new("station_find_wagon", "Find the train carriage", "Razan looks for the number on the carriage.", "Choose carriage seven.", "scene_platform.jpg", "Wagon 7", ["Wagon 2", "Wagon 7", "Wagon 10"], "You found the right carriage!")
+    ];
+
     private readonly int _index;
     private readonly Mission _mission;
     private readonly VerticalStackLayout _choices = new() { Spacing = 10 };
     private readonly Label _feedback = new() { FontSize = 19, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center };
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
     private bool _answered;
     private readonly Button _listen = new() { Text = "🔊", FontSize = 24, BackgroundColor = Color.FromArgb("#F59E0B"), TextColor = Colors.White, CornerRadius = 26, WidthRequest = 54, HeightRequest = 54, Padding = 0, HorizontalOptions = LayoutOptions.Center };
 
@@ -32,7 +42,7 @@ public sealed class StationMiniMissionPage : ContentPage
         _speechService = speech;
         _gameProgress = progress;
         _index = index;
-        _mission = Missions[index];
+        _mission = (IsEnglish ? EnglishMissions : Missions)[index];
         Title = $"Mission {index + 1}";
         BackgroundColor = Color.FromArgb("#EFF6FF");
         GameUi.AddHomeButton(this);
@@ -78,7 +88,7 @@ public sealed class StationMiniMissionPage : ContentPage
         if (!correct)
         {
             selected.BackgroundColor = Color.FromArgb("#DC2626");
-            _feedback.Text = "Kijk goed en probeer opnieuw.";
+            _feedback.Text = IsEnglish ? "Look carefully and try again." : "Kijk goed en probeer opnieuw.";
             _feedback.TextColor = Color.FromArgb("#DC2626");
             await GameFeedback.FailureAsync();
             await selected.TranslateTo(-10, 0, 70); await selected.TranslateTo(10, 0, 70); await selected.TranslateTo(0, 0, 70);
@@ -96,7 +106,7 @@ public sealed class StationMiniMissionPage : ContentPage
         await GameFeedback.SuccessAsync();
         await SuccessCelebration.ShowAsync(
             this,
-            () => SpeakDutch("Goed gedaan! " + _mission.Success));
+            () => SpeakDutch((IsEnglish ? "Well done! " : "Goed gedaan! ") + _mission.Success));
         if (_index == Missions.Length - 1)
             _gameProgress.Set("adventure_stage", 3);
 

@@ -22,6 +22,7 @@ public sealed class PackingMissionPage : ContentPage
         RowSpacing = 10,
         ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star) }
     };
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
     private bool _busy;
 
     private PackingMissionPage(string title, string hero, string image, string preferenceKey, Item[] items, IGameProgressStore progress, ISpeechService speech, IDestinationContent destination)
@@ -29,7 +30,7 @@ public sealed class PackingMissionPage : ContentPage
         _destination = destination;
         _speechService = speech;
         _gameProgress = progress;
-        Title = title;
+        Title = IsEnglish ? title.Replace("Missie", "Mission").Replace("koffer", "suitcase").Replace("Reispapieren", "Travel documents") : title;
         _hero = hero;
         _preferenceKey = preferenceKey;
         _items = items;
@@ -66,14 +67,14 @@ public sealed class PackingMissionPage : ContentPage
             scene,
             new VerticalStackLayout { Padding = 14, Spacing = 10, Children =
             {
-                new Label { Text = "Tik op een voorwerp", FontSize = 18, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.White },
+                new Label { Text = IsEnglish ? "Tap an item" : "Tik op een voorwerp", FontSize = 18, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.White },
                 _objects
             }}
         }}};
         BuildObjects();
     }
 
-    public static PackingMissionPage ForZayd(IGameProgressStore progress, ISpeechService speech, IDestinationContent destination) => new("Missie · Zayds koffer", "Zayd", "scene_home.jpg", "home_pack_zayd",
+    public static PackingMissionPage ForZayd(IGameProgressStore progress, ISpeechService speech, IDestinationContent destination) => new(destination.LanguagePair.SourceLanguage.Value == "en" ? "Mission · Zayd’s suitcase" : "Missie · Zayds koffer", "Zayd", "scene_home.jpg", "home_pack_zayd",
     [
         new("👕", "un tee-shirt", "een T-shirt", true), new("👖", "un pantalon", "een broek", true),
         new("📖", "un livre", "een boek", true), new("🪥", "une brosse à dents", "een tandenborstel", true),
@@ -81,7 +82,7 @@ public sealed class PackingMissionPage : ContentPage
         new("🛩️", "un avion jouet", "een speelgoedvliegtuig", false), new("🥾", "une grosse botte", "een grote laars", false)
     ], progress, speech, destination);
 
-    public static PackingMissionPage ForRazan(IGameProgressStore progress, ISpeechService speech, IDestinationContent destination) => new("Missie · Razans koffer", "Razan", "scene_home.jpg", "home_pack_razan",
+    public static PackingMissionPage ForRazan(IGameProgressStore progress, ISpeechService speech, IDestinationContent destination) => new(destination.LanguagePair.SourceLanguage.Value == "en" ? "Mission · Razan’s suitcase" : "Missie · Razans koffer", "Razan", "scene_home.jpg", "home_pack_razan",
     [
         new("👚", "un tee-shirt rose", "een roze T-shirt", true), new("👖", "un pantalon bleu", "een blauwe broek", true),
         new("📕", "un livre sur Paris", "een boek over Parijs", true), new("📷", "un appareil photo", "een fototoestel", true),
@@ -89,7 +90,7 @@ public sealed class PackingMissionPage : ContentPage
         new("🧸", "un gros nounours", "een grote knuffel", false), new("🧥", "un manteau trop lourd", "een te zware jas", false)
     ], progress, speech, destination);
 
-    public static PackingMissionPage ForDocuments(IGameProgressStore progress, ISpeechService speech, IDestinationContent destination) => new("Missie · Reispapieren", "Zayd en Razan", "scene_home.jpg", "home_documents",
+    public static PackingMissionPage ForDocuments(IGameProgressStore progress, ISpeechService speech, IDestinationContent destination) => new(destination.LanguagePair.SourceLanguage.Value == "en" ? "Mission · Travel documents" : "Missie · Reispapieren", "Zayd en Razan", "scene_home.jpg", "home_documents",
     [
         new("🛂", "les passeports", "de paspoorten", true), new("🎫", "les billets", "de tickets", true),
         new("🗺️", "le plan de Paris", "de kaart van Parijs", true), new("📒", "le carnet de voyage", "het reisboekje", true),
@@ -100,7 +101,7 @@ public sealed class PackingMissionPage : ContentPage
     {
         base.OnAppearing();
         await Task.Delay(350);
-        await SpeakDutchAsync($"Help {_hero}. Kies de spullen die nodig zijn voor de reis.");
+        await SpeakSourceAsync(IsEnglish ? $"Help {_hero}. Choose the items needed for the trip." : $"Help {_hero}. Kies de spullen die nodig zijn voor de reis.");
     }
 
     private void BuildObjects()
@@ -144,7 +145,7 @@ public sealed class PackingMissionPage : ContentPage
         {
             button.BackgroundColor = Color.FromArgb("#FCA5A5");
             await GameFeedback.FailureAsync();
-            await SpeakDutchAsync("Dat hebben we niet nodig. Kies een ander voorwerp.");
+            await SpeakSourceAsync(IsEnglish ? "We don’t need that. Choose another item." : "Dat hebben we niet nodig. Kies een ander voorwerp.");
             await button.TranslateTo(-12, 0, 70); await button.TranslateTo(12, 0, 70); await button.TranslateTo(0, 0, 70);
             button.BackgroundColor = Colors.White;
             _busy = false;
@@ -169,7 +170,7 @@ public sealed class PackingMissionPage : ContentPage
             _gameProgress.Set("stars", stars);
             await SuccessCelebration.ShowAsync(
                 this,
-                () => SpeakDutchAsync($"Goed gedaan! De koffer van {_hero} is klaar."));
+                () => SpeakSourceAsync(IsEnglish ? $"Well done! {_hero}’s suitcase is ready." : $"Goed gedaan! De koffer van {_hero} is klaar."));
 
             var stack = Navigation.NavigationStack;
             if (stack.Count > 1 && stack[^2] is AdventureMissionHubPage hub)
@@ -194,11 +195,11 @@ public sealed class PackingMissionPage : ContentPage
     private void UpdateHud()
     {
         var target = _items.Count(x => x.Useful);
-        _instruction.Text = $"Maak de koffer van {_hero} klaar";
+        _instruction.Text = IsEnglish ? $"Pack {_hero}’s suitcase" : $"Maak de koffer van {_hero} klaar";
         _counter.Text = $"{_packed.Count}/{target}";
     }
 
-    private Task SpeakDutchAsync(string text) => _speechService.SpeakAsync(text, _destination.LanguagePair.SourceLanguage.Value);
+    private Task SpeakSourceAsync(string text) => _speechService.SpeakAsync(text, _destination.LanguagePair.SourceLanguage.Value);
 
     private Task SpeakFrenchAsync(string text) => _speechService.SpeakAsync(text, _destination.LanguagePair.TargetLanguage.Value);
 }

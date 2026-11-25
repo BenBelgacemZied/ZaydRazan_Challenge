@@ -74,7 +74,31 @@ public sealed class AdventurePage : ContentPage
             ["la baguette", "la carte", "le billet"], "#FEF3C7", .55, .11)
     ];
 
+    private static readonly Stage[] EnglishStages =
+    [
+        new("🎒", "At home", "Zayd and Razan check their backpacks, tickets and passports. Their adventure can begin!",
+            "Nos sacs sont prêts !", "How do you say “a bag” in French?", "un sac", ["un sac", "un train", "une carte"], "#FEF3C7", .59, .86),
+        new("🧭", "On the way", "Zayd reads the map and Razan chooses the path to the station. Together they find the right direction.",
+            "Où est la gare ?", "Which French word means “where”?", "où", ["où", "quand", "merci"], "#FFEDD5", .63, .69),
+        new("🚉", "The station", "Razan finds the right platform on the departure board. Zayd keeps the tickets safe for inspection.",
+            "Le train part du quai trois.", "How do you say “the platform” in French?", "le quai", ["le quai", "la valise", "la tour"], "#DCFCE7", .69, .57),
+        new("🚄", "On the train", "They board by themselves, find their seats and watch the scenery pass by.",
+            "Nous voyageons en train.", "How do you say “we travel” in French?", "nous voyageons", ["nous voyageons", "nous mangeons", "nous dormons"], "#DBEAFE", .49, .46),
+        new("🗺️", "Arrival in Paris", "Zayd and Razan arrive in Paris. They open their city map and choose the next stop together.",
+            "Bonjour Paris, nous sommes arrivés !", "Which French word means “arrived”?", "arrivés", ["perdus", "arrivés", "partis"], "#EDE9FE", .43, .36),
+        new("🗼", "La tour Eiffel", "They follow the route along the Seine. Razan is the first to spot the top of the Eiffel Tower.",
+            "La tour Eiffel est très haute.", "Which French word means “high”?", "haut", ["bas", "haut", "petit"], "#FCE7F3", .36, .25),
+        new("🖼️", "Le musée du Louvre", "Zayd chooses the museum route. Together they look for the famous Mona Lisa among the artworks.",
+            "Où est la Joconde ?", "Where can they find the Mona Lisa?", "au Louvre", ["à la gare", "au Louvre", "dans le train"], "#FFEDD5", .63, .35),
+        new("🏛️", "L’Arc de Triomphe", "The clouds clear: Zayd and Razan reach the final stop of their Paris adventure by themselves!",
+            "Merci et au revoir, Paris !", "Which French expression means “goodbye”?", "au revoir", ["merci", "au revoir", "bonjour"], "#CCFBF1", .72, .18),
+        new("🥖", "La boulangerie · La baguette", "Zayd and Razan discover a warm bakery. Together they look for a crispy baguette.",
+            "Une baguette, s’il vous plaît.", "How do you say “baguette” in French?", "la baguette", ["la baguette", "la carte", "le billet"], "#FEF3C7", .55, .11)
+    ];
+
     private readonly IDestinationContent _destination;
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
+    private Stage[] ActiveStages => IsEnglish ? EnglishStages : Stages;
     private readonly IGamePageFactory _pages;
     private int StageCount => _destination.FirstStage + _destination.Count;
 
@@ -181,7 +205,7 @@ public sealed class AdventurePage : ContentPage
         _testStage = testStage;
         if (testStage is int stage && (stage < _destination.FirstStage || stage >= StageCount))
             throw new ArgumentOutOfRangeException(nameof(testStage));
-        Title = "Avontuur naar Parijs";
+        Title = IsEnglish ? "Adventure to Paris" : "Avontuur naar Parijs";
         BackgroundColor = Color.FromArgb("#E0F2FE");
         GameUi.AddHomeButton(this);
         _stageIndex = testStage ?? CurrentSavedStage();
@@ -192,7 +216,7 @@ public sealed class AdventurePage : ContentPage
 
         var listenButton = new Button
         {
-            Text = "🔊 Luister",
+            Text = IsEnglish ? "🔊 Listen" : "🔊 Luister",
             BackgroundColor = Color.FromArgb("#7C3AED"),
             TextColor = Colors.White,
             FontAttributes = FontAttributes.Bold
@@ -358,20 +382,29 @@ public sealed class AdventurePage : ContentPage
 
         var currentLevel = Math.Clamp(_stageIndex, 0, StageCount);
         _journeyProgress.Progress = (double)currentLevel / StageCount;
-        _routeTitle.Text = "📚 Niveaux de l'aventure";
+        _routeTitle.Text = IsEnglish ? "📚 Adventure stages" : "📚 Niveaux de l'aventure";
         _routeProgressText.Text = $"{currentLevel}/{StageCount}";
         _routeStatus.Text = currentLevel >= StageCount
-            ? "Aventure terminée 🎉"
-            : $"Niveau actuel : {currentLevel + 1} sur {StageCount}";
+            ? (IsEnglish ? "Adventure complete 🎉" : "Aventure terminée 🎉")
+            : (IsEnglish ? $"Current stage: {currentLevel + 1} of {StageCount}" : $"Niveau actuel : {currentLevel + 1} sur {StageCount}");
 
-        var prologue = new[]
-        {
-            ("Maison", "Préparer les valises", "mission_pack_zayd.jpg"),
-            ("En route", "Trouver le chemin", "adventure_map.jpg"),
-            ("Gare", "Billets et quai", "station_concourse.jpg"),
-            ("Train", "Monter dans le wagon", "scene_train_interior.jpg"),
-            ("Paris", "Arrivée à Paris", "paris_letter_scene.jpg")
-        };
+        var prologue = IsEnglish
+            ? new[]
+            {
+                ("Home", "Pack the suitcases", "mission_pack_zayd.jpg"),
+                ("On the way", "Find the way", "adventure_map.jpg"),
+                ("Station", "Tickets and platform", "station_concourse.jpg"),
+                ("Train", "Board the train", "scene_train_interior.jpg"),
+                ("Paris", "Arrive in Paris", "paris_letter_scene.jpg")
+            }
+            : new[]
+            {
+                ("Maison", "Préparer les valises", "mission_pack_zayd.jpg"),
+                ("En route", "Trouver le chemin", "adventure_map.jpg"),
+                ("Gare", "Billets et quai", "station_concourse.jpg"),
+                ("Train", "Monter dans le wagon", "scene_train_interior.jpg"),
+                ("Paris", "Arrivée à Paris", "paris_letter_scene.jpg")
+            };
 
         for (var stage = 0; stage < prologue.Length; stage++)
         {
@@ -386,12 +419,12 @@ public sealed class AdventurePage : ContentPage
             var discovered = stage < currentLevel || currentLevel >= StageCount;
             AddLevelRow(
                 stage + 1,
-                discovered ? $"Paris · {ShortTitle(quest.Title)}" : "Paris · Mystère",
+                discovered ? $"Paris · {ShortTitle(quest.Title)}" : (IsEnglish ? "Paris · Mystery" : "Paris · Mystère"),
                 discovered
-                    ? $"Découverte {questIndex + 1} sur {_destination.Count}"
+                    ? (IsEnglish ? $"Discovery {questIndex + 1} of {_destination.Count}" : $"Découverte {questIndex + 1} sur {_destination.Count}")
                     : stage == currentLevel
-                        ? "Cherche le lieu dans la mission"
-                        : "Lieu à découvrir",
+                        ? (IsEnglish ? "Find the place in the mission" : "Cherche le lieu dans la mission")
+                        : (IsEnglish ? "Place to discover" : "Lieu à découvrir"),
                 discovered ? quest.Photo : null,
                 stage,
                 currentLevel);
@@ -409,7 +442,7 @@ public sealed class AdventurePage : ContentPage
         var completed = stage < currentLevel || currentLevel >= StageCount;
         var current = stage == currentLevel && currentLevel < StageCount;
         var unlocked = stage <= currentLevel;
-        var status = completed ? "✓ Terminé" : current ? "▶ À jouer" : "🔒 Verrouillé";
+        var status = completed ? (IsEnglish ? "✓ Done" : "✓ Terminé") : current ? (IsEnglish ? "▶ Play" : "▶ À jouer") : (IsEnglish ? "🔒 Locked" : "🔒 Verrouillé");
         var accent = completed
             ? Color.FromArgb("#16A34A")
             : current ? Color.FromArgb("#D97706") : Color.FromArgb("#94A3B8");
@@ -684,12 +717,12 @@ public sealed class AdventurePage : ContentPage
         _answered = false;
         _missionCard.IsVisible = false;
         _missionCard.Opacity = 0;
-        var stage = Stages[Math.Min(_stageIndex, _destination.FirstStage)];
+        var stage = ActiveStages[Math.Min(_stageIndex, _destination.FirstStage)];
         _mapImage.Source = "paris_letter_scene.jpg";
         _stars.Text = $"⭐ {_gameProgress.Get("stars", 0)}";
         _step.Text = _stageIndex >= _destination.FirstStage
-            ? $"PARIJS · {Math.Min(_destination.Count, _stageIndex - _destination.FirstStage + 1)} / {_destination.Count}"
-            : $"MISSIE {_stageIndex + 1} / {StageCount}";
+            ? $"{(IsEnglish ? "PARIS" : "PARIJS")} · {Math.Min(_destination.Count, _stageIndex - _destination.FirstStage + 1)} / {_destination.Count}"
+            : $"{(IsEnglish ? "STAGE" : "MISSIE")} {_stageIndex + 1} / {StageCount}";
         _progress.Progress = (double)(_stageIndex + 1) / StageCount;
         _place.Text = $"{stage.Emoji} {stage.Place}";
         _story.Text = stage.Narration;
@@ -722,7 +755,7 @@ public sealed class AdventurePage : ContentPage
         foreach (var child in _answers.Children)
             if (child is Button button) button.IsEnabled = false;
 
-        var correct = answer == Stages[_stageIndex].CorrectAnswer;
+        var correct = answer == ActiveStages[_stageIndex].CorrectAnswer;
         var stars = _gameProgress.Get("stars", 0);
         stars = correct ? stars + 1 : Math.Max(0, stars - 1);
         _gameProgress.Set("stars", stars);
@@ -735,8 +768,8 @@ public sealed class AdventurePage : ContentPage
         await (correct ? GameFeedback.SuccessAsync() : GameFeedback.FailureAsync());
         _feedback.TextColor = selected.BackgroundColor;
         _feedback.Text = correct
-            ? "Bravo! +1 ⭐ De wolken verdwijnen..."
-            : "Bijna! −1 ⭐ Zayd en Razan leren van hun fout.";
+            ? (IsEnglish ? "Well done! +1 ⭐ The clouds are clearing..." : "Bravo! +1 ⭐ De wolken verdwijnen...")
+            : (IsEnglish ? "Almost! −1 ⭐ Zayd and Razan learn from their mistake." : "Bijna! −1 ⭐ Zayd en Razan leren van hun fout.");
 
         await _missionCard.ScaleTo(1.025, 160, Easing.CubicOut);
         await _missionCard.ScaleTo(1, 160, Easing.CubicIn);
@@ -746,7 +779,7 @@ public sealed class AdventurePage : ContentPage
             await SuccessCelebration.ShowAsync(
                 this,
                 () => _speechService.SpeakAsync(
-                    "Goed gedaan! Deze scène is voltooid.",
+                    (IsEnglish ? "Well done! This scene is complete." : "Goed gedaan! Deze scène is voltooid."),
                     _destination.LanguagePair.SourceLanguage.Value));
             await Navigation.PopAsync();
             return;
@@ -754,15 +787,15 @@ public sealed class AdventurePage : ContentPage
 
         var nextStage = _stageIndex + 1;
 
-        _gameProgress.Set("adventure_stage", Math.Min(nextStage, Stages.Length));
+        _gameProgress.Set("adventure_stage", Math.Min(nextStage, ActiveStages.Length));
 
         if (nextStage >= Stages.Length)
         {
-            _feedback.Text = $"🏆 Parijs ontdekt! ⭐ {stars}";
+            _feedback.Text = IsEnglish ? $"🏆 Paris discovered! ⭐ {stars}" : $"🏆 Parijs ontdekt! ⭐ {stars}";
             await SuccessCelebration.ShowAsync(
                 this,
                 () => _speechService.SpeakAsync(
-                    $"Goed gedaan! Parijs is ontdekt met {stars} sterren.",
+                    $"{(IsEnglish ? "Well done! Paris has been discovered with" : "Goed gedaan! Parijs is ontdekt met")} {stars} {(IsEnglish ? "stars." : "sterren.")}",
                     _destination.LanguagePair.SourceLanguage.Value));
             await Navigation.PopAsync();
             return;
@@ -773,6 +806,6 @@ public sealed class AdventurePage : ContentPage
         await _scroll.ScrollToAsync(0, 0, true);
     }
 
-    private Task SpeakFrench() => _speechService.SpeakAsync(Stages[_stageIndex].FrenchPhrase, _destination.LanguagePair.TargetLanguage.Value);
+    private Task SpeakFrench() => _speechService.SpeakAsync(ActiveStages[_stageIndex].FrenchPhrase, _destination.LanguagePair.TargetLanguage.Value);
 }
 

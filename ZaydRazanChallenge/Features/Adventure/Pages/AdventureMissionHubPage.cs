@@ -16,7 +16,7 @@ public sealed class AdventureMissionHubPage : ContentPage
 
     private readonly Label _speech = new()
     {
-        Text = "De koffers worden klaargemaakt...",
+        Text = IsEnglish ? "Getting the suitcases ready..." : "De koffers worden klaargemaakt...",
         FontSize = 17,
         FontAttributes = FontAttributes.Bold,
         TextColor = Color.FromArgb("#17324D"),
@@ -32,7 +32,7 @@ public sealed class AdventureMissionHubPage : ContentPage
 
     private readonly Button _resume = new()
     {
-        Text = "▶ Verder spelen",
+        Text = IsEnglish ? "▶ Continue playing" : "▶ Verder spelen",
         IsVisible = false,
         BackgroundColor = Color.FromArgb("#F59E0B"),
         TextColor = Colors.White,
@@ -42,6 +42,7 @@ public sealed class AdventureMissionHubPage : ContentPage
 
     // PushAsync returns when a mission appears, not when it is completed.
     // OnAppearing is the only place that starts the next mission after a return.
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
     private int _launchedMission = -1;
     private bool _navigating;
 
@@ -50,7 +51,7 @@ public sealed class AdventureMissionHubPage : ContentPage
         _destination = destination;
         _speechService = speech;
         _gameProgress = progress;
-        Title = "Thuis";
+        Title = IsEnglish ? "Home" : "Thuis";
         BackgroundColor = Color.FromArgb("#172554");
         GameUi.AddHomeButton(this);
 
@@ -84,7 +85,7 @@ public sealed class AdventureMissionHubPage : ContentPage
                 {
                     new Label
                     {
-                        Text = "🏠  THUISAVONTUUR",
+                        Text = IsEnglish ? "🏠  HOME ADVENTURE" : "🏠  THUISAVONTUUR",
                         FontSize = 17,
                         FontAttributes = FontAttributes.Bold,
                         TextColor = Colors.White
@@ -134,7 +135,7 @@ public sealed class AdventureMissionHubPage : ContentPage
             _launchedMission = -1;
             if (!completed)
             {
-                _speech.Text = "↩️ Je kunt verder spelen wanneer je wilt.";
+                _speech.Text = IsEnglish ? "↩️ You can continue whenever you like." : "↩️ Je kunt verder spelen wanneer je wilt.";
                 _resume.IsVisible = true;
             }
 
@@ -166,7 +167,7 @@ public sealed class AdventureMissionHubPage : ContentPage
             {
                 _gameProgress.Set("adventure_stage",
                     Math.Max(2, _gameProgress.Get("adventure_stage", 0)));
-                _speech.Text = "☀️ Goed gedaan! Op naar het station.";
+                _speech.Text = IsEnglish ? "☀️ Well done! On to the station." : "☀️ Goed gedaan! Op naar het station.";
                 // In regular play, continue to the station. In test mode, return to
                 // the test menu after the house missions rather than chaining into it.
                 if (!_gameProgress.IsTestMode)
@@ -175,7 +176,7 @@ public sealed class AdventureMissionHubPage : ContentPage
                 return;
             }
 
-            _speech.Text = "🎯 De volgende opdracht begint...";
+            _speech.Text = IsEnglish ? "🎯 The next mission is starting..." : "🎯 De volgende opdracht begint...";
             _launchedMission = nextIndex;
             await Task.Delay(250);
             var mission = nextIndex switch

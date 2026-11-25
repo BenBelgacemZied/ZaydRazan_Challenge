@@ -17,17 +17,18 @@
                 Stroke="White"
                 StrokeThickness="2"
                 StrokeShape="RoundRectangle 22">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                 <VerticalStackLayout Grid.Column="0" Spacing="0">
                     <Label Text="🌍 ZR LingoTrip"
                            TextColor="White"
                            FontSize="21"
                            FontAttributes="Bold" />
-                    <Label Text="Met Zayd &amp; Razan · Parijs"
+                    <Label x:Name="SubtitleLabel" Text="Parijs · Frans leren"
                            TextColor="#DBEAFE"
                            FontSize="13" />
                 </VerticalStackLayout>
-                <Label Grid.Column="1"
+                <Picker Grid.Column="1" x:Name="SourceLanguagePicker" Title="Brontaal" WidthRequest="118" TextColor="White" TitleColor="#DBEAFE" FontSize="13" SelectedIndexChanged="OnSourceLanguageChanged" />
+                <Label Grid.Column="2"
                        x:Name="StarsLabel"
                        Text="⭐ 0"
                        TextColor="White"
@@ -51,7 +52,7 @@
                         StrokeThickness="3"
                         StrokeShape="RoundRectangle 24">
                     <VerticalStackLayout Spacing="9">
-                        <Label Text="🎒 Hoofdavontuur"
+                        <Label x:Name="AdventureTitleLabel" Text="🎒 Hoofdavontuur"
                                FontSize="22"
                                FontAttributes="Bold"
                                TextColor="#183153" />
@@ -72,7 +73,7 @@
                                 CornerRadius="18"
                                 HeightRequest="58"
                                 Clicked="OnAdventureClicked" />
-                        <Button Text="↻  Réinitialiser l'application"
+                        <Button x:Name="ResetButton" Text="↻  App resetten"
                                 FontSize="13"
                                 BackgroundColor="#64748B"
                                 TextColor="White"
@@ -102,7 +103,7 @@
                                 CornerRadius="28"
                                 BackgroundColor="#2563EB"
                                 Clicked="OnMatchingClicked" />
-                        <Label Text="Mots"
+                        <Label x:Name="MatchingLabel" Text="Woorden"
                                FontSize="11"
                                TextColor="White"
                                HorizontalTextAlignment="Center" />
@@ -117,7 +118,7 @@
                                 CornerRadius="28"
                                 BackgroundColor="#7C3AED"
                                 Clicked="OnListeningClicked" />
-                        <Label Text="Écoute"
+                        <Label x:Name="ListeningLabel" Text="Luisteren"
                                FontSize="11"
                                TextColor="White"
                                HorizontalTextAlignment="Center" />
@@ -147,7 +148,7 @@
                                 CornerRadius="28"
                                 BackgroundColor="#0891B2"
                                 Clicked="OnPuzzleClicked" />
-                        <Label Text="Puzzle"
+                        <Label x:Name="PuzzleLabel" Text="Puzzel"
                                FontSize="11"
                                TextColor="White"
                                HorizontalTextAlignment="Center" />

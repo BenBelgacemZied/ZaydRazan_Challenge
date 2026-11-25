@@ -8,6 +8,7 @@ public sealed class StationMissionHubPage : ContentPage
     private readonly IDestinationContent _destination;
     private readonly ISpeechService _speechService;
     private readonly IGameProgressStore _gameProgress;
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
     private static readonly string[] Keys =
     [
         "station_find_counter",
@@ -26,7 +27,7 @@ public sealed class StationMissionHubPage : ContentPage
 
     private readonly Label _instruction = new()
     {
-        Text = "De missie begint...",
+        Text = IsEnglish ? "The mission is starting..." : "De missie begint...",
         FontSize = 18,
         FontAttributes = FontAttributes.Bold,
         TextColor = Color.FromArgb("#17324D"),
@@ -40,7 +41,7 @@ public sealed class StationMissionHubPage : ContentPage
         _destination = destination;
         _speechService = speech;
         _gameProgress = progress;
-        Title = "Het station";
+        Title = IsEnglish ? "The station" : "Het station";
         BackgroundColor = Color.FromArgb("#172554");
         GameUi.AddHomeButton(this);
 
@@ -79,7 +80,7 @@ public sealed class StationMissionHubPage : ContentPage
                 {
                     new Label
                     {
-                        Text = "🚉  STATIONSAVONTUUR",
+                        Text = IsEnglish ? "🚉  STATION ADVENTURE" : "🚉  STATIONSAVONTUUR",
                         FontSize = 17,
                         FontAttributes = FontAttributes.Bold,
                         TextColor = Colors.White
@@ -122,7 +123,7 @@ public sealed class StationMissionHubPage : ContentPage
 
             if (!completed)
             {
-                _instruction.Text = "↩️ De missie is gestopt.";
+                _instruction.Text = IsEnglish ? "↩️ The mission was stopped." : "↩️ De missie is gestopt.";
                 return;
             }
         }
@@ -141,15 +142,15 @@ public sealed class StationMissionHubPage : ContentPage
         {
             _gameProgress.Set("adventure_stage",
                 Math.Max(3, _gameProgress.Get("adventure_stage", 0)));
-            _instruction.Text = "☀️ Goed gedaan! Ga verder naar de trein.";
+            _instruction.Text = IsEnglish ? "☀️ Well done! Continue to the train." : "☀️ Goed gedaan! Ga verder naar de trein.";
             await SuccessCelebration.ShowAsync(
                 this,
-                () => SpeakDutchAsync("Goed gedaan! Het station is voltooid. Ga verder naar de trein."));
+                () => SpeakDutchAsync(IsEnglish ? "Well done! The station is complete. Continue to the train." : "Goed gedaan! Het station is voltooid. Ga verder naar de trein."));
             await Navigation.PopAsync();
             return;
         }
 
-        _instruction.Text = "🎯 De volgende vraag begint...";
+        _instruction.Text = IsEnglish ? "🎯 The next question is starting..." : "🎯 De volgende vraag begint...";
         _launchedMission = nextIndex;
         await Task.Delay(250);
         await Navigation.PushAsync(new StationMiniMissionPage(nextIndex, _gameProgress, _speechService, _destination));

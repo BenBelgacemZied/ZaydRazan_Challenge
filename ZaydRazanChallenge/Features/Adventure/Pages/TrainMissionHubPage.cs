@@ -8,14 +8,14 @@ public sealed class TrainMissionHubPage : ContentPage
     private readonly IDestinationContent _destination;
     private readonly ISpeechService _speechService;
     private readonly IGameProgressStore _gameProgress;
-    private sealed record TrainObject(string Key, string Icon, string Dutch, string French, double X, double Y);
+    private sealed record TrainObject(string Key, string Icon, string Dutch, string English, string French, double X, double Y);
     private static readonly TrainObject[] Objects =
     [
-        new("train_door", "🚪", "de deur", "la porte", .27, .34),
-        new("train_seat", "💺", "de stoel", "le siège", .09, .61),
-        new("train_rack", "🧳", "het bagagerek", "le porte-bagages", .72, .14),
-        new("train_window", "🪟", "het raam", "la fenêtre", .84, .42),
-        new("train_table", "▰", "de tafel", "la table", .84, .60)
+        new("train_door", "🚪", "de deur", "the door", "la porte", .27, .34),
+        new("train_seat", "💺", "de stoel", "the seat", "le siège", .09, .61),
+        new("train_rack", "🧳", "het bagagerek", "the luggage rack", "le porte-bagages", .72, .14),
+        new("train_window", "🪟", "het raam", "the window", "la fenêtre", .84, .42),
+        new("train_table", "▰", "de tafel", "the table", "la table", .84, .60)
     ];
     private readonly AbsoluteLayout _playground = new();
     private readonly List<View> _markers = [];
@@ -38,6 +38,7 @@ public sealed class TrainMissionHubPage : ContentPage
             new RowDefinition(new GridLength(66))
         }
     };
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
     private bool _busy;
     private bool _introPlayed;
     private readonly int? _testEndAt;
@@ -54,7 +55,7 @@ public sealed class TrainMissionHubPage : ContentPage
             _gameProgress.Set("train_mission_v3_initialized", true);
             for (var i = 0; i < index; i++) _gameProgress.Set(Objects[i].Key, true);
         }
-        Title = "In de trein";
+        Title = IsEnglish ? "On the train" : "In de trein";
         BackgroundColor = Color.FromArgb("#172554");
         GameUi.AddHomeButton(this);
         var scene = new Image { Source = "scene_train_interior.jpg", Aspect = Aspect.AspectFill };
@@ -65,7 +66,7 @@ public sealed class TrainMissionHubPage : ContentPage
         AbsoluteLayout.SetLayoutBounds(characters, new Rect(.5, .96, 300, 330));
         AbsoluteLayout.SetLayoutFlags(characters, AbsoluteLayoutFlags.PositionProportional);
         _playground.Add(characters);
-        var hud = new Border { Padding = new Thickness(13, 9), Margin = 12, BackgroundColor = Color.FromArgb("#D917324D"), Stroke = Colors.White, StrokeThickness = 1, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 }, Content = new Grid { ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) }, Children = { new Label { Text = "🚄  TREINAVONTUUR", FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Colors.White }, _stars } } };
+        var hud = new Border { Padding = new Thickness(13, 9), Margin = 12, BackgroundColor = Color.FromArgb("#D917324D"), Stroke = Colors.White, StrokeThickness = 1, StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 22 }, Content = new Grid { ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) }, Children = { new Label { Text = IsEnglish ? "🚄  TRAIN ADVENTURE" : "🚄  TREINAVONTUUR", FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Colors.White }, _stars } } };
         Grid.SetColumn(_stars, 1);
         AbsoluteLayout.SetLayoutBounds(hud, new Rect(0, 0, 1, 72));
         AbsoluteLayout.SetLayoutFlags(hud, AbsoluteLayoutFlags.WidthProportional);
@@ -139,14 +140,14 @@ public sealed class TrainMissionHubPage : ContentPage
         if (completed == Objects.Length)
         {
             _gameProgress.Set("adventure_stage", Math.Max(4, _gameProgress.Get("adventure_stage", 0)));
-            _instruction.Text = "☀️ Goed gedaan! Parijs komt dichterbij.";
-            var next = new Button { Text = "▶  VERDER", FontSize = 18, FontAttributes = FontAttributes.Bold, CornerRadius = 24, WidthRequest = 190, HeightRequest = 52, BackgroundColor = Color.FromArgb("#16A34A"), TextColor = Colors.White, BorderColor = Colors.White, BorderWidth = 2 };
+            _instruction.Text = IsEnglish ? "☀️ Well done! Paris is getting closer." : "☀️ Goed gedaan! Parijs komt dichterbij.";
+            var next = new Button { Text = IsEnglish ? "▶  CONTINUE" : "▶  VERDER", FontSize = 18, FontAttributes = FontAttributes.Bold, CornerRadius = 24, WidthRequest = 190, HeightRequest = 52, BackgroundColor = Color.FromArgb("#16A34A"), TextColor = Colors.White, BorderColor = Colors.White, BorderWidth = 2 };
             next.Clicked += async (_, _) => await Navigation.PopAsync();
             AbsoluteLayout.SetLayoutBounds(next, new Rect(.5, .84, 190, 52));
             AbsoluteLayout.SetLayoutFlags(next, AbsoluteLayoutFlags.PositionProportional);
             _playground.Add(next); _markers.Add(next);
         }
-        else _instruction.Text = $"🔎 Zoek {Objects[completed].Dutch}";
+        else _instruction.Text = $"🔎 {(IsEnglish ? Objects[completed].English : Objects[completed].Dutch)}";
     }
 
     private void BuildChoices(int expectedIndex)
@@ -179,7 +180,7 @@ public sealed class TrainMissionHubPage : ContentPage
                     _busy = true;
                     choice.BackgroundColor = Color.FromArgb("#DC2626");
                     await GameFeedback.FailureAsync();
-                    await SpeakDutchAsync("Dat is niet juist. Probeer opnieuw.");
+                    await SpeakDutchAsync(IsEnglish ? "That’s not right. Try again." : "Dat is niet juist. Probeer opnieuw.");
                     choice.BackgroundColor = Color.FromArgb("#2563EB");
                     _busy = false;
                     return;
@@ -214,7 +215,7 @@ public sealed class TrainMissionHubPage : ContentPage
 
             await SuccessCelebration.ShowAsync(
                 this,
-                () => SpeakDutchAsync("Goed gedaan! Parijs komt dichterbij."));
+                () => SpeakDutchAsync(IsEnglish ? "Well done! Paris is getting closer." : "Goed gedaan! Parijs komt dichterbij."));
             _busy = false;
             await Navigation.PopAsync();
             return;
@@ -228,7 +229,9 @@ public sealed class TrainMissionHubPage : ContentPage
     private async Task SpeakCurrentInstruction()
     {
         var completed = Objects.Count(x => _gameProgress.Get(x.Key, false));
-        await SpeakDutchAsync(completed >= Objects.Length ? "Goed gedaan! Parijs komt dichterbij." : $"Zoek {Objects[completed].Dutch}.");
+        await SpeakDutchAsync(completed >= Objects.Length
+            ? (IsEnglish ? "Well done! Paris is getting closer." : "Goed gedaan! Parijs komt dichterbij.")
+            : (IsEnglish ? $"Find {Objects[completed].English}." : $"Zoek {Objects[completed].Dutch}."));
     }
     private Task SpeakDutchAsync(string text) => _speechService.SpeakAsync(text, _destination.LanguagePair.SourceLanguage.Value);
     private Task SpeakFrenchAsync(string text) => _speechService.SpeakAsync(text, _destination.LanguagePair.TargetLanguage.Value);
