@@ -16,7 +16,12 @@ public sealed class PackingMissionPage : ContentPage
     private readonly Label _instruction = new() { FontSize = 20, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.White };
     private readonly Label _counter = new() { FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Colors.White };
     private readonly Label _suitcase = new() { FontSize = 31, HorizontalTextAlignment = TextAlignment.Center, Text = "" };
-    private readonly FlexLayout _objects = new() { Wrap = FlexWrap.Wrap, JustifyContent = FlexJustify.Center, AlignItems = FlexAlignItems.Center };
+    private readonly Grid _objects = new()
+    {
+        ColumnSpacing = 10,
+        RowSpacing = 10,
+        ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star) }
+    };
     private bool _busy;
 
     private PackingMissionPage(string title, string hero, string image, string preferenceKey, Item[] items, IGameProgressStore progress, ISpeechService speech, IDestinationContent destination)
@@ -101,16 +106,33 @@ public sealed class PackingMissionPage : ContentPage
     private void BuildObjects()
     {
         UpdateHud();
-        foreach (var item in _items.OrderBy(_ => Random.Shared.Next()))
+        _objects.Children.Clear();
+        _objects.RowDefinitions.Clear();
+
+        var choices = _items.OrderBy(_ => Random.Shared.Next()).ToArray();
+        var rowCount = (choices.Length + 1) / 2;
+        for (var row = 0; row < rowCount; row++)
+            _objects.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+
+        for (var index = 0; index < choices.Length; index++)
         {
+            var item = choices[index];
             var button = new Button
             {
-                Text = $"{item.Emoji}  {item.French}", FontSize = 17, CornerRadius = 17,
-                BackgroundColor = Colors.White, TextColor = Color.FromArgb("#172554"), Margin = 5,
-                Padding = new Thickness(13, 8), FontAttributes = FontAttributes.Bold
+                Text = item.French,
+                FontSize = 17,
+                LineBreakMode = LineBreakMode.WordWrap,
+                CornerRadius = 17,
+                BackgroundColor = Colors.White,
+                TextColor = Color.FromArgb("#172554"),
+                Padding = new Thickness(8, 8),
+                Margin = 2,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 68,
+                MinimumHeightRequest = 68
             };
             button.Clicked += async (_, _) => await SelectItem(item, button);
-            _objects.Add(button);
+            _objects.Add(button, index % 2, index / 2);
         }
     }
 

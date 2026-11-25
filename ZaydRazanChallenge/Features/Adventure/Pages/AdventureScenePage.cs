@@ -23,15 +23,15 @@ public sealed class AdventureScenePage : ContentPage
         [
             new("Zoek de rugzak · « le sac à dos »", "Trouve le sac à dos", 0,
             [
-                new("🎒", .12, .55), new("🧳", .85, .58), new("👟", .14, .72)
+                new("le sac à dos", .12, .55), new("la valise", .85, .58), new("les chaussures", .14, .72)
             ]),
             new("Zoek een kledingstuk · « un vêtement »", "Trouve le vêtement", 1,
             [
-                new("🎩", .78, .43), new("👕", .48, .29), new("🎫", .82, .84)
+                new("le chapeau", .78, .43), new("le tee-shirt", .48, .29), new("le billet", .82, .84)
             ]),
             new("Zoek het treinkaartje · « le billet de train »", "Le billet de train", 2,
             [
-                new("👟", .13, .72), new("🧳", .86, .58), new("🎫", .82, .84)
+                new("les chaussures", .13, .72), new("la valise", .86, .58), new("le billet", .82, .84)
             ])
         ]),
         new("🎫 Tickets kopen", "scene_station.jpg",
@@ -58,7 +58,7 @@ public sealed class AdventureScenePage : ContentPage
             ]),
             new("Waar kijk je naar de vertrektijden?", "Le tableau des départs", 0,
             [
-                new("📋", .28, .18), new("🧳", .82, .52), new("🪑", .78, .75)
+                new("le tableau des départs", .28, .18), new("la valise", .82, .52), new("la chaise", .78, .75)
             ]),
             new("Welk Frans woord betekent « perron »?", "Le quai", 1,
             [
@@ -73,7 +73,7 @@ public sealed class AdventureScenePage : ContentPage
             ]),
             new("Zoek de deur van de trein.", "La porte du train", 2,
             [
-                new("🪑", .22, .50), new("🧳", .79, .56), new("🚪", .68, .35)
+                new("la chaise", .22, .50), new("la valise", .79, .56), new("la porte", .68, .35)
             ]),
             new("Wat zeggen ze wanneer ze instappen?", "Bonjour, voici nos billets", 0,
             [
@@ -221,7 +221,8 @@ public sealed class AdventureScenePage : ContentPage
             var button = new Button
             {
                 Text = choice.Text,
-                FontSize = choice.Text.Length > 5 ? 13 : 22,
+                FontSize = choice.Text.Length > 18 ? 11 : choice.Text.Length > 11 ? 12 : 14,
+                LineBreakMode = LineBreakMode.WordWrap,
                 FontAttributes = FontAttributes.Bold,
                 BackgroundColor = Color.FromArgb("#E6FFFFFF"),
                 TextColor = Color.FromArgb("#183153"),
@@ -229,15 +230,14 @@ public sealed class AdventureScenePage : ContentPage
                 BorderWidth = 3,
                 CornerRadius = 24,
                 Padding = new Thickness(7, 2),
-                MinimumWidthRequest = 52,
-                HeightRequest = 50
+                MinimumWidthRequest = 120,
+                HeightRequest = 58
             };
             button.Clicked += async (_, _) => await CheckChoice(selectedIndex, button);
-            AbsoluteLayout.SetLayoutBounds(button, new Rect(
-                choice.X * _width - 48,
-                choice.Y * _height - 25,
-                96,
-                50));
+            var buttonWidth = Math.Min(142, _width - 16);
+            var buttonX = Math.Clamp(choice.X * _width - buttonWidth / 2, 8, _width - buttonWidth - 8);
+            var buttonY = Math.Clamp(choice.Y * _height - 29, 72, _height - 66);
+            AbsoluteLayout.SetLayoutBounds(button, new Rect(buttonX, buttonY, buttonWidth, 58));
             _playfield.Children.Add(button);
         }
 

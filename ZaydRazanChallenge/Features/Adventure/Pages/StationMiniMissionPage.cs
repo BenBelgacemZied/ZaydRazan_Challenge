@@ -12,7 +12,7 @@ public sealed class StationMiniMissionPage : ContentPage
 
     private static readonly Mission[] Missions =
     [
-        new("station_find_counter", "Vind het loket", "Zayd en Razan zoeken het loket.", "Welk symbool hoort bij de tickets?", "station_concourse.jpg", "🎫 Les billets", ["🎫 Les billets", "☕ Le café", "🧳 Les bagages"], "Jullie hebben het loket gevonden!"),
+        new("station_find_counter", "Vind het loket", "Zayd en Razan zoeken het loket.", "Welk symbool hoort bij de tickets?", "station_concourse.jpg", "Les billets", ["Les billets", "Le café", "Les bagages"], "Jullie hebben het loket gevonden!"),
         new("station_ask_tickets", "Vraag de tickets", "Razan staat aan het loket.", "Welke Franse zin moet Razan zeggen?", "station_ticket_counter.jpg", "Deux billets pour Paris, s'il vous plaît.", ["Où est le café ?", "Deux billets pour Paris, s'il vous plaît.", "Au revoir Paris !"], "De twee tickets zijn klaar!"),
         new("station_pay", "Betaal de tickets", "Zayd ziet het betaaltoestel.", "Welk Frans woord betekent ‘betalen’?", "station_ticket_counter.jpg", "payer", ["voyager", "payer", "manger"], "De betaling is gelukt!"),
         new("station_find_platform", "Vind het spoor", "De trein naar Parijs vertrekt op spoor drie.", "Kies het juiste spoor.", "station_concourse.jpg", "Quai 3", ["Quai 1", "Quai 3", "Quai 8"], "Spoor drie is gevonden!"),
@@ -40,7 +40,7 @@ public sealed class StationMiniMissionPage : ContentPage
 
         foreach (var choice in _mission.Choices.OrderBy(_ => Random.Shared.Next()))
         {
-            var button = new Button { Text = choice, FontSize = 17, FontAttributes = FontAttributes.Bold, BackgroundColor = Color.FromArgb("#2563EB"), TextColor = Colors.White, CornerRadius = 17, HeightRequest = 55 };
+            var button = new Button { Text = choice, FontSize = 17, FontAttributes = FontAttributes.Bold, BackgroundColor = Color.FromArgb("#2563EB"), TextColor = Colors.White, CornerRadius = 17, HeightRequest = 64, MinimumHeightRequest = 64, LineBreakMode = LineBreakMode.WordWrap, Padding = new Thickness(10, 7) };
             button.Clicked += async (_, _) => await Check(choice, button);
             _choices.Add(button);
         }
