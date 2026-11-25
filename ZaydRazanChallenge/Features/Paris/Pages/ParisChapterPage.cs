@@ -3,6 +3,7 @@ namespace ZaydRazanChallenge.Features.Paris.Pages;
 public sealed class ParisChapterPage : ContentPage
 {
     private readonly IGameProgressStore _gameProgress;
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
     private sealed record RouteChapter(string Icon, string Title, string Subtitle, string Image);
 
     private static readonly RouteChapter[] Chapters =
@@ -15,6 +16,18 @@ public sealed class ParisChapterPage : ContentPage
         new("⭐", "De laatste ontdekkingen", "Maak het reisdagboek compleet", "paris_journey_finale.jpg")
     ];
 
+    private static readonly RouteChapter[] EnglishChapters =
+    [
+        new("🗺️", "Arrival in Paris", "The first route through the city", "paris_journey_map.jpg"),
+        new("🏛️", "Historic monuments", "Follow the trail of history", "paris_journey_footsteps.jpg"),
+        new("🔭", "The city comes alive", "Look beyond the familiar streets", "paris_journey_river.jpg"),
+        new("🎨", "Art, squares and light", "Collect clues like real explorers", "paris_journey_art.jpg"),
+        new("🥐", "Bridges, neighbourhoods and flavours", "Explore everyday Paris", "paris_journey_neighborhood.jpg"),
+        new("⭐", "The final discoveries", "Complete the travel journal", "paris_journey_finale.jpg")
+    ];
+
+    private RouteChapter[] ActiveChapters => IsEnglish ? EnglishChapters : Chapters;
+
     private readonly VerticalStackLayout _levels = new() { Spacing = 8, Padding = new Thickness(14, 12, 14, 24) };
     private readonly IDestinationContent _destination;
     private readonly IGamePageFactory _pages;
@@ -25,14 +38,14 @@ public sealed class ParisChapterPage : ContentPage
         _gameProgress = progress;
         _destination = destination;
         _pages = pages;
-        Title = "Parijs · 30 ontdekkingen";
+        Title = IsEnglish ? "Paris · 30 discoveries" : "Parijs · 30 ontdekkingen";
         BackgroundColor = Color.FromArgb("#17324D");
         GameUi.AddHomeButton(this);
         var header = new Grid { HeightRequest = 225 };
         header.Add(new Image { Source = "paris_journey_map.jpg", Aspect = Aspect.AspectFill });
         header.Add(new Label
         {
-            Text = "🧭 Ons avontuur door Parijs\n30 ontdekkingen · één grote reis",
+            Text = IsEnglish ? "🧭 Our Paris adventure\n30 discoveries · one big journey" : "🧭 Ons avontuur door Parijs\n30 ontdekkingen · één grote reis",
             VerticalOptions = LayoutOptions.End,
             Padding = new Thickness(15, 10),
             FontSize = 22, FontAttributes = FontAttributes.Bold,
@@ -60,14 +73,14 @@ public sealed class ParisChapterPage : ContentPage
         _levels.Add(new Label
         {
             Text = completed == _destination.Count
-                ? "🏆 Je hebt alle 30 schatten ontdekt!"
-                : $"{completed}/30 ontdekt · reis naar de volgende etappe",
+                ? (IsEnglish ? "🏆 You discovered all 30 treasures!" : "🏆 Je hebt alle 30 schatten ontdekt!")
+                : IsEnglish ? $"{completed}/30 discovered · continue to the next stop" : $"{completed}/30 ontdekt · reis naar de volgende etappe",
             TextColor = Colors.White, FontSize = 18, FontAttributes = FontAttributes.Bold,
             Margin = new Thickness(0, 0, 0, 8)
         });
-        for (var chapterIndex = 0; chapterIndex < Chapters.Length; chapterIndex++)
+        for (var chapterIndex = 0; chapterIndex < ActiveChapters.Length; chapterIndex++)
         {
-            var chapter = Chapters[chapterIndex];
+            var chapter = ActiveChapters[chapterIndex];
             var firstLevel = chapterIndex * 5;
             var chapterProgress = Math.Clamp(completed - firstLevel, 0, 5);
             var chapterCard = new Border
@@ -110,7 +123,10 @@ public sealed class ParisChapterPage : ContentPage
                 var discovered = index < completed;
                 var button = new Button
                 {
-                    Text = discovered ? $"✓  ETAPPE {index + 1:00}  ·  {_destination.Quests[index].Title}" : unlocked ? $"▶  ETAPPE {index + 1:00}  ·  Vertrek" : $"🔒  ETAPPE {index + 1:00}",
+                    Text = discovered
+                        ? IsEnglish ? $"✓  DISCOVERY {index + 1:00}  ·  {_destination.Quests[index].TargetName}" : $"✓  ETAPPE {index + 1:00}  ·  {_destination.Quests[index].Title}"
+                        : unlocked ? IsEnglish ? $"▶  DISCOVERY {index + 1:00}  ·  Start" : $"▶  ETAPPE {index + 1:00}  ·  Vertrek"
+                        : IsEnglish ? $"🔒  DISCOVERY {index + 1:00}" : $"🔒  ETAPPE {index + 1:00}",
                     HorizontalOptions = LayoutOptions.Fill,
                     FontSize = 14, FontAttributes = FontAttributes.Bold,
                     HeightRequest = 50, CornerRadius = 13,

@@ -8,6 +8,7 @@ public sealed class ParisTreasurePage : ContentPage
     private readonly ISpeechService _speechService;
     private readonly IGameProgressStore _gameProgress;
     private sealed record AdventureMoment(string Icon, string Action, string Intro, string Discovery);
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
 
     private static readonly AdventureMoment[] AdventureMoments =
     [
@@ -17,6 +18,16 @@ public sealed class ParisTreasurePage : ContentPage
         new("📷", "Bekijk de foto", "Razan heeft onderweg een mysterieuze foto gemaakt. Bekijk hem goed.", "Op de foto ontdekken ze de eerste aanwijzing."),
         new("🔭", "Kijk door de verrekijker", "In de verte is iets bijzonders te zien. Kijk door de verrekijker.", "Aan de horizon vinden ze de eerste aanwijzing."),
         new("👣", "Volg het spoor", "Glanzende voetstappen wijzen de weg door Parijs. Volg het spoor.", "Het spoor eindigt bij de eerste aanwijzing.")
+    ];
+
+    private static readonly AdventureMoment[] EnglishMoments =
+    [
+        new("🗺️", "View the route", "The journey continues. Let’s look at the route through Paris.", "The map shows the first clue."),
+        new("🧭", "Use the compass", "The compass points to a new place. Tap to follow the direction.", "The compass leads to the first clue."),
+        new("📓", "Open the travel journal", "A new page is waiting in the travel journal.", "The travel journal holds the first clue."),
+        new("📷", "Look at the photo", "Razan took a mysterious photo on the way. Look closely.", "They find the first clue in the photo."),
+        new("🔭", "Look through the binoculars", "Something special is visible in the distance. Take a look.", "They find the first clue on the horizon."),
+        new("👣", "Follow the trail", "Shiny footprints show the way through Paris. Follow them.", "The trail ends at the first clue.")
     ];
 
     private static readonly string[] ChapterImages =
@@ -55,8 +66,8 @@ public sealed class ParisTreasurePage : ContentPage
         _stage = stage;
         var questIndex = stage - _destination.FirstStage;
         _quest = _destination.Quests[questIndex];
-        _moment = AdventureMoments[questIndex % AdventureMoments.Length];
-        Title = "Schattenjacht in Parijs";
+        _moment = (IsEnglish ? EnglishMoments : AdventureMoments)[questIndex % AdventureMoments.Length];
+        Title = IsEnglish ? "Paris treasure hunt" : "Schattenjacht in Parijs";
         BackgroundColor = Color.FromArgb("#17324D");
         GameUi.AddHomeButton(this);
 
@@ -79,7 +90,7 @@ public sealed class ParisTreasurePage : ContentPage
         var top = new Grid { Padding = new Thickness(12, 4), VerticalOptions = LayoutOptions.Start, BackgroundColor = Color.FromArgb("#BE17324D"), ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) } };
         top.Add(_status);
         top.Add(hear, 1, 0);
-        _status.Text = $"{_moment.Icon} Parijs {questIndex + 1}/30 · onderweg";
+        _status.Text = IsEnglish ? $"{_moment.Icon} Paris {questIndex + 1}/30 · on the way" : $"{_moment.Icon} Parijs {questIndex + 1}/30 · onderweg";
 
         for (var i = 0; i < 3; i++) _choices.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         _missionPanel.Children.Add(_instruction);
@@ -103,14 +114,16 @@ public sealed class ParisTreasurePage : ContentPage
     private void RenderClue()
     {
         _questionReady = false;
-        _status.Text = $"☁️ Parijs {(_stage - 3)}/30 · aanwijzing {_clueIndex + 1}/3";
+        _status.Text = IsEnglish ? $"☁️ Paris {_stage - 3}/30 · clue {_clueIndex + 1}/3" : $"☁️ Parijs {_stage - 3}/30 · aanwijzing {_clueIndex + 1}/3";
         _instruction.Text = _clueIndex == 0
             ? _moment.Discovery
-            : ((_stage + _clueIndex) % 2 == 0 ? "Razan ontdekt de volgende aanwijzing:" : "Zayd ontdekt de volgende aanwijzing:");
+            : IsEnglish
+                ? ((_stage + _clueIndex) % 2 == 0 ? "Razan found the next clue:" : "Zayd found the next clue:")
+                : ((_stage + _clueIndex) % 2 == 0 ? "Razan ontdekt de volgende aanwijzing:" : "Zayd ontdekt de volgende aanwijzing:");
         _feedback.Text = "";
         _choices.Children.Clear();
         var clue = _quest.Clues[_clueIndex];
-        _question.Text = clue.SourceSentence + " Welk Frans woord betekent ‘" + clue.HighlightedSourceText + "’?";
+        _question.Text = IsEnglish ? $"{clue.SourceSentence} Which French word means “{clue.HighlightedSourceText}”?" : clue.SourceSentence + " Welk Frans woord betekent ‘" + clue.HighlightedSourceText + "’?";
         foreach (var (answer, index) in clue.TargetChoices.OrderBy(_ => Random.Shared.Next()).Select((value, index) => (value, index)))
         {
             var choice = answer;
@@ -158,9 +171,9 @@ public sealed class ParisTreasurePage : ContentPage
         {
             button.BackgroundColor = Color.FromArgb("#B92E3D");
             _gameProgress.Set("stars", Math.Max(0, _gameProgress.Get("stars", 0) - 1));
-            _feedback.Text = "Probeer opnieuw. Luister naar de vraag.";
+            _feedback.Text = IsEnglish ? "Try again. Listen to the clue." : "Probeer opnieuw. Luister naar de vraag.";
             await GameFeedback.FailureAsync();
-            await SpeakDutchAsync("Probeer opnieuw.");
+            await SpeakDutchAsync(IsEnglish ? "Try again." : "Probeer opnieuw.");
             button.BackgroundColor = Color.FromArgb("#2051A3");
             _busy = false;
             _questionReady = true;
@@ -170,7 +183,7 @@ public sealed class ParisTreasurePage : ContentPage
         }
 
         button.BackgroundColor = Color.FromArgb("#15803D");
-        _feedback.Text = $"Goed zo! {clue.HighlightedSourceText} = {clue.TargetWord}";
+        _feedback.Text = IsEnglish ? $"Well done! {clue.HighlightedSourceText} = {clue.TargetWord}" : $"Goed zo! {clue.HighlightedSourceText} = {clue.TargetWord}";
         await GameFeedback.SuccessAsync();
         _clueIndex++;
         await _fog.FadeTo(Math.Max(0, .40 - _clueIndex * .13), 400);
@@ -189,10 +202,10 @@ public sealed class ParisTreasurePage : ContentPage
 
     private void ShowPhotoChoices()
     {
-        _status.Text = "🎯 Parijs · welke foto is de schat?";
-        _instruction.Text = "Razan en Zayd hebben alle aanwijzingen gevonden.";
-        _question.Text = "Welke foto past bij alle aanwijzingen?";
-        _feedback.Text = "Kies een van de drie foto's.";
+        _status.Text = IsEnglish ? "🎯 Paris · which photo is the treasure?" : "🎯 Parijs · welke foto is de schat?";
+        _instruction.Text = IsEnglish ? "Razan and Zayd have found all the clues." : "Razan en Zayd hebben alle aanwijzingen gevonden.";
+        _question.Text = IsEnglish ? "Which photo matches all the clues?" : "Welke foto past bij alle aanwijzingen?";
+        _feedback.Text = IsEnglish ? "Choose one of the three photos." : "Kies een van de drie foto's.";
         _choices.Children.Clear();
         var photos = _destination.PhotosFor(_stage - _destination.FirstStage);
         for (var i = 0; i < photos.Length; i++)
@@ -218,7 +231,7 @@ public sealed class ParisTreasurePage : ContentPage
         {
             _gameProgress.Set("stars", Math.Max(0, _gameProgress.Get("stars", 0) - 1));
             await GameFeedback.FailureAsync();
-            await SpeakDutchAsync("Dat is het niet. Kijk nog eens goed.");
+            await SpeakDutchAsync(IsEnglish ? "That is not it. Look carefully and try again." : "Dat is het niet. Kijk nog eens goed.");
             _busy = false;
             return;
         }
@@ -247,17 +260,17 @@ public sealed class ParisTreasurePage : ContentPage
         var story = new VerticalStackLayout { Padding = 16, Spacing = 12, BackgroundColor = Color.FromArgb("#17324D") };
         story.Children.Add(new Label { Text = "⭐ " + _quest.Title, FontSize = 23, FontAttributes = FontAttributes.Bold, TextColor = Colors.White });
         story.Children.Add(new Label { Text = _quest.Story, FontSize = 17, TextColor = Colors.White });
-        var listen = new Button { Text = "🔊 Luister naar het verhaal", BackgroundColor = Color.FromArgb("#2051A3"), TextColor = Colors.White };
+        var listen = new Button { Text = IsEnglish ? "🔊 Listen to the story" : "🔊 Luister naar het verhaal", BackgroundColor = Color.FromArgb("#2051A3"), TextColor = Colors.White };
         listen.Clicked += async (_, _) => await TellStoryAsync();
         story.Children.Add(listen);
-        var next = new Button { Text = "Verder", BackgroundColor = Color.FromArgb("#C97920"), TextColor = Colors.White };
+        var next = new Button { Text = IsEnglish ? "Continue" : "Verder", BackgroundColor = Color.FromArgb("#C97920"), TextColor = Colors.White };
         next.Clicked += async (_, _) => await Navigation.PopAsync();
         story.Children.Add(next);
         discovered.Add(story, 0, 1);
         _root.Add(discovered);
         await SuccessCelebration.ShowAsync(
             this,
-            () => SpeakDutchAsync($"Goed gedaan! Jullie hebben {_quest.TargetName} gevonden."));
+            () => SpeakDutchAsync(IsEnglish ? $"Well done! You found {_quest.TargetName}." : $"Goed gedaan! Jullie hebben {_quest.TargetName} gevonden."));
         await TellStoryAsync();
     }
 

@@ -32,7 +32,7 @@ internal sealed class GamePageFactory(
     public AdventureTestMenuPage CreateAdventureTestMenuPage() => new(destination, this, progress, speech);
     public ParisChapterPage CreateParisChapterPage() => new(destination, this, progress);
     public ParisTreasurePage CreateParisTreasurePage(int stage) => new(stage, destination, progress, speech);
-    public PuzzleGalleryPage CreatePuzzleGalleryPage() => new(puzzles, this, progress);
+    public PuzzleGalleryPage CreatePuzzleGalleryPage() => new(puzzles, this, progress, destination);
     public PuzzlePage CreatePuzzlePage(PuzzleDefinition puzzle) => new(puzzle, puzzles, this, progress, speech, destination);
     public PuzzleDiscoveryPage CreatePuzzleDiscoveryPage(PuzzleDefinition puzzle, int moves, int maxMoves, int reward) =>
         new(puzzle, moves, maxMoves, reward, puzzles, this, progress, speech, destination);

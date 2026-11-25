@@ -6,9 +6,11 @@ namespace ZRLingoTrip.Application.Games;
 /// <summary>Shared puzzle selection behavior over the active destination's puzzle content.</summary>
 public sealed class PuzzleCatalog : IPuzzleCatalog
 {
-    public IReadOnlyList<PuzzleDefinition> Items { get; }
+    private readonly IDestinationContent _destination;
 
-    public PuzzleCatalog(IDestinationContent destination) => Items = destination.Puzzles;
+    public IReadOnlyList<PuzzleDefinition> Items => _destination.Puzzles;
+
+    public PuzzleCatalog(IDestinationContent destination) => _destination = destination;
 
     public PuzzleDefinition GetRandom(string? excludedKey = null)
     {

@@ -9,6 +9,8 @@ public sealed class PuzzleDiscoveryPage : ContentPage
     private readonly IGamePageFactory _pages;
     private readonly IDestinationContent _destination;
 
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
+
     public PuzzleDiscoveryPage(PuzzleDefinition puzzle, int moves, int maxMoves, int reward, IPuzzleCatalog puzzles, IGamePageFactory pages, IGameProgressStore progress, ISpeechService speech, IDestinationContent destination)
     {
         _speechService = speech;
@@ -17,13 +19,13 @@ public sealed class PuzzleDiscoveryPage : ContentPage
         _puzzles = puzzles;
         _pages = pages;
         _destination = destination;
-        Title = "Ontdekking";
+        Title = IsEnglish ? "Discovery" : "Ontdekking";
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
 
         var listen = new Button
         {
-            Text = "🔊 Luister naar de uitleg",
+            Text = IsEnglish ? "🔊 Listen to the explanation" : "🔊 Luister naar de uitleg",
             FontSize = 18,
             FontAttributes = FontAttributes.Bold,
             BackgroundColor = Color.FromArgb("#7C3AED"),
@@ -34,7 +36,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
 
         var next = new Button
         {
-            Text = "🎲 Nieuwe verrassingspuzzel",
+            Text = IsEnglish ? "🎲 New surprise puzzle" : "🎲 Nieuwe verrassingspuzzel",
             FontSize = 17,
             FontAttributes = FontAttributes.Bold,
             BackgroundColor = Color.FromArgb("#E11D48"),
@@ -45,7 +47,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
 
         var home = new Button
         {
-            Text = "⌂ Terug naar start",
+            Text = IsEnglish ? "⌂ Back to start" : "⌂ Terug naar start",
             FontSize = 17,
             FontAttributes = FontAttributes.Bold,
             BackgroundColor = Color.FromArgb("#183153"),
@@ -63,7 +65,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
                 {
                     new Label
                     {
-                        Text = "🏆 Puzzel opgelost!",
+                        Text = IsEnglish ? "🏆 Puzzle solved!" : "🏆 Puzzel opgelost!",
                         FontSize = 30,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center,
@@ -84,7 +86,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
                     },
                     new Label
                     {
-                        Text = $"{moves}/{maxMoves} zetten · {new string('⭐', reward)}",
+                        Text = IsEnglish ? $"{moves}/{maxMoves} moves · {new string('⭐', reward)}" : $"{moves}/{maxMoves} zetten · {new string('⭐', reward)}",
                         FontSize = 20,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center,
@@ -104,7 +106,7 @@ public sealed class PuzzleDiscoveryPage : ContentPage
                             {
                                 new Label
                                 {
-                                    Text = "🎓 Wist je dat?",
+                                    Text = IsEnglish ? "🎓 Did you know?" : "🎓 Wist je dat?",
                                     FontSize = 22,
                                     FontAttributes = FontAttributes.Bold,
                                     TextColor = Color.FromArgb("#1D4ED8")

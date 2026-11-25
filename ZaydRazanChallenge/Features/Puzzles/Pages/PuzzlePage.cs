@@ -36,6 +36,7 @@ public sealed class PuzzlePage : ContentPage
     private int _moves;
     private int? _selectedPosition;
     private bool _completed;
+    private bool IsEnglish => _destination.LanguagePair.SourceLanguage.Value == "en";
 
     public PuzzlePage(PuzzleDefinition puzzle, IPuzzleCatalog puzzles, IGamePageFactory pages,
         IGameProgressStore progress, ISpeechService speechService, IDestinationContent destination)
@@ -53,7 +54,7 @@ public sealed class PuzzlePage : ContentPage
         var display = DeviceDisplay.Current.MainDisplayInfo;
         _boardSize = Math.Min(390d, Math.Max(280d, display.Width / display.Density - 44d));
 
-        Title = "Verrassingspuzzel";
+        Title = IsEnglish ? "Surprise puzzle" : "Verrassingspuzzel";
         BackgroundColor = Color.FromArgb("#FFF8E7");
         GameUi.AddHomeButton(this);
 
@@ -67,7 +68,7 @@ public sealed class PuzzlePage : ContentPage
 
         var newChallengeButton = new Button
         {
-            Text = "🎲 Andere willekeurige puzzel",
+            Text = IsEnglish ? "🎲 Another random puzzle" : "🎲 Andere willekeurige puzzel",
             BackgroundColor = Color.FromArgb("#0891B2"),
             TextColor = Colors.White,
             FontAttributes = FontAttributes.Bold
@@ -125,14 +126,14 @@ public sealed class PuzzlePage : ContentPage
                 {
                     new Label
                     {
-                        Text = "🎲 Défi culturel surprise",
+                        Text = IsEnglish ? "🎲 Surprise culture puzzle" : "🎲 Défi culturel surprise",
                         FontSize = 25,
                         FontAttributes = FontAttributes.Bold,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
                     new Label
                     {
-                        Text = $"Image, grille et limite choisies au hasard · maximum {_maxMoves} déplacements",
+                        Text = IsEnglish ? $"Picture, grid and move limit chosen at random · up to {_maxMoves} moves" : $"Image, grille et limite choisies au hasard · maximum {_maxMoves} déplacements",
                         FontSize = 15,
                         HorizontalTextAlignment = TextAlignment.Center
                     },
@@ -202,7 +203,7 @@ public sealed class PuzzlePage : ContentPage
         _completed = false;
         _selectedPosition = null;
         _messageLabel.TextColor = Color.FromArgb("#334155");
-        _messageLabel.Text = $"Nog {_maxMoves} zetten";
+        _messageLabel.Text = IsEnglish ? $"{_maxMoves} moves left" : $"Nog {_maxMoves} zetten";
 
         var minimumShuffle = Math.Max(3, (int)Math.Ceiling(_maxMoves * .35));
         var maximumShuffle = Math.Max(minimumShuffle, (int)Math.Floor(_maxMoves * .60));
@@ -289,7 +290,7 @@ public sealed class PuzzlePage : ContentPage
         if (_selectedPosition is null)
         {
             _selectedPosition = position;
-            _messageLabel.Text = "Kies het tweede blok.";
+            _messageLabel.Text = IsEnglish ? "Choose the second tile." : "Kies het tweede blok.";
             RenderPuzzle();
             return;
         }
@@ -300,7 +301,7 @@ public sealed class PuzzlePage : ContentPage
             Swap(source, position);
         else
         {
-            _messageLabel.Text = $"Nog {_maxMoves - _moves} zetten";
+            _messageLabel.Text = IsEnglish ? $"{_maxMoves - _moves} moves left" : $"Nog {_maxMoves - _moves} zetten";
             RenderPuzzle();
         }
     }
@@ -326,19 +327,21 @@ public sealed class PuzzlePage : ContentPage
             _messageLabel.TextColor = remaining <= 3
                 ? Color.FromArgb("#DC2626")
                 : Color.FromArgb("#334155");
-            _messageLabel.Text = $"Nog {remaining} zet{(remaining == 1 ? "" : "ten")}";
+            _messageLabel.Text = IsEnglish ? $"{remaining} moves left" : $"Nog {remaining} zet{(remaining == 1 ? "" : "ten")}";
             return;
         }
 
         _completed = true;
         await GameFeedback.FailureAsync();
         _messageLabel.TextColor = Color.FromArgb("#DC2626");
-        _messageLabel.Text = "Geen zetten meer. Probeer opnieuw!";
+        _messageLabel.Text = IsEnglish ? "No moves left. Try again!" : "Geen zetten meer. Probeer opnieuw!";
         var retry = await DisplayAlert(
-            "⏱️ Limiet bereikt",
-            $"Je hebt alle {_maxMoves} zetten gebruikt. Wil je deze afbeelding opnieuw mengen?",
-            "Opnieuw",
-            "Andere afbeelding");
+            IsEnglish ? "⏱️ Move limit reached" : "⏱️ Limiet bereikt",
+            IsEnglish
+                ? $"You used all {_maxMoves} moves. Would you like to shuffle this picture again?"
+                : $"Je hebt alle {_maxMoves} zetten gebruikt. Wil je deze afbeelding opnieuw mengen?",
+            IsEnglish ? "Shuffle again" : "Opnieuw",
+            IsEnglish ? "Another picture" : "Andere afbeelding");
         if (retry)
             Shuffle();
         else
@@ -362,7 +365,7 @@ public sealed class PuzzlePage : ContentPage
 
         var starText = new string('⭐', reward);
         _messageLabel.TextColor = Color.FromArgb("#16A34A");
-        _messageLabel.Text = $"Goed gedaan! {_puzzle.TargetName} {starText}";
+        _messageLabel.Text = IsEnglish ? $"Well done! {_puzzle.TargetName} {starText}" : $"Goed gedaan! {_puzzle.TargetName} {starText}";
 
         await _puzzleGrid.ScaleTo(1.04, 180, Easing.CubicOut);
         await _puzzleGrid.ScaleTo(1, 180, Easing.CubicIn);
@@ -370,7 +373,7 @@ public sealed class PuzzlePage : ContentPage
         await SuccessCelebration.ShowAsync(
             this,
             () => _speechService.SpeakAsync(
-                $"Goed gedaan! Je hebt {_puzzle.TargetName} ontdekt.",
+                IsEnglish ? $"Well done! You discovered {_puzzle.TargetName}." : $"Goed gedaan! Je hebt {_puzzle.TargetName} ontdekt.",
                 _destination.LanguagePair.SourceLanguage.Value));
 
         await Navigation.PushAsync(

@@ -79,7 +79,7 @@ public sealed class ParisDestinationContent : IDestinationContent
     private static DestinationClue C(string sentence, string highlight, string word, string other1, string other2) =>
         new(sentence, highlight, word, [word, other1, other2]);
 
-    public IReadOnlyList<DestinationQuest> Quests { get; } =
+    private static readonly DestinationQuest[] DutchQuests =
     [
         new("De stadskaart", "la carte", "paris_map_choice.jpg", "Op de kaart vinden Zayd en Razan de weg door Parijs. Samen kiezen ze een nieuwe halte.",
             [
@@ -263,10 +263,242 @@ public sealed class ParisDestinationContent : IDestinationContent
             ]),
     ];
 
+    private static readonly string[] EnglishStories = [
+        "Zayd and Razan use the map to find their way around Paris. Together, they choose their next stop.",
+        "The Eiffel Tower is made of iron. From the top, you can look out over Paris.",
+        "Zayd and Razan see lots of art in the Louvre. The Mona Lisa is here too.",
+        "The Arc de Triomphe is a large arch in a square in Paris.",
+        "A baguette is a long, crispy loaf of bread. Zayd and Razan find one at the bakery.",
+        "Notre-Dame is a large cathedral on an island in the River Seine.",
+        "The white Sacré-Cœur Basilica stands high on the hill of Montmartre.",
+        "Shows take place at the Opéra Garnier. Zayd admires the magnificent building.",
+        "The Panthéon has a large dome. Famous people are remembered here.",
+        "At Les Invalides, Zayd and Razan see a large golden dome.",
+        "La Joconde is the French name for the Mona Lisa. You can see the painting in the Louvre.",
+        "A croissant is a light, flaky pastry. Razan finds one in a bakery.",
+        "Zayd and Razan travel to Paris with their train tickets. Keep your ticket safe.",
+        "The Seine is the river that flows through Paris. Zayd and Razan walk beside the water.",
+        "Montmartre is a neighbourhood on a hill. It has steep streets and the Sacré-Cœur.",
+        "In the Luxembourg Gardens, Zayd and Razan see flowers, trees and a pond.",
+        "The Place de la Concorde has a tall obelisk and fountains.",
+        "The Place des Vosges is a square with arches and a green garden.",
+        "The Musée d’Orsay used to be a railway station. Now Zayd and Razan see paintings there.",
+        "At the Sainte-Chapelle, light shines through tall, colourful stained-glass windows.",
+        "The Centre Pompidou displays modern art. You can see colourful pipes on the outside.",
+        "The Pont Alexandre III is a decorated bridge over the Seine.",
+        "Artists paint pictures in the Place du Tertre in Montmartre.",
+        "The metro takes people quickly around Paris. Zayd and Razan look for the entrance.",
+        "From a river boat, Zayd and Razan see the bridges of Paris.",
+        "Macarons are small, colourful cookies. They are displayed in the bakery window.",
+        "Zayd finds a beret, a soft, round hat. In French, it is called le béret.",
+        "A crêpe is a thin pancake. Zayd and Razan choose one from a street stall.",
+        "Gustave Eiffel was an engineer. His name is linked to the famous Eiffel Tower.",
+        "Marie Curie was a scientist. She worked in Paris and carried out important research."
+    ];
+
+    private static readonly string[] EnglishClueSentences = [
+        "Zayd is looking for the map.",
+        "The street leads to the tower.",
+        "Razan sees the city.",
+        "The tower is made of iron.",
+        "The tower is very tall.",
+        "You can see the top of the tower.",
+        "You can see art in the museum.",
+        "The Mona Lisa hangs here.",
+        "Zayd is looking for a painting.",
+        "The large arch stands in a square.",
+        "The arch is a monument.",
+        "You can see a large arch.",
+        "The baker makes fresh bread.",
+        "You can buy bread at the bakery.",
+        "A baguette is a long loaf of bread.",
+        "A cathedral is a large church.",
+        "Zayd sees a large window.",
+        "The cathedral stands on an island.",
+        "The basilica is white.",
+        "Razan walks up the stairs.",
+        "The building stands on a hill.",
+        "Music can be heard in the hall.",
+        "You can see a beautiful building.",
+        "Razan watches a show.",
+        "Zayd sees a large dome.",
+        "This building is in Paris.",
+        "We remember famous people.",
+        "The dome is golden.",
+        "Razan sees a museum.",
+        "A soldier wears a uniform.",
+        "This is a famous painting.",
+        "The painting shows a woman.",
+        "Zayd looks at a smile.",
+        "The bakery sells pastries.",
+        "The pastry is shaped like an arch.",
+        "Zayd eats breakfast.",
+        "You need a ticket to travel by train.",
+        "The ticket is in a bag.",
+        "Zayd sees a train.",
+        "The water flows through the city.",
+        "A river flows under the bridge.",
+        "Zayd sees a bridge.",
+        "Razan walks through a neighbourhood.",
+        "The street is steep.",
+        "There is a hill above.",
+        "There are trees in the park.",
+        "Razan smells a flower.",
+        "There is a chair beside the water.",
+        "A large square is in front of us.",
+        "An obelisk stands in the middle.",
+        "The fountain sprays water.",
+        "You can see arches beneath the buildings.",
+        "There is a garden in the middle of the square.",
+        "The bricks are red.",
+        "There used to be a station here.",
+        "Now paintings hang here.",
+        "You can see a clock on the building.",
+        "Light shines through the window.",
+        "The glass has many colours.",
+        "Razan looks at the light.",
+        "You can see pipes on the outside.",
+        "Inside, you can see modern art.",
+        "The building has many colours.",
+        "The bridge crosses the river.",
+        "You can see golden statues on top.",
+        "Water flows under the bridge.",
+        "An artist makes a drawing.",
+        "There are easels in the square.",
+        "Zayd looks at a painting.",
+        "We are going to the entrance.",
+        "A train runs beneath the city.",
+        "A station has a platform.",
+        "The boat travels along the river.",
+        "We see a bridge on the way.",
+        "The water glitters in the sun.",
+        "The cookies have many colours.",
+        "Razan chooses a small cookie.",
+        "There are pastries in the shop.",
+        "The hat is lying on the table.",
+        "This fabric is soft.",
+        "Razan sees a round shape.",
+        "The pancake is thin.",
+        "You can put fruit on it.",
+        "Zayd smells a sweet crêpe.",
+        "An engineer designs buildings.",
+        "The tower is made of iron.",
+        "Zayd reads a man's name.",
+        "A scientist carries out research.",
+        "A woman is working in the laboratory.",
+        "She learns a lot about science."
+    ];
+
+    private static readonly IReadOnlyDictionary<string, string> EnglishClueWords = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["la carte"] = "the map",
+            ["la rue"] = "the street",
+            ["la ville"] = "the city",
+            ["le fer"] = "iron",
+            ["haute"] = "tall",
+            ["le sommet"] = "the top",
+            ["le musée"] = "the museum",
+            ["la Joconde"] = "the Mona Lisa",
+            ["le tableau"] = "a painting",
+            ["la place"] = "a square",
+            ["le monument"] = "a monument",
+            ["un arc"] = "an arch",
+            ["le boulanger"] = "the baker",
+            ["la boulangerie"] = "the bakery",
+            ["le pain"] = "bread",
+            ["une église"] = "a church",
+            ["une fenêtre"] = "a window",
+            ["une île"] = "an island",
+            ["blanc"] = "white",
+            ["les escaliers"] = "the stairs",
+            ["une colline"] = "a hill",
+            ["la musique"] = "music",
+            ["un bâtiment"] = "a building",
+            ["un spectacle"] = "a show",
+            ["un dôme"] = "a dome",
+            ["des personnes"] = "people",
+            ["doré"] = "golden",
+            ["un musée"] = "a museum",
+            ["un soldat"] = "a soldier",
+            ["une femme"] = "a woman",
+            ["un sourire"] = "a smile",
+            ["une pâtisserie"] = "pastry",
+            ["le petit-déjeuner"] = "breakfast",
+            ["un billet"] = "a ticket",
+            ["un sac"] = "a bag",
+            ["un train"] = "a train",
+            ["l’eau"] = "water",
+            ["une rivière"] = "a river",
+            ["un pont"] = "a bridge",
+            ["un quartier"] = "a neighbourhood",
+            ["des arbres"] = "trees",
+            ["une fleur"] = "a flower",
+            ["une chaise"] = "a chair",
+            ["un obélisque"] = "an obelisk",
+            ["une fontaine"] = "a fountain",
+            ["des arcades"] = "arches",
+            ["un jardin"] = "a garden",
+            ["rouge"] = "red",
+            ["une gare"] = "a station",
+            ["des tableaux"] = "paintings",
+            ["une horloge"] = "a clock",
+            ["des couleurs"] = "colours",
+            ["la lumière"] = "light",
+            ["des tuyaux"] = "pipes",
+            ["l’art"] = "art",
+            ["des statues"] = "statues",
+            ["un artiste"] = "an artist",
+            ["une entrée"] = "an entrance",
+            ["un quai"] = "a platform",
+            ["un bateau"] = "a boat",
+            ["le soleil"] = "the sun",
+            ["un biscuit"] = "a cookie",
+            ["une boutique"] = "a shop",
+            ["un chapeau"] = "a hat",
+            ["doux"] = "soft",
+            ["rond"] = "round",
+            ["fine"] = "thin",
+            ["un fruit"] = "fruit",
+            ["sucrée"] = "sweet",
+            ["un ingénieur"] = "an engineer",
+            ["un nom"] = "a name",
+            ["la recherche"] = "research",
+            ["la science"] = "science",
+            ["un tableau"] = "a painting", ["une rue"] = "a street", ["une place"] = "a square"
+        };
+
+    private static readonly DestinationQuest[] EnglishQuests = BuildEnglishQuests();
+
+    public IReadOnlyList<DestinationQuest> Quests =>
+        _languageSettings.SourceLanguageCode == "en" ? EnglishQuests : DutchQuests;
+
+    private static DestinationQuest[] BuildEnglishQuests()
+    {
+        var clueIndex = 0;
+        return DutchQuests.Select((quest, index) =>
+        {
+            var translatedClues = quest.Clues.Select(clue => clue with
+            {
+                SourceSentence = EnglishClueSentences[clueIndex++],
+                HighlightedSourceText = EnglishClueWords.GetValueOrDefault(clue.TargetWord, clue.TargetWord)
+            }).ToArray();
+            return quest with
+            {
+                Title = index == 0 ? "The city map" : quest.Title,
+                Story = EnglishStories[index],
+                Clues = translatedClues
+            };
+        }).ToArray();
+    }
+
     public IReadOnlyList<PuzzleDefinition> Puzzles => Quests.Select((quest, index) =>
         new PuzzleDefinition(KeyFor(quest.Photo), quest.Title, quest.TargetName, AdventureEmojis[index], quest.Story, quest.Photo))
-        .Append(new PuzzleDefinition("versailles", "het paleis van Versailles", "Le château de Versailles", "👑",
-            "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen."))
+        .Append(new PuzzleDefinition("versailles",
+            _languageSettings.SourceLanguageCode == "en" ? "the Palace of Versailles" : "het paleis van Versailles",
+            "Le château de Versailles", "👑",
+            _languageSettings.SourceLanguageCode == "en"
+                ? "The Palace of Versailles was a royal residence. It is famous for its Hall of Mirrors and vast French gardens."
+                : "Le château de Versailles was een koninklijk paleis. Het is bekend om zijn Spiegelzaal en grote Franse tuinen."))
         .ToArray();
 
     public IReadOnlyList<VocabularyWord> VocabularyWords => (_languageSettings.SourceLanguageCode == "en"
