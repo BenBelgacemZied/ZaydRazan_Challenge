@@ -16,7 +16,7 @@ public sealed class AdventureMissionHubPage : ContentPage
 
     private readonly Label _speech = new()
     {
-        Text = IsEnglish ? "Getting the suitcases ready..." : "De koffers worden klaargemaakt...",
+        Text = "De koffers worden klaargemaakt...",
         FontSize = 17,
         FontAttributes = FontAttributes.Bold,
         TextColor = Color.FromArgb("#17324D"),
@@ -32,7 +32,7 @@ public sealed class AdventureMissionHubPage : ContentPage
 
     private readonly Button _resume = new()
     {
-        Text = IsEnglish ? "▶ Continue playing" : "▶ Verder spelen",
+        Text = "▶ Verder spelen",
         IsVisible = false,
         BackgroundColor = Color.FromArgb("#F59E0B"),
         TextColor = Colors.White,
@@ -49,6 +49,8 @@ public sealed class AdventureMissionHubPage : ContentPage
     public AdventureMissionHubPage(IGameProgressStore progress, ISpeechService speech, IDestinationContent destination)
     {
         _destination = destination;
+        _speech.Text = IsEnglish ? "Getting the suitcases ready..." : "De koffers worden klaargemaakt...";
+        _resume.Text = IsEnglish ? "▶ Continue playing" : "▶ Verder spelen";
         _speechService = speech;
         _gameProgress = progress;
         Title = IsEnglish ? "Home" : "Thuis";
