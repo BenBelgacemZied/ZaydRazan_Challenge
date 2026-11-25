@@ -102,11 +102,10 @@ public sealed class SplashPage : ContentPage
 
         _characters = new Image
         {
-            Source = "zayd_razan_official.png",
-            Aspect = Aspect.AspectFit,
-            HeightRequest = 300,
-            HorizontalOptions = LayoutOptions.Fill,
-            Scale = .82
+            Source = "welcome_globe.png",
+            Aspect = Aspect.AspectFill,
+            HeightRequest = 340,
+            HorizontalOptions = LayoutOptions.Fill
         };
 
         _loadingMessage = new Label
@@ -223,7 +222,8 @@ public sealed class SplashPage : ContentPage
         _welcomePanel.IsVisible = true;
 
         await _welcomePanel.FadeTo(1, 450, Easing.CubicOut);
-        await _characters.ScaleTo(1, 700, Easing.CubicOut);
+        await _characters.ScaleTo(1.04, 700, Easing.CubicOut);
+        await _characters.ScaleTo(1, 350, Easing.CubicInOut);
         await _progress.ProgressTo(1, 1700, Easing.CubicInOut);
         await Task.Delay(250);
 
