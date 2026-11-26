@@ -139,7 +139,7 @@ public sealed class SplashPage : ContentPage
             HorizontalTextAlignment = TextAlignment.Center,
             VerticalTextAlignment = TextAlignment.Center,
             LineBreakMode = LineBreakMode.WordWrap,
-            Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 3), Radius = 5, Opacity = .75 }
+            Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 3), Radius = 5, Opacity = .75f }
         };
 
         var titlePanel = new Border
