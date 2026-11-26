@@ -296,7 +296,7 @@ public sealed class SplashPage : ContentPage
             canvas.FillPath(path);
             canvas.StrokeColor = outlineColor;
             canvas.StrokeSize = 4;
-            canvas.StrokePath(path);
+            canvas.DrawPath(path);
         }
     }
 
