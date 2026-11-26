@@ -144,17 +144,20 @@ public sealed class SplashPage : ContentPage
 
         var titlePanel = new Border
         {
-            BackgroundColor = Color.FromArgb("#B3102A43"),
-            Stroke = Colors.Transparent,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 20 },
-            Padding = new Thickness(16, 12),
+            BackgroundColor = Color.FromArgb("#FF1685E8"),
+            Stroke = Colors.White,
+            StrokeThickness = 3,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 38 },
+            Padding = new Thickness(18, 12),
+            Margin = new Thickness(16, 12, 16, 0),
+            HeightRequest = 168,
             HorizontalOptions = LayoutOptions.Fill,
             Content = _slogan
         };
 
         _characters = new Image
         {
-            Source = "welcome_globe.png",
+            Source = "splash.jpg",
             Aspect = Aspect.AspectFill,
             HorizontalOptions = LayoutOptions.Fill,
             VerticalOptions = LayoutOptions.Fill
@@ -166,7 +169,7 @@ public sealed class SplashPage : ContentPage
             ProgressColor = Color.FromArgb("#FBBF24"),
             BackgroundColor = Color.FromArgb("#38556B"),
             HeightRequest = 12,
-            Margin = new Thickness(12, 0)
+            Margin = new Thickness(30, 0, 30, 14)
         };
 
         _welcomePanel = new Grid
@@ -179,7 +182,7 @@ public sealed class SplashPage : ContentPage
                 new RowDefinition { Height = GridLength.Star },
                 new RowDefinition { Height = GridLength.Auto }
             },
-            Padding = new Thickness(22, 28, 22, 28),
+            Padding = 0,
             Children = { _characters, titlePanel, _progress }
         };
         Grid.SetRowSpan(_characters, 3);
