@@ -144,18 +144,13 @@ public sealed class SplashPage : ContentPage
             Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 3), Radius = 5, Opacity = .75f }
         };
 
-        var firstTitleLine = new Border
+        var firstTitleLine = new Grid
         {
-            BackgroundColor = Color.FromArgb("#0879D5"),
-            Stroke = Color.FromArgb("#8EDBFF"),
-            StrokeThickness = 2,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 34 },
-            Padding = new Thickness(18, 8),
-            Margin = new Thickness(28, 12, 28, 0),
-            HorizontalOptions = LayoutOptions.Fill,
-            Content = _slogan,
-            Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 4), Radius = 8, Opacity = .4f }
+            HeightRequest = 86,
+            Margin = new Thickness(28, 8, 28, 0)
         };
+        firstTitleLine.Children.Add(CreateCloudShape(Color.FromArgb("#0879D5"), Color.FromArgb("#8EDBFF")));
+        firstTitleLine.Children.Add(_slogan);
 
         _names = new Label
         {
@@ -166,7 +161,6 @@ public sealed class SplashPage : ContentPage
             LineBreakMode = LineBreakMode.NoWrap,
             Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 3), Radius = 4, Opacity = .3f }
         };
-
         _names.FormattedText = CreateNamesTitle(isEnglish: false);
 
         var globe = new Label
@@ -175,32 +169,29 @@ public sealed class SplashPage : ContentPage
             FontSize = 30,
             HorizontalTextAlignment = TextAlignment.Center,
             VerticalTextAlignment = TextAlignment.Center,
-            HeightRequest = 38,
-            Margin = new Thickness(0, -5, 0, 0)
+            HeightRequest = 36,
+            Margin = new Thickness(0, -8, 0, 0)
         };
 
         var namesAndGlobe = new VerticalStackLayout
         {
-            Spacing = -5,
+            Spacing = -4,
+            HorizontalOptions = LayoutOptions.Fill,
+            VerticalOptions = LayoutOptions.Center,
             Children = { _names, globe }
         };
 
-        var namesCloud = new Border
+        var namesCloud = new Grid
         {
-            BackgroundColor = Color.FromArgb("#FFFCF7"),
-            Stroke = Colors.White,
-            StrokeThickness = 3,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 42 },
-            Padding = new Thickness(8, 5),
-            Margin = new Thickness(8, -4, 8, 0),
-            HorizontalOptions = LayoutOptions.Fill,
-            Content = namesAndGlobe,
-            Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 5), Radius = 8, Opacity = .35f }
+            HeightRequest = 112,
+            Margin = new Thickness(8, -8, 8, 0)
         };
+        namesCloud.Children.Add(CreateCloudShape(Color.FromArgb("#FFFCF7"), Colors.White));
+        namesCloud.Children.Add(namesAndGlobe);
 
         var titlePanel = new VerticalStackLayout
         {
-            Spacing = 0,
+            Spacing = -2,
             Margin = new Thickness(8, 0, 8, 0),
             Children = { firstTitleLine, namesCloud }
         };
@@ -272,6 +263,40 @@ public sealed class SplashPage : ContentPage
             await _brandBadge.ScaleTo(1.06, 650, Easing.CubicOut);
             if (_languageChosen) break;
             await _brandBadge.ScaleTo(1, 650, Easing.CubicIn);
+        }
+    }
+
+    private static GraphicsView CreateCloudShape(Color fillColor, Color outlineColor) => new()
+    {
+        Drawable = new CloudDrawable(fillColor, outlineColor),
+        InputTransparent = true
+    };
+
+    private sealed class CloudDrawable(Color fillColor, Color outlineColor) : IDrawable
+    {
+        public void Draw(ICanvas canvas, RectF dirtyRect)
+        {
+            var w = dirtyRect.Width;
+            var h = dirtyRect.Height;
+            var path = new PathF();
+
+            path.MoveTo(w * .12f, h * .83f);
+            path.CurveTo(w * .02f, h * .81f, w * .01f, h * .68f, w * .07f, h * .57f);
+            path.CurveTo(w * .01f, h * .43f, w * .10f, h * .28f, w * .24f, h * .34f);
+            path.CurveTo(w * .23f, h * .13f, w * .43f, h * .08f, w * .51f, h * .29f);
+            path.CurveTo(w * .59f, h * .04f, w * .80f, h * .10f, w * .79f, h * .33f);
+            path.CurveTo(w * .94f, h * .22f, w * 1.02f, h * .39f, w * .93f, h * .54f);
+            path.CurveTo(w * 1.02f, h * .69f, w * .94f, h * .86f, w * .80f, h * .85f);
+            path.CurveTo(w * .69f, h * .98f, w * .56f, h * .94f, w * .49f, h * .82f);
+            path.CurveTo(w * .37f, h * .99f, w * .21f, h * .96f, w * .20f, h * .82f);
+            path.CurveTo(w * .17f, h * .84f, w * .14f, h * .84f, w * .12f, h * .83f);
+            path.Close();
+
+            canvas.FillColor = fillColor;
+            canvas.FillPath(path);
+            canvas.StrokeColor = outlineColor;
+            canvas.StrokeSize = 4;
+            canvas.StrokePath(path);
         }
     }
 
