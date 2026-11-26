@@ -144,14 +144,6 @@ public sealed class SplashPage : ContentPage
             Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 3), Radius = 5, Opacity = .75f }
         };
 
-        var firstTitleLine = new Grid
-        {
-            HeightRequest = 86,
-            Margin = new Thickness(28, 8, 28, 0)
-        };
-        firstTitleLine.Children.Add(CreateCloudShape(Color.FromArgb("#0879D5"), Color.FromArgb("#8EDBFF")));
-        firstTitleLine.Children.Add(_slogan);
-
         _names = new Label
         {
             FontSize = 36,
@@ -169,32 +161,39 @@ public sealed class SplashPage : ContentPage
             FontSize = 30,
             HorizontalTextAlignment = TextAlignment.Center,
             VerticalTextAlignment = TextAlignment.Center,
-            HeightRequest = 36,
-            Margin = new Thickness(0, -8, 0, 0)
+            HeightRequest = 38
         };
 
-        var namesAndGlobe = new VerticalStackLayout
+        var titlePanel = new Grid
         {
-            Spacing = -4,
-            HorizontalOptions = LayoutOptions.Fill,
-            VerticalOptions = LayoutOptions.Center,
-            Children = { _names, globe }
+            HeightRequest = 194,
+            Margin = new Thickness(0, 4, 0, 0),
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(88) },
+                new RowDefinition { Height = new GridLength(58) },
+                new RowDefinition { Height = new GridLength(42) }
+            }
         };
 
-        var namesCloud = new Grid
-        {
-            HeightRequest = 112,
-            Margin = new Thickness(8, -8, 8, 0)
-        };
-        namesCloud.Children.Add(CreateCloudShape(Color.FromArgb("#FFFCF7"), Colors.White));
-        namesCloud.Children.Add(namesAndGlobe);
+        var whiteCloudBackground = CreateCloudShape(Color.FromArgb("#FFFCF7"), Colors.White);
+        titlePanel.Children.Add(whiteCloudBackground);
+        Grid.SetRowSpan(whiteCloudBackground, 3);
 
-        var titlePanel = new VerticalStackLayout
+        var blueCloudHeader = new Grid
         {
-            Spacing = -2,
-            Margin = new Thickness(8, 0, 8, 0),
-            Children = { firstTitleLine, namesCloud }
+            Margin = new Thickness(24, 0, 24, 0)
         };
+        blueCloudHeader.Children.Add(CreateCloudShape(Color.FromArgb("#0879D5"), Color.FromArgb("#8EDBFF")));
+        blueCloudHeader.Children.Add(_slogan);
+        titlePanel.Children.Add(blueCloudHeader);
+        Grid.SetRow(blueCloudHeader, 0);
+
+        titlePanel.Children.Add(_names);
+        Grid.SetRow(_names, 1);
+
+        titlePanel.Children.Add(globe);
+        Grid.SetRow(globe, 2);
 
         _characters = new Image
         {
