@@ -10,6 +10,7 @@ public static class MauiProgram
     {
         var builder = MauiApp.CreateBuilder();
         builder.UseMauiApp<App>();
+        builder.ConfigureFonts(fonts => fonts.AddFont("Baloo2.ttf", "Baloo2"));
 
         builder.Services.AddSingleton<ILearningLanguageSettings, MauiLearningLanguageSettings>();
         builder.Services.AddSingleton<IDestinationContent, ParisDestinationContent>();

@@ -277,7 +277,7 @@ public sealed class SplashPage : ContentPage
 
     private static Label CreateTitleLabel(Color color, double fontSize, double depth) => new()
     {
-        FontFamily = "sans-serif-rounded",
+        FontFamily = "Baloo2",
         FontSize = fontSize,
         FontAttributes = FontAttributes.Bold,
         TextColor = color,

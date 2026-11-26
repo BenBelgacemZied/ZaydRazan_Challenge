@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <MauiIcon Include="Resources/AppIcon/appicon.png" BaseSize="1024,1024" />
+    <MauiFont Include="Resources/Fonts/Baloo2.ttf" />
     <!-- Flatten asset names at build time so existing Image.Source values remain stable. -->
     <MauiImage Include="Resources/Images/**/*" LogicalName="%(Filename)%(Extension)" />
   </ItemGroup>
