@@ -9,6 +9,7 @@ public sealed class SplashPage : ContentPage
     private readonly Grid _welcomePanel;
     private readonly Image _characters;
     private readonly Label _slogan;
+    private readonly Label _names;
     private readonly ProgressBar _progress;
     private bool _languageChosen;
     private bool _navigationStarted;
@@ -133,7 +134,8 @@ public sealed class SplashPage : ContentPage
 
         _slogan = new Label
         {
-            FontSize = 29,
+            Text = "Op reis met",
+            FontSize = 31,
             FontAttributes = FontAttributes.Bold,
             TextColor = Colors.White,
             HorizontalTextAlignment = TextAlignment.Center,
@@ -142,17 +144,65 @@ public sealed class SplashPage : ContentPage
             Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 3), Radius = 5, Opacity = .75f }
         };
 
-        var titlePanel = new Border
+        var firstTitleLine = new Border
         {
-            BackgroundColor = Color.FromArgb("#FF1685E8"),
+            BackgroundColor = Color.FromArgb("#0879D5"),
+            Stroke = Color.FromArgb("#8EDBFF"),
+            StrokeThickness = 2,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 34 },
+            Padding = new Thickness(18, 8),
+            Margin = new Thickness(28, 12, 28, 0),
+            HorizontalOptions = LayoutOptions.Fill,
+            Content = _slogan,
+            Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 4), Radius = 8, Opacity = .4f }
+        };
+
+        _names = new Label
+        {
+            FontSize = 36,
+            FontAttributes = FontAttributes.Bold,
+            HorizontalTextAlignment = TextAlignment.Center,
+            VerticalTextAlignment = TextAlignment.Center,
+            LineBreakMode = LineBreakMode.NoWrap,
+            Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 3), Radius = 4, Opacity = .3f }
+        };
+
+        _names.FormattedText = CreateNamesTitle(isEnglish: false);
+
+        var globe = new Label
+        {
+            Text = "🌍",
+            FontSize = 30,
+            HorizontalTextAlignment = TextAlignment.Center,
+            VerticalTextAlignment = TextAlignment.Center,
+            HeightRequest = 38,
+            Margin = new Thickness(0, -5, 0, 0)
+        };
+
+        var namesAndGlobe = new VerticalStackLayout
+        {
+            Spacing = -5,
+            Children = { _names, globe }
+        };
+
+        var namesCloud = new Border
+        {
+            BackgroundColor = Color.FromArgb("#FFFCF7"),
             Stroke = Colors.White,
             StrokeThickness = 3,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 38 },
-            Padding = new Thickness(18, 12),
-            Margin = new Thickness(16, 12, 16, 0),
-            HeightRequest = 168,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 42 },
+            Padding = new Thickness(8, 5),
+            Margin = new Thickness(8, -4, 8, 0),
             HorizontalOptions = LayoutOptions.Fill,
-            Content = _slogan
+            Content = namesAndGlobe,
+            Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 5), Radius = 8, Opacity = .35f }
+        };
+
+        var titlePanel = new VerticalStackLayout
+        {
+            Spacing = 0,
+            Margin = new Thickness(8, 0, 8, 0),
+            Children = { firstTitleLine, namesCloud }
         };
 
         _characters = new Image
@@ -225,6 +275,16 @@ public sealed class SplashPage : ContentPage
         }
     }
 
+    private static FormattedString CreateNamesTitle(bool isEnglish) => new()
+    {
+        Spans =
+        {
+            new Span { Text = "Zayd", TextColor = Color.FromArgb("#FFAA00"), FontAttributes = FontAttributes.Bold },
+            new Span { Text = isEnglish ? " & " : " en ", TextColor = Color.FromArgb("#1685E8"), FontAttributes = FontAttributes.Bold },
+            new Span { Text = "Razan", TextColor = Color.FromArgb("#E91E63"), FontAttributes = FontAttributes.Bold }
+        }
+    };
+
     private async Task ChooseLanguageAsync(string languageCode)
     {
         if (_languageChosen) return;
@@ -233,7 +293,8 @@ public sealed class SplashPage : ContentPage
         _languageSettings.SourceLanguageCode = languageCode;
         var english = languageCode == "en";
 
-        _slogan.Text = english ? "Travel with Zayd & Razan" : "Op reis met Zayd en Razan";
+        _slogan.Text = english ? "Travel with" : "Op reis met";
+        _names.FormattedText = CreateNamesTitle(english);
         _welcomePanel.IsVisible = true;
         await _welcomePanel.FadeTo(1, 450, Easing.CubicOut);
         await _progress.ProgressTo(1, 1900, Easing.CubicInOut);
