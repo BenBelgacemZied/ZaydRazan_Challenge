@@ -8,5 +8,5 @@ public sealed class MauiSplashImageProvider : ISplashImageProvider
     public string GetSplashImageAsset(string sourceLanguageCode) =>
         string.Equals(sourceLanguageCode, "en", StringComparison.OrdinalIgnoreCase)
             ? "splash_en.png"
-            : "splash.jpg";
+            : "splash_nl.png";
 }
