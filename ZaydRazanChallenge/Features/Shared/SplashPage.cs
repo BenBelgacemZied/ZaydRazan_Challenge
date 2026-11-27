@@ -8,18 +8,16 @@ public sealed class SplashPage : ContentPage
     private readonly VerticalStackLayout _languagePanel;
     private readonly Grid _welcomePanel;
     private readonly Image _characters;
-    private readonly Grid _localizedTitlePanel;
-    private readonly Label _slogan;
-    private readonly Label _sloganMidDepth;
-    private readonly Label _sloganDeepDepth;
+    private readonly ISplashImageProvider _splashImageProvider;
     private readonly ProgressBar _progress;
     private bool _languageChosen;
     private bool _navigationStarted;
 
-    public SplashPage(IGamePageFactory pages, ILearningLanguageSettings languageSettings)
+    public SplashPage(IGamePageFactory pages, ILearningLanguageSettings languageSettings, ISplashImageProvider splashImageProvider)
     {
         _pages = pages;
         _languageSettings = languageSettings;
+        _splashImageProvider = splashImageProvider;
         NavigationPage.SetHasNavigationBar(this, false);
         BackgroundColor = Color.FromArgb("#102A43");
 
@@ -134,32 +132,6 @@ public sealed class SplashPage : ContentPage
             }
         };
 
-        _sloganDeepDepth = CreateTitleLabel(Color.FromArgb("#074078"), 31, 5);
-        _sloganMidDepth = CreateTitleLabel(Color.FromArgb("#0A62A8"), 31, 2);
-        _slogan = CreateTitleLabel(Colors.White, 31, 0);
-        _slogan.Text = "Travel with";
-        _slogan.Shadow = new Shadow { Brush = Color.FromArgb("#063B70"), Offset = new Point(0, 2), Radius = 2, Opacity = .85f };
-
-        var blueCloudHeader = new Grid
-        {
-            HeightRequest = 112,
-            Margin = new Thickness(64, 0, 64, 0)
-        };
-        var blueCloudDepth = CreateCloudShape(Color.FromArgb("#0754A6"), Color.FromArgb("#06478B"));
-        blueCloudDepth.TranslationY = 5;
-        blueCloudHeader.Children.Add(blueCloudDepth);
-        blueCloudHeader.Children.Add(CreateCloudShape(Color.FromArgb("#0879D5"), Color.FromArgb("#A6E8FF")));
-        blueCloudHeader.Children.Add(_sloganDeepDepth);
-        blueCloudHeader.Children.Add(_sloganMidDepth);
-        blueCloudHeader.Children.Add(_slogan);
-
-        _localizedTitlePanel = new Grid
-        {
-            HeightRequest = 114,
-            IsVisible = false,
-            Children = { blueCloudHeader }
-        };
-
         _characters = new Image
         {
             Source = "splash.jpg",
@@ -188,10 +160,9 @@ public sealed class SplashPage : ContentPage
                 new RowDefinition { Height = GridLength.Auto }
             },
             Padding = 0,
-            Children = { _characters, _localizedTitlePanel, _progress }
+            Children = { _characters, _progress }
         };
         Grid.SetRowSpan(_characters, 3);
-        Grid.SetRow(_localizedTitlePanel, 0);
         Grid.SetRow(_progress, 2);
 
         var root = new Grid();
@@ -230,65 +201,13 @@ public sealed class SplashPage : ContentPage
         }
     }
 
-    private static Label CreateTitleLabel(Color color, double fontSize, double depth) => new()
-    {
-        FontFamily = "Baloo2",
-        FontSize = fontSize,
-        FontAttributes = FontAttributes.Bold,
-        TextColor = color,
-        HorizontalTextAlignment = TextAlignment.Center,
-        VerticalTextAlignment = TextAlignment.Center,
-        LineBreakMode = LineBreakMode.NoWrap,
-        TranslationY = depth
-    };
-
-    private static GraphicsView CreateCloudShape(Color fillColor, Color outlineColor) => new()
-    {
-        Drawable = new CloudDrawable(fillColor, outlineColor),
-        InputTransparent = true,
-        Shadow = new Shadow { Brush = Color.FromArgb("#554C6A80"), Offset = new Point(0, 4), Radius = 5, Opacity = .45f }
-    };
-
-    private sealed class CloudDrawable(Color fillColor, Color outlineColor) : IDrawable
-    {
-        public void Draw(ICanvas canvas, RectF dirtyRect)
-        {
-            var w = dirtyRect.Width;
-            var h = dirtyRect.Height;
-            var path = new PathF();
-
-            path.MoveTo(w * .12f, h * .83f);
-            path.CurveTo(w * .02f, h * .81f, w * .01f, h * .68f, w * .07f, h * .57f);
-            path.CurveTo(w * .01f, h * .43f, w * .10f, h * .28f, w * .24f, h * .34f);
-            path.CurveTo(w * .23f, h * .13f, w * .43f, h * .08f, w * .51f, h * .29f);
-            path.CurveTo(w * .59f, h * .04f, w * .80f, h * .10f, w * .79f, h * .33f);
-            path.CurveTo(w * .94f, h * .22f, w * 1.02f, h * .39f, w * .93f, h * .54f);
-            path.CurveTo(w * 1.02f, h * .69f, w * .94f, h * .86f, w * .80f, h * .85f);
-            path.CurveTo(w * .69f, h * .98f, w * .56f, h * .94f, w * .49f, h * .82f);
-            path.CurveTo(w * .37f, h * .99f, w * .21f, h * .96f, w * .20f, h * .82f);
-            path.CurveTo(w * .17f, h * .84f, w * .14f, h * .84f, w * .12f, h * .83f);
-            path.Close();
-
-            canvas.FillColor = fillColor;
-            canvas.FillPath(path);
-            canvas.StrokeColor = outlineColor;
-            canvas.StrokeSize = 4;
-            canvas.DrawPath(path);
-        }
-    }
-
     private async Task ChooseLanguageAsync(string languageCode)
     {
         if (_languageChosen) return;
 
         _languageChosen = true;
         _languageSettings.SourceLanguageCode = languageCode;
-        var english = languageCode == "en";
-
-        _slogan.Text = "Travel with";
-        _sloganMidDepth.Text = _slogan.Text;
-        _sloganDeepDepth.Text = _slogan.Text;
-        _localizedTitlePanel.IsVisible = english;
+        _characters.Source = _splashImageProvider.GetSplashImageAsset(languageCode);
         _welcomePanel.IsVisible = true;
         await _welcomePanel.FadeTo(1, 450, Easing.CubicOut);
         await _progress.ProgressTo(1, 1900, Easing.CubicInOut);

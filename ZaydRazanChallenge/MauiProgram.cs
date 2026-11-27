@@ -13,6 +13,7 @@ public static class MauiProgram
         builder.ConfigureFonts(fonts => fonts.AddFont("Baloo2.ttf", "Baloo2"));
 
         builder.Services.AddSingleton<ILearningLanguageSettings, MauiLearningLanguageSettings>();
+        builder.Services.AddSingleton<ISplashImageProvider, MauiSplashImageProvider>();
         builder.Services.AddSingleton<IDestinationContent, ParisDestinationContent>();
         builder.Services.AddSingleton<IPuzzleCatalog, PuzzleCatalog>();
         builder.Services.AddSingleton<IVocabularyCatalog, VocabularyCatalog>();
