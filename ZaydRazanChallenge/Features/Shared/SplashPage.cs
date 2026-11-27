@@ -8,12 +8,10 @@ public sealed class SplashPage : ContentPage
     private readonly VerticalStackLayout _languagePanel;
     private readonly Grid _welcomePanel;
     private readonly Image _characters;
+    private readonly Grid _localizedTitlePanel;
     private readonly Label _slogan;
     private readonly Label _sloganMidDepth;
     private readonly Label _sloganDeepDepth;
-    private readonly Label _names;
-    private readonly Label _namesMidDepth;
-    private readonly Label _namesDeepDepth;
     private readonly ProgressBar _progress;
     private bool _languageChosen;
     private bool _navigationStarted;
@@ -136,74 +134,31 @@ public sealed class SplashPage : ContentPage
             }
         };
 
-        _sloganDeepDepth = CreateTitleLabel(Color.FromArgb("#074078"), 31, 6);
-        _sloganMidDepth = CreateTitleLabel(Color.FromArgb("#0A62A8"), 31, 3);
+        _sloganDeepDepth = CreateTitleLabel(Color.FromArgb("#074078"), 31, 5);
+        _sloganMidDepth = CreateTitleLabel(Color.FromArgb("#0A62A8"), 31, 2);
         _slogan = CreateTitleLabel(Colors.White, 31, 0);
-        _slogan.Text = "Op reis met";
+        _slogan.Text = "Travel with";
         _slogan.Shadow = new Shadow { Brush = Color.FromArgb("#063B70"), Offset = new Point(0, 2), Radius = 2, Opacity = .85f };
-
-        _namesDeepDepth = CreateTitleLabel(Colors.White, 38, 6);
-        _namesMidDepth = CreateTitleLabel(Colors.White, 38, 3);
-        _names = CreateTitleLabel(Colors.White, 38, 0);
-        _namesDeepDepth.FormattedText = CreateNamesTitle(false, "#974700", "#064878", "#90103E");
-        _namesMidDepth.FormattedText = CreateNamesTitle(false, "#D27A00", "#0A65AA", "#BF164E");
-        _names.FormattedText = CreateNamesTitle(false, "#FFAA00", "#1685E8", "#E91E63");
-        _names.Shadow = new Shadow { Brush = Color.FromArgb("#55233B"), Offset = new Point(0, 2), Radius = 2, Opacity = .8f };
-
-        var globe = new Label
-        {
-            Text = "🌍",
-            FontSize = 32,
-            HorizontalTextAlignment = TextAlignment.Center,
-            VerticalTextAlignment = TextAlignment.Center,
-            HeightRequest = 38,
-            Shadow = new Shadow { Brush = Color.FromArgb("#66452D"), Offset = new Point(0, 3), Radius = 3, Opacity = .65f }
-        };
-
-        var titlePanel = new Grid
-        {
-            HeightRequest = 194,
-            Margin = new Thickness(0, 4, 0, 0),
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(88) },
-                new RowDefinition { Height = new GridLength(58) },
-                new RowDefinition { Height = new GridLength(42) }
-            }
-        };
-
-        var whiteCloudDepth = CreateCloudShape(Color.FromArgb("#D5E7F2"), Color.FromArgb("#A9C8DB"));
-        whiteCloudDepth.TranslationY = 8;
-        titlePanel.Children.Add(whiteCloudDepth);
-        Grid.SetRowSpan(whiteCloudDepth, 3);
-
-        var whiteCloudBackground = CreateCloudShape(Color.FromArgb("#FFFCF7"), Colors.White);
-        titlePanel.Children.Add(whiteCloudBackground);
-        Grid.SetRowSpan(whiteCloudBackground, 3);
 
         var blueCloudHeader = new Grid
         {
-            Margin = new Thickness(24, 0, 24, 0)
+            HeightRequest = 112,
+            Margin = new Thickness(64, 0, 64, 0)
         };
         var blueCloudDepth = CreateCloudShape(Color.FromArgb("#0754A6"), Color.FromArgb("#06478B"));
-        blueCloudDepth.TranslationY = 7;
+        blueCloudDepth.TranslationY = 5;
         blueCloudHeader.Children.Add(blueCloudDepth);
         blueCloudHeader.Children.Add(CreateCloudShape(Color.FromArgb("#0879D5"), Color.FromArgb("#A6E8FF")));
         blueCloudHeader.Children.Add(_sloganDeepDepth);
         blueCloudHeader.Children.Add(_sloganMidDepth);
         blueCloudHeader.Children.Add(_slogan);
-        titlePanel.Children.Add(blueCloudHeader);
-        Grid.SetRow(blueCloudHeader, 0);
 
-        titlePanel.Children.Add(_namesDeepDepth);
-        Grid.SetRow(_namesDeepDepth, 1);
-        titlePanel.Children.Add(_namesMidDepth);
-        Grid.SetRow(_namesMidDepth, 1);
-        titlePanel.Children.Add(_names);
-        Grid.SetRow(_names, 1);
-
-        titlePanel.Children.Add(globe);
-        Grid.SetRow(globe, 2);
+        _localizedTitlePanel = new Grid
+        {
+            HeightRequest = 114,
+            IsVisible = false,
+            Children = { blueCloudHeader }
+        };
 
         _characters = new Image
         {
@@ -233,10 +188,10 @@ public sealed class SplashPage : ContentPage
                 new RowDefinition { Height = GridLength.Auto }
             },
             Padding = 0,
-            Children = { _characters, titlePanel, _progress }
+            Children = { _characters, _localizedTitlePanel, _progress }
         };
         Grid.SetRowSpan(_characters, 3);
-        Grid.SetRow(titlePanel, 0);
+        Grid.SetRow(_localizedTitlePanel, 0);
         Grid.SetRow(_progress, 2);
 
         var root = new Grid();
@@ -322,16 +277,6 @@ public sealed class SplashPage : ContentPage
         }
     }
 
-    private static FormattedString CreateNamesTitle(bool isEnglish, string zaydColor, string linkColor, string razanColor) => new()
-    {
-        Spans =
-        {
-            new Span { Text = "Zayd", TextColor = Color.FromArgb(zaydColor), FontAttributes = FontAttributes.Bold },
-            new Span { Text = isEnglish ? " & " : " en ", TextColor = Color.FromArgb(linkColor), FontAttributes = FontAttributes.Bold },
-            new Span { Text = "Razan", TextColor = Color.FromArgb(razanColor), FontAttributes = FontAttributes.Bold }
-        }
-    };
-
     private async Task ChooseLanguageAsync(string languageCode)
     {
         if (_languageChosen) return;
@@ -340,12 +285,10 @@ public sealed class SplashPage : ContentPage
         _languageSettings.SourceLanguageCode = languageCode;
         var english = languageCode == "en";
 
-        _slogan.Text = english ? "Travel with" : "Op reis met";
+        _slogan.Text = "Travel with";
         _sloganMidDepth.Text = _slogan.Text;
         _sloganDeepDepth.Text = _slogan.Text;
-        _namesDeepDepth.FormattedText = CreateNamesTitle(english, "#974700", "#064878", "#90103E");
-        _namesMidDepth.FormattedText = CreateNamesTitle(english, "#D27A00", "#0A65AA", "#BF164E");
-        _names.FormattedText = CreateNamesTitle(english, "#FFAA00", "#1685E8", "#E91E63");
+        _localizedTitlePanel.IsVisible = english;
         _welcomePanel.IsVisible = true;
         await _welcomePanel.FadeTo(1, 450, Easing.CubicOut);
         await _progress.ProgressTo(1, 1900, Easing.CubicInOut);
