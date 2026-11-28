@@ -47,6 +47,7 @@ jobs:
             -c Release `
             -f net10.0-android36.0 `
             --no-restore `
+            -v:diag `
             -p:AndroidKeyStore=true `
             -p:AndroidSigningKeyStore="$env:RUNNER_TEMP\zrlingotrip-upload-key.jks" `
             -p:AndroidSigningStorePass="$env:STORE_PASSWORD" `
